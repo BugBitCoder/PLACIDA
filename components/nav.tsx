@@ -13,12 +13,6 @@ export function Nav() {
         </Link>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Button asChild variant="ghost" className="rounded-full">
-            <Link href="/dashboard">Sign In</Link>
-          </Button>
-          <Button asChild className="rounded-full">
-            <Link href="/dashboard">Sign Up</Link>
-          </Button>
         </div>
       </div>
     </header>

@@ -1,352 +1,203 @@
-// // import { type NextRequest, NextResponse } from "next/server"
-// // import { generateText } from "ai"
-
-// // // Server-side model selection only. The AI Gateway handles provider routing/keys.
-// // const GROK_MODEL = process.env.GROK_MODEL || "xai/grok-4"
-
-// // export async function POST(req: NextRequest) {
-// //   try {
-// //     const body = await req.json().catch(() => ({}))
-// //     const { message, messages } = body as {
-// //       message?: string
-// //       messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>
-// //     }
-
-// //     if ((!message || message.length === 0) && (!messages || messages.length === 0)) {
-// //       return NextResponse.json({ error: "Message required" }, { status: 400 })
-// //     }
-
-// //     const systemPrompt =
-// //       "You are Placida, a warm, compassionate mental well-being companion. " +
-// //       "Offer brief, empathetic reflections and gentle, practical suggestions. " +
-// //       "Avoid medical diagnoses. Encourage seeking professional help if needed."
-
-// //     // Build chat history with system prompt
-// //     const history: Array<{ role: "user" | "assistant" | "system"; content: string }> = [
-// //       { role: "system", content: systemPrompt },
-// //     ]
-
-// //     if (Array.isArray(messages) && messages.length > 0) {
-// //       for (const m of messages) {
-// //         if (!m?.content || typeof m.content !== "string") continue
-// //         const role = m.role === "assistant" || m.role === "system" ? m.role : "user"
-// //         history.push({ role, content: m.content })
-// //       }
-// //     } else if (typeof message === "string" && message.length > 0) {
-// //       history.push({ role: "user", content: message })
-// //     }
-
-// //     // Convert history into a single prompt for generateText
-// //     const prompt = history
-// //       .map((m) => {
-// //         const role = m.role === "system" ? "System" : m.role === "assistant" ? "Assistant" : "User"
-// //         return `${role}: ${m.content}`
-// //       })
-// //       .concat("Assistant:")
-// //       .join("\n")
-
-// //     // Use AI SDK with sane defaults via AI Gateway; no direct key/URL usage
-// //     const { text } = await generateText({
-// //       model: GROK_MODEL,
-// //       prompt,
-// //       maxOutputTokens: 800,
-// //       temperature: 0.7,
-// //     })
-
-// //     return NextResponse.json({ reply: text })
-// //   } catch (err) {
-// //     return NextResponse.json({ reply: "", error: "Unexpected server error contacting model." }, { status: 500 })
-// //   }
-// // }
-
-
-
 // // import { type NextRequest, NextResponse } from "next/server";
 
 // // export async function POST(req: NextRequest) {
 // //   try {
-// //     // Parse the request body
 // //     const body = await req.json().catch(() => ({}));
 // //     const { message, messages } = body as {
 // //       message?: string;
 // //       messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>;
 // //     };
 
-// //     // Validate input
-// //     if ((!message || message.length === 0) && (!messages || messages.length === 0)) {
+// //     // 🧩 Input validation
+// //     if ((!message || !message.trim()) && (!messages || messages.length === 0)) {
 // //       return NextResponse.json({ error: "Message required" }, { status: 400 });
 // //     }
 
-// //     // Get the Grok API key from environment variables
-// //     const apiKey = process.env.GROK_API_KEY;
+// //     // 🔐 Get Gemini API key
+// //     const apiKey = process.env.GEMINI_API_KEY;
 // //     if (!apiKey) {
 // //       return NextResponse.json(
-// //         { error: "Server configuration error: Missing GROK_API_KEY" },
+// //         { error: "Missing GEMINI_API_KEY in environment" },
 // //         { status: 500 }
 // //       );
 // //     }
 
-// //     // Define the system prompt
+// //     // 🧠 System prompt (same as before)
+// //     // const systemPrompt =
+// //     //   "You are Placida, a warm, compassionate mental well-being companion. " +
+// //     //   "Offer brief, empathetic reflections and gentle, practical suggestions. " +
+// //     //   "Avoid medical diagnoses. Encourage seeking professional help if needed.";
 // //     const systemPrompt =
-// //       "You are Placida, a warm, compassionate mental well-being companion. " +
-// //       "Offer brief, empathetic reflections and gentle, practical suggestions. " +
-// //       "Avoid medical diagnoses. Encourage seeking professional help if needed.";
+// //   "You are Placida — a deeply empathetic, understanding, and emotionally grounded companion. " +
+// //   "You listen closely, respond with warmth, and make people feel genuinely heard and safe. " +
+// //   "Speak in a natural, human tone — honest, calm, and comforting. " +
+// //   "When you respond, reflect what the person is feeling, validate their emotions, and gently explore what might help them feel a little better. " +
+// //   "Keep your words real and emotionally raw, not scripted or polished. " +
+// //   "Encourage open and honest conversation — even about personal, sensitive, or vulnerable topics — while always staying respectful and caring. " +
+// //   "After responding, help the person open up more by asking thoughtful, compassionate questions that move the conversation forward naturally. " +
+// //   "Never judge, lecture, or sound clinical. " +
+// //   "Do not offer medical or therapeutic diagnoses, but you can gently suggest healthy ways to cope or find comfort. " +
+// //   "If someone seems deeply distressed, softly remind them that talking to a trusted person or mental health professional can really help. " +
+// //   "Above all, your presence should feel deeply human — kind, safe, and steady — like someone who truly understands and cares.";
 
-// //     // Build chat history with system prompt
-// //     const history: Array<{ role: "user" | "assistant" | "system"; content: string }> = [
+
+// //     // 📜 Build message history
+// //     const history: Array<{ role: string; content: string }> = [
 // //       { role: "system", content: systemPrompt },
 // //     ];
 
 // //     if (Array.isArray(messages) && messages.length > 0) {
 // //       for (const m of messages) {
 // //         if (!m?.content || typeof m.content !== "string") continue;
-// //         const role = m.role === "assistant" || m.role === "system" ? m.role : "user";
+// //         const role = ["assistant", "system"].includes(m.role)
+// //           ? m.role
+// //           : "user";
 // //         history.push({ role, content: m.content });
 // //       }
-// //     } else if (typeof message === "string" && message.length > 0) {
+// //     } else if (message) {
 // //       history.push({ role: "user", content: message });
 // //     }
 
-// //     // Make a request to the xAI Grok API
-// //     const response = await fetch("https://api.x.ai/v1/chat/completions", {
-// //       method: "POST",
-// //       headers: {
-// //         "Content-Type": "application/json",
-// //         Authorization: `Bearer ${apiKey}`,
-// //       },
-// //       body: JSON.stringify({
-// //         model: "grok-3", // Adjust model as needed (e.g., grok-4 if available)
-// //         messages: history,
-// //         max_tokens: 800,
-// //         temperature: 0.7,
-// //         stream: false,
-// //       }),
-// //     });
+// //     // 🗣️ Convert messages to plain text for Gemini
+// //     const conversationText = history
+// //       .map((m) => `${m.role}: ${m.content}`)
+// //       .join("\n");
 
-// //     // Handle API response
+// //     // 🚀 Send request to Gemini API
+// //     const response = await fetch(
+// //       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+// //       {
+// //         method: "POST",
+// //         headers: { "Content-Type": "application/json" },
+// //         body: JSON.stringify({
+// //           contents: [
+// //             {
+// //               parts: [{ text: conversationText }],
+// //             },
+// //           ],
+// //           generationConfig: {
+// //             temperature: 0.7,
+// //             maxOutputTokens: 800,
+// //           },
+// //         }),
+// //       }
+// //     );
+
+// //     // 🧾 Parse response
+// //     const data = await response.json();
+
 // //     if (!response.ok) {
-// //       const errorData = await response.json();
+// //       console.error("Gemini API error:", data);
 // //       return NextResponse.json(
-// //         { error: `Grok API error: ${errorData.message || response.statusText}` },
+// //         {
+// //           error:
+// //             data.error?.message ||
+// //             `Gemini API error (${response.status}): ${response.statusText}`,
+// //         },
 // //         { status: response.status }
 // //       );
 // //     }
 
-// //     // Parse the response and extract the reply
-// //     const data = await response.json();
-// //     const reply = data.choices?.[0]?.message?.content;
+// //     const reply =
+// //       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+// //       "No response. Please try again.";
 
-// //     if (!reply) {
-// //       return NextResponse.json(
-// //         { error: "No response content from Grok API" },
-// //         { status: 500 }
-// //       );
-// //     }
-
-// //     // Return the reply in the format expected by the frontend
 // //     return NextResponse.json({ reply });
-// //   } catch (err) {
+// //   } catch (err: any) {
 // //     console.error("Error in /api/chat:", err);
 // //     return NextResponse.json(
-// //       { reply: "", error: "Unexpected server error contacting model." },
+// //       { error: `Server error: ${err.message || "Unknown error"}` },
 // //       { status: 500 }
 // //     );
 // //   }
 // // }
-
-// import { type NextRequest, NextResponse } from "next/server";
-
-// export const runtime = "edge"; // optional: improves speed in Vercel Edge runtime
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     // Parse body
-//     const body = await req.json().catch(() => ({}));
-//     const { message, messages } = body as {
-//       message?: string;
-//       messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>;
-//     };
-
-//     // Validate input
-//     if ((!message || !message.trim()) && (!messages || messages.length === 0)) {
-//       return NextResponse.json({ error: "Message required" }, { status: 400 });
-//     }
-
-//     // Get API key
-//     const apiKey = process.env.GROK_API_KEY;
-//     if (!apiKey) {
-//       return NextResponse.json(
-//         { error: "Server misconfiguration: Missing GROK_API_KEY" },
-//         { status: 500 }
-//       );
-//     }
-
-//     // Define system prompt
-//     const systemPrompt =
-//       "You are Placida, a warm, compassionate mental well-being companion. " +
-//       "Offer brief, empathetic reflections and gentle, practical suggestions. " +
-//       "Avoid medical diagnoses. Encourage seeking professional help if needed.";
-
-//     // Construct chat history
-//     const history: Array<{ role: "user" | "assistant" | "system"; content: string }> = [
-//       { role: "system", content: systemPrompt },
-//     ];
-
-//     if (Array.isArray(messages) && messages.length > 0) {
-//       for (const m of messages) {
-//         if (!m?.content || typeof m.content !== "string") continue;
-//         const role =
-//           m.role === "assistant" || m.role === "system" ? m.role : "user";
-//         history.push({ role, content: m.content });
-//       }
-//     } else if (message && typeof message === "string") {
-//       history.push({ role: "user", content: message });
-//     }
-
-//     // Make request to xAI Grok API with timeout
-//     const controller = new AbortController();
-//     const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
-
-//     const response = await fetch("https://api.x.ai/v1/chat/completions", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${apiKey}`,
-//       },
-//       body: JSON.stringify({
-//         model: "grok-3", // or grok-2, grok-beta depending on availability
-//         messages: history,
-//         max_tokens: 800,
-//         temperature: 0.7,
-//       }),
-//       signal: controller.signal,
-//     }).finally(() => clearTimeout(timeout));
-
-//     // Handle failed responses
-//     if (!response.ok) {
-//       let errorText = response.statusText;
-//       try {
-//         const errData = await response.json();
-//         errorText = errData.message || JSON.stringify(errData);
-//       } catch {}
-//       return NextResponse.json(
-//         { error: `Grok API error: ${errorText}` },
-//         { status: response.status }
-//       );
-//     }
-
-//     // Parse successful response
-//     const data = await response.json();
-//     const reply = data?.choices?.[0]?.message?.content?.trim();
-
-//     if (!reply) {
-//       return NextResponse.json(
-//         { error: "No content received from Grok API" },
-//         { status: 500 }
-//       );
-//     }
-
-//     // Return clean reply
-//     return NextResponse.json({ reply });
-//   } catch (err: any) {
-//     console.error("Error in /api/chat:", err);
-
-//     // Handle known fetch/timeout errors clearly
-//     if (err.name === "AbortError") {
-//       return NextResponse.json(
-//         { error: "Connection to Grok API timed out (20s limit)." },
-//         { status: 504 }
-//       );
-//     }
-
-//     return NextResponse.json(
-//       {
-//         error: `Unexpected server error: ${err?.message || "Unknown error"}`,
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
-
-
 // import { type NextRequest, NextResponse } from "next/server";
 
 // export async function POST(req: NextRequest) {
 //   try {
 //     const body = await req.json().catch(() => ({}));
-//     const { message, messages } = body as {
+//     const { message, messages, language } = body as {
 //       message?: string;
 //       messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>;
+//       language?: string; // optional: user can send language preference
 //     };
 
 //     if ((!message || !message.trim()) && (!messages || messages.length === 0)) {
 //       return NextResponse.json({ error: "Message required" }, { status: 400 });
 //     }
 
-//     const apiKey = process.env.GROK_API_KEY;
+//     const apiKey = process.env.GEMINI_API_KEY;
 //     if (!apiKey) {
 //       return NextResponse.json(
-//         { error: "Missing GROK_API_KEY in environment" },
+//         { error: "Missing GEMINI_API_KEY in environment" },
 //         { status: 500 }
 //       );
 //     }
 
+//     // 🌍 Multilingual, empathetic system prompt
 //     const systemPrompt =
-//       "You are Placida, a warm, compassionate mental well-being companion. " +
-//       "Offer brief, empathetic reflections and gentle, practical suggestions. " +
-//       "Avoid medical diagnoses. Encourage seeking professional help if needed.";
+//       `You are Placida — a deeply empathetic, multilingual mental well-being companion. ` +
+//       `You naturally understand and respond in the same language the user speaks — whether it's English, Hindi, Spanish, French, Bengali, or others. ` +
+//       `Use the user’s language for all replies. If you’re unsure, politely ask which language they prefer. ` +
+//       `Your tone should always be warm, human, and emotionally grounded. ` +
+//       `Reflect their emotions, validate what they feel, and respond with understanding and care. ` +
+//       `You can gently ask thoughtful questions to help them express themselves. ` +
+//       `Avoid medical or diagnostic language, but you may suggest small, kind coping ideas. ` +
+//       `If someone seems very distressed, softly encourage them to reach out to a trusted person or mental health professional.` +
+//       (language ? ` Please respond in ${language}.` : "");
 
-//     const history: Array<{ role: "user" | "assistant" | "system"; content: string }> = [
+//     // 🧠 Build message history
+//     const history: Array<{ role: string; content: string }> = [
 //       { role: "system", content: systemPrompt },
 //     ];
 
 //     if (Array.isArray(messages) && messages.length > 0) {
 //       for (const m of messages) {
 //         if (!m?.content || typeof m.content !== "string") continue;
-//         const role =
-//           m.role === "assistant" || m.role === "system" ? m.role : "user";
+//         const role = ["assistant", "system"].includes(m.role)
+//           ? m.role
+//           : "user";
 //         history.push({ role, content: m.content });
 //       }
 //     } else if (message) {
 //       history.push({ role: "user", content: message });
 //     }
 
-//     // 🔥 Use correct fields for xAI Grok API
-//     const response = await fetch("https://api.x.ai/v1/chat/completions", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${apiKey}`,
-//       },
-//       body: JSON.stringify({
-//         model: "grok-beta", // ✅ use grok-beta or grok-2 (supported as of 2025)
-//         messages: history,
-//         temperature: 0.7,
-//         max_output_tokens: 800, // ✅ correct key name
-//       }),
-//     });
+//     const conversationText = history.map((m) => `${m.role}: ${m.content}`).join("\n");
 
-//     // Handle API response
+//     // 🌐 Call Gemini multilingual model
+//     const response = await fetch(
+//       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+//       {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           contents: [{ parts: [{ text: conversationText }] }],
+//           generationConfig: {
+//             temperature: 0.75,
+//             maxOutputTokens: 800,
+//           },
+//         }),
+//       }
+//     );
+
 //     const data = await response.json();
 
 //     if (!response.ok) {
-//       console.error("Grok API error:", data);
+//       console.error("Gemini API error:", data);
 //       return NextResponse.json(
-//         { error: `Grok API error: ${data.error?.message || response.statusText}` },
+//         {
+//           error:
+//             data.error?.message ||
+//             `Gemini API error (${response.status}): ${response.statusText}`,
+//         },
 //         { status: response.status }
 //       );
 //     }
 
-//     const reply = data?.choices?.[0]?.message?.content || data?.output || "";
-
-//     if (!reply) {
-//       return NextResponse.json(
-//         { error: "No response content from Grok API" },
-//         { status: 500 }
-//       );
-//     }
+//     const reply =
+//       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+//       "No response. Please try again.";
 
 //     return NextResponse.json({ reply });
 //   } catch (err: any) {
@@ -358,105 +209,98 @@
 //   }
 // }
 
-
-
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const { message, messages } = body as {
-      message?: string;
-      messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>;
-    };
+    const body = await req.json().catch(() => ({}))
+    const { message, messages, language } = body as {
+      message?: string
+      messages?: Array<{ role: "user" | "assistant" | "system"; content: string }>
+      language?: string
+    }
 
-    // 🧩 Input validation
     if ((!message || !message.trim()) && (!messages || messages.length === 0)) {
-      return NextResponse.json({ error: "Message required" }, { status: 400 });
+      return NextResponse.json({ error: "Message required" }, { status: 400 })
     }
 
-    // 🔐 Get Gemini API key
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "Missing GEMINI_API_KEY in environment" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Missing GEMINI_API_KEY" }, { status: 500 })
     }
 
-    // 🧠 System prompt (same as before)
+    // 💛 Updated system prompt
     const systemPrompt =
-      "You are Placida, a warm, compassionate mental well-being companion. " +
-      "Offer brief, empathetic reflections and gentle, practical suggestions. " +
-      "Avoid medical diagnoses. Encourage seeking professional help if needed.";
+      `You are **Placida**, a deeply empathetic and emotionally intelligent mental well-being companion. ` +
+      `You are multilingual — you understand and respond in the user’s preferred or detected language (English, Hindi, Bengali, Spanish, French, etc.). ` +
+      (language ? `For this conversation, please respond in ${language}. ` : ``) +
+      `Your mission is to make people feel heard, understood, and emotionally safe. ` +
+      `You respond with warmth, compassion, and a very human tone — never robotic or clinical. ` +
+      `You validate feelings, reflect emotions naturally, and ask gentle, open-ended questions to help users open up at their own pace. ` +
+      `Your words should feel like a calm friend — someone trustworthy, steady, and real. ` +
+      `You never give medical advice or diagnoses. ` +
+      `If the user expresses distress, hopelessness, or thoughts of self-harm, respond with deep care: ` +
+      `1. Acknowledge and validate their pain. ` +
+      `2. Encourage them to reach out to someone they trust — a friend, family member, or a trained mental health professional or helpline. ` +
+      `3. Offer emotional grounding — for example, gently shift the topic toward something comforting, hopeful, or soothing (like hobbies, music, nature, memories, or what used to make them feel safe). ` +
+      `4. Always speak as if you truly care and want them to stay safe. ` +
+      `If they keep returning to dark thoughts, continue offering gentle care and grounding without judgment. ` +
+      `Avoid generic statements like “everything will be fine” — instead, use soft realism and warmth. ` +
+      `Your ultimate goal is to help them feel safe enough to keep talking. `
 
-    // 📜 Build message history
+    // 🧱 Build chat history
     const history: Array<{ role: string; content: string }> = [
       { role: "system", content: systemPrompt },
-    ];
+    ]
 
     if (Array.isArray(messages) && messages.length > 0) {
       for (const m of messages) {
-        if (!m?.content || typeof m.content !== "string") continue;
-        const role = ["assistant", "system"].includes(m.role)
-          ? m.role
-          : "user";
-        history.push({ role, content: m.content });
+        if (!m?.content || typeof m.content !== "string") continue
+        const role = ["assistant", "system"].includes(m.role) ? m.role : "user"
+        history.push({ role, content: m.content })
       }
     } else if (message) {
-      history.push({ role: "user", content: message });
+      history.push({ role: "user", content: message })
     }
 
-    // 🗣️ Convert messages to plain text for Gemini
-    const conversationText = history
-      .map((m) => `${m.role}: ${m.content}`)
-      .join("\n");
+    const conversationText = history.map((m) => `${m.role}: ${m.content}`).join("\n")
 
-    // 🚀 Send request to Gemini API
+    // 🌍 Gemini API request
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: conversationText }],
-            },
-          ],
+          contents: [{ parts: [{ text: conversationText }] }],
           generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
+            temperature: 0.8,
+            maxOutputTokens: 900,
           },
         }),
       }
-    );
+    )
 
-    // 🧾 Parse response
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
-      console.error("Gemini API error:", data);
+      console.error("Gemini API error:", data)
       return NextResponse.json(
-        {
-          error:
-            data.error?.message ||
-            `Gemini API error (${response.status}): ${response.statusText}`,
-        },
+        { error: data.error?.message || `Gemini API error (${response.status})` },
         { status: response.status }
-      );
+      )
     }
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response from Gemini model.";
+      "I'm here for you. Would you like to tell me a bit more about what’s going on?"
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({ reply })
   } catch (err: any) {
-    console.error("Error in /api/chat:", err);
+    console.error("Error in /api/chat:", err)
     return NextResponse.json(
       { error: `Server error: ${err.message || "Unknown error"}` },
       { status: 500 }
-    );
+    )
   }
 }

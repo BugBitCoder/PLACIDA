@@ -85,13 +85,13 @@ export function Chatbot() {
             ))}
             {typing && (
               <div className="inline-flex items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-muted-foreground">
-                <span className="sr-only">Grok is thinking</span>
+                <span className="sr-only">Thinking</span>
                 <span className="inline-flex gap-1">
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:120ms]" />
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:240ms]" />
                 </span>
-                <span className="text-sm">Grok is thinking...</span>
+                <span className="text-sm">Thinking...</span>
               </div>
             )}
           </div>
