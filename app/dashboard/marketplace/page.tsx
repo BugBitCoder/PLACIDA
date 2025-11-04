@@ -23,7 +23,7 @@ const products = [
     price: 499,
     rating: 4.8,
     image:
-      "https://images.unsplash.com/photo-1606813902913-52527b9c3f9b?auto=format&fit=crop&w=800&q=80",
+      "/p1.jpg",
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const products = [
     price: 899,
     rating: 4.9,
     image:
-      "https://images.unsplash.com/photo-1628191010644-b3e7dc4c5d6b?auto=format&fit=crop&w=800&q=80",
+      "/p2.webp",
   },
   {
     id: 3,
@@ -43,7 +43,7 @@ const products = [
     price: 699,
     rating: 4.7,
     image:
-      "https://images.unsplash.com/photo-1623776059420-57d0d2b25d3b?auto=format&fit=crop&w=800&q=80",
+      "/p3.jpg",
   },
   {
     id: 4,
@@ -53,7 +53,7 @@ const products = [
     price: 349,
     rating: 4.6,
     image:
-      "https://images.unsplash.com/photo-1604335399105-9f2c61b1d5b0?auto=format&fit=crop&w=800&q=80",
+      "/p4.jpg",
   },
 ];
 
