@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Week 2: Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -23,20 +25,20 @@
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html" class="active" aria-current="page">Dashboard</a></li>
-      <li><a href="index.html#breathing">Breathe</a></li>
-      <li><a href="index.html#resources">Resources</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="summary.html">Summary</a></li>
     </ul>
   </nav>
 
   <!-- ── Page Wrapper ── -->
   <main class="page-wrapper">
 
-    <!-- ── Dashboard Header ── -->
+    <!-- ── Dashboard Header (Week 2: time-aware greeting + streak) ── -->
     <header class="dashboard-header" aria-label="Dashboard header">
-      <h1 class="greeting">
+      <h1 class="greeting" id="dashGreeting">
         Hi, <span>Sahil</span> 👋
       </h1>
-      <p class="greeting-sub">Here's a snapshot of your emotional wellness journey.</p>
+      <p class="greeting-sub" id="dashGreetingSub">Here's a snapshot of your emotional wellness journey.</p>
     </header>
 
     <!-- ── Dashboard Grid ── -->
@@ -70,14 +72,36 @@
         <div class="stat-sub">weekly pattern</div>
       </div>
 
+      <!-- ── Week 2: 7-Day Mood Chart ── -->
+      <div class="glass-card col-span-2" aria-label="7-day mood trend chart">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">📊</div>
+          <div>
+            <div class="card-title">7-Day Mood Trend</div>
+            <div class="card-subtitle">Your average mood score for each day this week</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="moodChart" aria-label="Mood trend bar chart" role="img"></canvas>
+          <div id="chartEmptyMsg" class="chart-empty">
+            <div>📭</div>
+            <p>No data yet — log some moods to see your trend!</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Mood History — full width -->
       <div class="glass-card col-span-2" aria-label="Mood history">
         <div class="card-header">
           <div class="card-icon teal" aria-hidden="true">📋</div>
-          <div>
+          <div style="flex:1">
             <div class="card-title">Mood History</div>
             <div class="card-subtitle">Your last 10 entries</div>
           </div>
+          <!-- Week 2: Clear All Data button -->
+          <button id="clearDataBtn" class="btn-clear" onclick="clearAllData()" aria-label="Clear all mood data">
+            🗑️ Clear All
+          </button>
         </div>
         <div class="mood-history-list" id="moodHistory" aria-live="polite">
           <!-- Populated by script.js -->
@@ -90,7 +114,7 @@
           <div class="card-icon purple" aria-hidden="true">⚡</div>
           <div>
             <div class="card-title">Wellness Tools</div>
-            <div class="card-subtitle">Coming in Week 3 — preview below</div>
+            <div class="card-subtitle">Quick access to all your self-care features</div>
           </div>
         </div>
         <div class="quick-actions">
@@ -136,14 +160,27 @@
       Made with 💜 by <strong>Sahil</strong> &amp; Team · © 2026 Placida
     </p>
     <ul class="footer-links">
-      <li><a href="#">Privacy</a></li>
-      <li><a href="#">About</a></li>
       <li><a href="index.html">Home</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
     </ul>
   </footer>
 
   <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ── Week 2: Confirm Clear Modal ── -->
+  <div id="confirmModal" class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="confirm-dialog">
+      <div class="confirm-icon">🗑️</div>
+      <h2 id="modalTitle">Clear All Data?</h2>
+      <p>This will permanently delete all your logged moods and chat history. This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn-cancel" onclick="cancelClear()">Cancel</button>
+        <button class="confirm-btn-confirm" onclick="confirmClear()">Yes, Clear Everything</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
