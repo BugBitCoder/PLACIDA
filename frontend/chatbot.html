@@ -672,41 +672,42 @@
     }
 
     /* ─────────────────────────────────────
-       OVERRIDE sendMessage to also persist
+       INIT — runs after features.js has
+       already fired its DOMContentLoaded
+       (window load fires later, so safe)
     ───────────────────────────────────── */
-    const _origSendMessage = sendMessage;
-    // Patch: after each send, save history
-    const chatSendBtnEl = document.getElementById('chatSendBtn');
-    chatSendBtnEl.addEventListener('click', () => {
-      setTimeout(saveChatHistory, 1800); // after typing indicator + bot reply
-    });
-    chatInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        setTimeout(saveChatHistory, 1800);
-      }
-    });
+    window.addEventListener('load', () => {
 
-    /* ─────────────────────────────────────
-       INIT (runs after features.js loads)
-    ───────────────────────────────────── */
-    document.addEventListener('DOMContentLoaded', () => {
-      // Disable send button on load (no text yet)
+      // Disable send on start (no text)
       chatSendBtn.disabled = true;
+
+      // Wire up post-send history save
+      chatSendBtn.addEventListener('click', () => {
+        setTimeout(saveChatHistory, 1800);
+      });
+      chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          setTimeout(saveChatHistory, 1800);
+        }
+      });
+
+      // features.js already fires a default greeting via its own DOMContentLoaded.
+      // We clear that and replace with our mood-aware / history-restored greeting.
+      const container = document.getElementById('chatMessages');
+      if (container) container.innerHTML = '';
 
       const historyLoaded = loadChatHistory();
 
       if (!historyLoaded) {
-        // Fresh session — send mood-aware greeting
         setTimeout(() => {
           renderMessage(getMoodAwareGreeting(), 'bot');
           saveChatHistory();
-        }, 400);
+        }, 250);
       } else {
-        // History found — no repeat greeting, just show a "welcome back" hint
         setTimeout(() => {
           renderMessage("Welcome back 💜 I'm still here. What's on your mind today?", 'bot');
           saveChatHistory();
-        }, 400);
+        }, 250);
       }
     });
   </script>
