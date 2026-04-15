@@ -46,8 +46,8 @@ Placida is a **human-centered mental health companion** built using design think
 |---|---|---|---|
 | **Sahil** | Frontend Dev | `index.html`, `dashboard.html`, `script.js`, `style.css` | ✅ Done |
 | **Sanchari** | Frontend Dev | `breathe.html`, `summary.html`, `features.js` | ✅ Done |
-| **Ayushi** | UI Dev | `chatbot.html` (Chat UI page) | ⏳ In Progress |
-| **Divyans** | QA & Docs | Testing all pages, `README.md` | ⏳ In Progress |
+| **Ayushi** | UI Dev | `chatbot.html` (Chat UI page) | ✅ Done |
+| **Divyans** | QA & Docs | Testing all pages, `README.md` | ✅ Done |
 
 ---
 
