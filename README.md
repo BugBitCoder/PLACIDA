@@ -23,6 +23,14 @@ Placida focuses on a calm, simple, and supportive user experience while storing 
 ---
 
 ## 🎯 Core Features
+## 👥 Team — Week 1 Contributions
+
+| Member | Role | Files Owned | Status |
+|---|---|---|---|
+| **Sahil** | Frontend Dev | `index.html`, `dashboard.html`, `script.js`, `style.css` | ✅ Done |
+| **Sanchari** | Frontend Dev | `breathe.html`, `summary.html`, `features.js` | ✅ Done |
+| **Ayushi** | UI Dev | `chatbot.html` (Chat UI page) | ✅ Done |
+| **Divyans** | QA & Docs | Testing all pages, `README.md` | ✅ Done |
 
 ### 😊 Mood Tracking
 Users can log their mood using emoji-based selection on the landing page. These entries are stored in `localStorage` and used across the app to generate insights and history.
