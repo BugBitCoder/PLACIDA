@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Placida Breathing Exercise — Guided 4-7-8 breathing technique for instant calm and anxiety relief." />
+  <meta name="description" content="Placida Breathing Exercise — Choose 4-7-8, Box Breathing or Simple breathing to calm anxiety and stress." />
   <title>Breathe — Placida</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,7 +15,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 52px 24px 32px;
+      padding: 52px 24px 24px;
       animation: fadeInUp 0.7s ease both;
     }
 
@@ -39,20 +39,76 @@
       line-height: 1.7;
     }
 
+    /* ── Pattern Selector ── */
+    .pattern-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 18px 24px 0;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 0.8s ease 0.05s both;
+    }
+
+    .pattern-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-glass);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      min-width: 130px;
+    }
+
+    .pattern-btn .pb-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .pattern-btn .pb-timing {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    .pattern-btn .pb-icon {
+      font-size: 1.3rem;
+      margin-bottom: 2px;
+    }
+
+    .pattern-btn:hover {
+      background: rgba(124,106,247,0.12);
+      border-color: rgba(124,106,247,0.4);
+      transform: translateY(-2px);
+    }
+
+    .pattern-btn.active {
+      background: rgba(124,106,247,0.2);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 20px rgba(124,106,247,0.25);
+    }
+
     /* ── The Breathing Circle ── */
     .circle-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 24px;
-      gap: 32px;
+      padding: 36px 24px 24px;
+      gap: 28px;
     }
 
     .breath-ring {
       position: relative;
-      width: 220px;
-      height: 220px;
+      width: 230px;
+      height: 230px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -74,7 +130,7 @@
     }
 
     #breathLabel {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--text-primary);
       text-align: center;
@@ -96,7 +152,7 @@
     /* ── Stats row ── */
     .breath-stats {
       display: flex;
-      gap: 20px;
+      gap: 16px;
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -129,36 +185,42 @@
     /* ── Phase steps ── */
     .phase-steps {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
       padding: 0 24px;
-      max-width: 560px;
+      max-width: 620px;
       margin: 0 auto;
     }
 
     .phase-step {
       flex: 1;
-      min-width: 140px;
+      min-width: 120px;
       background: var(--bg-card);
       border: 1px solid var(--border-glass);
       border-radius: 16px;
-      padding: 18px 14px;
+      padding: 16px 12px;
       text-align: center;
       backdrop-filter: blur(10px);
+      transition: border-color 0.4s ease, background 0.4s ease;
     }
 
-    .phase-step .ps-icon { font-size: 1.6rem; margin-bottom: 6px; }
-    .phase-step .ps-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
-    .phase-step .ps-dur  { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    .phase-step.active-phase {
+      border-color: var(--accent-purple);
+      background: rgba(124,106,247,0.1);
+    }
+
+    .phase-step .ps-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .phase-step .ps-name { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+    .phase-step .ps-dur  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
     /* ── Btn area ── */
     .btn-area {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      padding: 28px 24px 60px;
+      gap: 12px;
+      padding: 24px 24px 28px;
       max-width: 360px;
       margin: 0 auto;
       width: 100%;
@@ -168,15 +230,95 @@
       background: rgba(94,196,182,0.08);
       border: 1px solid rgba(94,196,182,0.25);
       border-radius: 14px;
-      padding: 16px 20px;
+      padding: 14px 20px;
       font-size: 0.83rem;
       color: var(--text-soft);
       line-height: 1.6;
       text-align: center;
       max-width: 560px;
-      margin: 0 auto 8px;
+      margin: 8px auto 0;
     }
     .tip-box strong { color: var(--accent-teal); }
+
+    /* ── Session History ── */
+    .session-history-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 24px 28px;
+      animation: fadeInUp 0.7s ease 0.15s both;
+    }
+
+    .session-history-section .sh-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-log {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .session-item .si-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+    .session-item .si-info { flex: 1; }
+    .session-item .si-main {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .session-item .si-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .session-item .si-time {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .sh-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+    }
+
+    .sh-today-summary {
+      background: rgba(94,196,182,0.08);
+      border: 1px solid rgba(94,196,182,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sh-today-summary strong { color: var(--accent-teal); }
   </style>
 </head>
 <body>
@@ -200,9 +342,28 @@
     <!-- Hero -->
     <section class="breathe-hero" aria-labelledby="breathe-title">
       <div class="hero-badge">🌬️ Guided Breathing</div>
-      <h1 id="breathe-title">4 · 7 · 8 Breathing</h1>
-      <p>A scientifically-backed technique to calm anxiety, reduce stress, and bring you back to the present moment.</p>
+      <h1 id="breathe-title">Breathing Exercises</h1>
+      <p>Choose a pattern, press start, and let your breath guide you back to calm.</p>
     </section>
+
+    <!-- ── Pattern Selector ── -->
+    <div class="pattern-selector" role="group" aria-label="Choose a breathing pattern">
+      <button class="pattern-btn active" id="btn-478" data-pattern="478" aria-pressed="true">
+        <span class="pb-icon">🌬️</span>
+        <span class="pb-name">4 · 7 · 8</span>
+        <span class="pb-timing">Inhale · Hold · Exhale</span>
+      </button>
+      <button class="pattern-btn" id="btn-box" data-pattern="box" aria-pressed="false">
+        <span class="pb-icon">📦</span>
+        <span class="pb-name">Box Breathing</span>
+        <span class="pb-timing">4 · 4 · 4 · 4</span>
+      </button>
+      <button class="pattern-btn" id="btn-simple" data-pattern="simple" aria-pressed="false">
+        <span class="pb-icon">✨</span>
+        <span class="pb-name">Simple Calm</span>
+        <span class="pb-timing">4 in · 4 out</span>
+      </button>
+    </div>
 
     <!-- Circle -->
     <div class="circle-wrapper">
@@ -223,32 +384,22 @@
           <div class="bs-label">Cycles Done</div>
           <div class="bs-value" id="breathCycles">0 cycles completed</div>
         </div>
+        <div class="breath-stat">
+          <div class="bs-label">Pattern</div>
+          <div class="bs-value" id="breathPatternLabel">4-7-8</div>
+        </div>
       </div>
     </div>
 
-    <!-- Phase Guide -->
-    <div class="phase-steps" aria-label="Breathing phases">
-      <div class="phase-step">
-        <div class="ps-icon">🌬️</div>
-        <div class="ps-name">Inhale</div>
-        <div class="ps-dur">4 seconds — through nose</div>
-      </div>
-      <div class="phase-step">
-        <div class="ps-icon">🤚</div>
-        <div class="ps-name">Hold</div>
-        <div class="ps-dur">7 seconds — hold gently</div>
-      </div>
-      <div class="phase-step">
-        <div class="ps-icon">💨</div>
-        <div class="ps-name">Exhale</div>
-        <div class="ps-dur">8 seconds — through mouth</div>
-      </div>
+    <!-- Phase Guide — updated dynamically by JS -->
+    <div class="phase-steps" id="phaseStepsContainer" aria-label="Breathing phases">
+      <!-- Populated by features.js -->
     </div>
 
     <!-- Tip -->
-    <p class="tip-box" style="margin-top:28px;">
-      <strong>Tip:</strong> Do at least <strong>3–4 cycles</strong> for best results. 
-      Best used before sleep, during anxiety, or before an exam 📚
+    <p class="tip-box" style="margin-top:24px;" id="breathTip">
+      <strong>Tip:</strong> Do at least <strong>3–4 cycles</strong> for best results.
+      The 4-7-8 pattern is great for anxiety and sleep 📚
     </p>
 
     <!-- Buttons -->
@@ -261,8 +412,20 @@
       </a>
     </div>
 
+    <!-- ── Session History ── -->
+    <section class="session-history-section" aria-label="Today's breathing sessions">
+      <div class="sh-title">📋 Today's Sessions</div>
+      <div id="todaySummaryBadge" style="display:none;" class="sh-today-summary">
+        <span>🎉</span>
+        <span>You completed <strong id="todayCycleCount">0</strong> cycles across <strong id="todaySessionCount">0</strong> session(s) today — great work!</span>
+      </div>
+      <div class="session-log" id="sessionLog">
+        <div class="sh-empty">No sessions yet — press <em>Start Breathing</em> above to begin! 🌬️</div>
+      </div>
+    </section>
+
     <!-- Crisis Banner -->
-    <div style="max-width:560px; margin: 0 auto 60px; padding: 0 24px;">
+    <div style="max-width:600px; margin: 0 auto 60px; padding: 0 24px;">
       <div class="crisis-banner" role="alert">
         <div class="crisis-icon">🆘</div>
         <div>

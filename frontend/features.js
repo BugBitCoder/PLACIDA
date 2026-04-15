@@ -1,34 +1,122 @@
 /* ============================================
    PLACIDA — features.js
-   Week 1 Features Logic — Sanchari
+   Week 1 + Week 2 Features Logic — Sanchari
    Breathing Timer | Chatbot | Weekly Summary
    ============================================ */
 
-/* ══════════════════════════════════════
-   SECTION 1 — BREATHING TIMER (4-7-8)
-   ══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   SECTION 1 — BREATHING TIMER (Week 1 + Week 2)
+   Patterns: 4-7-8 | Box (4-4-4-4) | Simple (4-4)
+   + Session history saved to localStorage
+   ══════════════════════════════════════════════════ */
 
-const BREATH_PHASES = [
-  { label: 'Inhale',  emoji: '🌬️', duration: 4, color: '#7c6af7' },
-  { label: 'Hold',    emoji: '🤚', duration: 7, color: '#5ec4b6' },
-  { label: 'Exhale',  emoji: '💨', duration: 8, color: '#f06b8b' },
-];
+const BREATH_PATTERNS = {
+  '478': {
+    name:  '4-7-8',
+    tip:   'Best for anxiety relief and falling asleep. Do 3–4 cycles for full effect 📚',
+    phases: [
+      { label: 'Inhale',  emoji: '🌬️', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — through nose' },
+      { label: 'Hold',    emoji: '🤚', duration: 7, color: '#5ec4b6', icon: '🤚', desc: '7 seconds — hold gently' },
+      { label: 'Exhale',  emoji: '💨', duration: 8, color: '#f06b8b', icon: '💨', desc: '8 seconds — through mouth' },
+    ],
+  },
+  'box': {
+    name: 'Box Breathing',
+    tip:  'Used by Navy SEALs! Equalises your nervous system. Great for stress and focus 🎯',
+    phases: [
+      { label: 'Inhale',  emoji: '⬆️', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — through nose' },
+      { label: 'Hold In', emoji: '➡️', duration: 4, color: '#5ec4b6', icon: '🤚', desc: '4 seconds — hold' },
+      { label: 'Exhale',  emoji: '⬇️', duration: 4, color: '#f06b8b', icon: '💨', desc: '4 seconds — through mouth' },
+      { label: 'Hold Out',emoji: '⬅️', duration: 4, color: '#f0a06b', icon: '⏸️', desc: '4 seconds — hold empty' },
+    ],
+  },
+  'simple': {
+    name: 'Simple Calm',
+    tip:  'A gentle 4-4 rhythm — perfect for beginners or a quick reset anytime 🌿',
+    phases: [
+      { label: 'Inhale',  emoji: '🌱', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — breathe in slowly' },
+      { label: 'Exhale',  emoji: '🍃', duration: 4, color: '#5ec4b6', icon: '💨', desc: '4 seconds — breathe out slowly' },
+    ],
+  },
+};
 
-let breathInterval  = null;
-let breathPhaseIdx  = 0;
-let breathCountdown = BREATH_PHASES[0].duration;
-let breathCycles    = 0;
-let breathRunning   = false;
+const STORAGE_KEY_SESSIONS = 'placida_breathe_sessions';
 
+let breathInterval   = null;
+let breathPhaseIdx   = 0;
+let breathCountdown  = 0;
+let breathCycles     = 0;
+let breathRunning    = false;
+let currentPattern   = '478';
+
+/* ── Pattern switching ── */
+function selectPattern(patternKey) {
+  if (breathRunning) stopBreathing();
+  currentPattern = patternKey;
+
+  // Update button states
+  document.querySelectorAll('.pattern-btn').forEach(btn => {
+    const active = btn.dataset.pattern === patternKey;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  // Update tip and phase steps
+  renderPhaseSteps();
+  updateTip();
+
+  // Update pattern label in stats
+  const labelEl = document.getElementById('breathPatternLabel');
+  if (labelEl) labelEl.textContent = BREATH_PATTERNS[patternKey].name;
+
+  resetBreathCircle();
+}
+
+function getPhases() {
+  return BREATH_PATTERNS[currentPattern].phases;
+}
+
+function renderPhaseSteps() {
+  const container = document.getElementById('phaseStepsContainer');
+  if (!container) return;
+  const phases = getPhases();
+  container.innerHTML = phases.map((p, i) => `
+    <div class="phase-step" id="phaseStep${i}">
+      <div class="ps-icon">${p.icon}</div>
+      <div class="ps-name">${p.label}</div>
+      <div class="ps-dur">${p.desc}</div>
+    </div>`).join('');
+}
+
+function updateTip() {
+  const tipEl = document.getElementById('breathTip');
+  if (!tipEl) return;
+  tipEl.innerHTML = `<strong>Tip:</strong> ${BREATH_PATTERNS[currentPattern].tip}`;
+}
+
+function resetBreathCircle() {
+  const label   = document.getElementById('breathLabel');
+  const counter = document.getElementById('breathCounter');
+  const circle  = document.getElementById('breathCircle');
+  const cycles  = document.getElementById('breathCycles');
+  const phase   = document.getElementById('breathPhase');
+  if (label)   label.textContent   = 'Ready when you are';
+  if (counter) counter.textContent = '';
+  if (circle)  { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; circle.style.borderColor = '#7c6af7'; }
+  if (cycles)  cycles.textContent  = '0 cycles completed';
+  if (phase)   phase.textContent   = '—';
+}
+
+/* ── Start / Stop ── */
 function startBreathing() {
   if (breathRunning) return;
   breathRunning   = true;
   breathPhaseIdx  = 0;
-  breathCountdown = BREATH_PHASES[0].duration;
   breathCycles    = 0;
+  breathCountdown = getPhases()[0].duration;
 
   updateBreathUI();
-  setBreathStart();
+  breathInterval = setInterval(breathTick, 1000);
 
   const btn = document.getElementById('breathBtn');
   if (btn) { btn.textContent = 'Stop Session'; btn.onclick = stopBreathing; }
@@ -37,37 +125,40 @@ function startBreathing() {
 function stopBreathing() {
   clearInterval(breathInterval);
   breathRunning = false;
+
+  // Save session to localStorage if at least 1 cycle was done
+  if (breathCycles > 0) {
+    saveBreathSession(breathCycles, currentPattern);
+    renderSessionHistory();
+    showToast(`✨ Session saved! ${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed.`);
+  }
+
+  resetBreathCircle();
   breathPhaseIdx  = 0;
-  breathCountdown = BREATH_PHASES[0].duration;
+  breathCountdown = getPhases()[0].duration;
 
-  const label   = document.getElementById('breathLabel');
-  const counter = document.getElementById('breathCounter');
-  const circle  = document.getElementById('breathCircle');
-  const cycles  = document.getElementById('breathCycles');
-  const btn     = document.getElementById('breathBtn');
+  // Deactivate phase highlights
+  document.querySelectorAll('.phase-step').forEach(el => el.classList.remove('active-phase'));
 
-  if (label)   label.textContent   = 'Ready when you are';
-  if (counter) counter.textContent = '';
-  if (circle)  { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; }
-  if (cycles)  cycles.textContent  = '0 cycles completed';
-  if (btn)     { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
+  const btn = document.getElementById('breathBtn');
+  if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
 }
 
-function setBreathStart() {
-  breathInterval = setInterval(() => {
-    breathCountdown--;
-    updateBreathUI();
+function breathTick() {
+  breathCountdown--;
+  updateBreathUI();
 
-    if (breathCountdown <= 0) {
-      breathPhaseIdx = (breathPhaseIdx + 1) % BREATH_PHASES.length;
-      if (breathPhaseIdx === 0) breathCycles++;
-      breathCountdown = BREATH_PHASES[breathPhaseIdx].duration;
-    }
-  }, 1000);
+  if (breathCountdown <= 0) {
+    const phases = getPhases();
+    breathPhaseIdx = (breathPhaseIdx + 1) % phases.length;
+    if (breathPhaseIdx === 0) breathCycles++;
+    breathCountdown = phases[breathPhaseIdx].duration;
+  }
 }
 
 function updateBreathUI() {
-  const phase   = BREATH_PHASES[breathPhaseIdx];
+  const phases  = getPhases();
+  const phase   = phases[breathPhaseIdx];
   const label   = document.getElementById('breathLabel');
   const counter = document.getElementById('breathCounter');
   const circle  = document.getElementById('breathCircle');
@@ -77,21 +168,96 @@ function updateBreathUI() {
   if (label)   label.textContent   = `${phase.emoji}  ${phase.label}`;
   if (counter) counter.textContent = breathCountdown + 's';
   if (cycles)  cycles.textContent  = `${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed`;
-  if (phaseEl) phaseEl.textContent = `Phase ${breathPhaseIdx + 1}/3`;
+  if (phaseEl) phaseEl.textContent = `Phase ${breathPhaseIdx + 1}/${phases.length}`;
+
+  // Highlight active phase step card
+  document.querySelectorAll('.phase-step').forEach((el, i) => {
+    el.classList.toggle('active-phase', i === breathPhaseIdx);
+  });
 
   if (circle) {
-    if (phase.label === 'Inhale') {
+    if (phase.label === 'Inhale' || phase.label.startsWith('Inhale')) {
       circle.style.transform  = 'scale(1.35)';
       circle.style.boxShadow  = `0 0 80px rgba(124,106,247,0.55)`;
-    } else if (phase.label === 'Hold') {
+    } else if (phase.label.startsWith('Hold') || phase.label === 'Hold In') {
       circle.style.transform  = 'scale(1.35)';
       circle.style.boxShadow  = `0 0 80px rgba(94,196,182,0.55)`;
+    } else if (phase.label === 'Hold Out') {
+      circle.style.transform  = 'scale(0.85)';
+      circle.style.boxShadow  = `0 0 60px rgba(240,160,107,0.5)`;
     } else {
       circle.style.transform  = 'scale(0.85)';
       circle.style.boxShadow  = `0 0 60px rgba(240,107,139,0.45)`;
     }
     circle.style.borderColor = phase.color;
   }
+}
+
+/* ── Session History (localStorage) ── */
+function saveBreathSession(cycles, patternKey) {
+  const sessions = getBreathSessions();
+  sessions.unshift({
+    id:        Date.now(),
+    pattern:   BREATH_PATTERNS[patternKey].name,
+    cycles,
+    timestamp: new Date().toISOString(),
+  });
+  // Keep only last 30 sessions
+  localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions.slice(0, 30)));
+}
+
+function getBreathSessions() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS)) || []; }
+  catch { return []; }
+}
+
+function renderSessionHistory() {
+  const logEl    = document.getElementById('sessionLog');
+  const badgeEl  = document.getElementById('todaySummaryBadge');
+  if (!logEl) return;
+
+  const sessions = getBreathSessions();
+  const todayStr = new Date().toDateString();
+  const todaySessions = sessions.filter(s => new Date(s.timestamp).toDateString() === todayStr);
+
+  // Today's summary badge
+  if (todaySessions.length > 0 && badgeEl) {
+    const totalCycles = todaySessions.reduce((sum, s) => sum + s.cycles, 0);
+    document.getElementById('todayCycleCount').textContent   = totalCycles;
+    document.getElementById('todaySessionCount').textContent = todaySessions.length;
+    badgeEl.style.display = 'flex';
+  } else if (badgeEl) {
+    badgeEl.style.display = 'none';
+  }
+
+  if (sessions.length === 0) {
+    logEl.innerHTML = `<div class="sh-empty">No sessions yet — press <em>Start Breathing</em> above to begin! 🌬️</div>`;
+    return;
+  }
+
+  // Show last 10 sessions
+  logEl.innerHTML = sessions.slice(0, 10).map(s => {
+    const d   = new Date(s.timestamp);
+    const ago = formatSessionTime(d);
+    return `
+      <div class="session-item">
+        <span class="si-icon">🌬️</span>
+        <div class="si-info">
+          <div class="si-main">${s.cycles} cycle${s.cycles !== 1 ? 's' : ''} — ${s.pattern}</div>
+          <div class="si-sub">${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+        <div class="si-time">${ago}</div>
+      </div>`;
+  }).join('');
+}
+
+function formatSessionTime(date) {
+  const now  = new Date();
+  const diff = (now - date) / 1000;
+  if (diff < 60)    return 'Just now';
+  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
 
@@ -253,12 +419,78 @@ function escapeHtmlChat(text) {
 }
 
 
-/* ══════════════════════════════════════
-   SECTION 3 — WEEKLY SUMMARY
-   ══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   SECTION 3 — WEEKLY SUMMARY (Week 1 + Week 2)
+   + Emoji mood row for last 7 days
+   + Save Journal Entry with timestamp
+   ══════════════════════════════════════════════════ */
 
-const STORAGE_KEY_MOODS = 'placida_moods';
+const STORAGE_KEY_MOODS    = 'placida_moods';
+const STORAGE_KEY_JOURNALS = 'placida_journal_entries';
 
+/* ── Day-name helpers ── */
+const DAY_NAMES_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function getLast7Days() {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+  return days;
+}
+
+/* ── Emoji Mood Row ── */
+function renderEmojiMoodRow(allMoods) {
+  const container = document.getElementById('emojiMoodRow');
+  if (!container) return;
+
+  const days    = getLast7Days();
+  const todayStr = new Date().toDateString();
+
+  container.innerHTML = days.map(day => {
+    const dayStr    = day.toDateString();
+    const shortName = DAY_NAMES_SHORT[day.getDay()];
+    const isToday   = dayStr === todayStr;
+
+    // Find all moods for this day, pick last logged one
+    const dayMoods = allMoods.filter(m => new Date(m.timestamp).toDateString() === dayStr);
+    const lastMood = dayMoods.length > 0 ? dayMoods[0] : null; // already sorted newest-first
+
+    return `
+      <div class="emoji-day ${isToday ? 'today' : ''} ${lastMood ? 'has-entry' : ''}">
+        <span class="ed-label">${isToday ? 'Today' : shortName}</span>
+        ${lastMood
+          ? `<span class="ed-emoji" title="${lastMood.label}">${lastMood.emoji}</span>`
+          : `<span class="ed-empty ed-emoji">·</span>`}
+        <div class="ed-dot"></div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Rotating motivational quotes ── */
+const WEEKLY_QUOTES = [
+  { text: "You don't have to be positive all the time. It's okay to feel sad, angry, annoyed, or scared. Having feelings doesn't make you a negative person. It makes you human.", author: "Lori Deschene" },
+  { text: "One small crack does not mean that you are broken, it means that you were put to the test and you didn't fall apart.", author: "Linda Poindexter" },
+  { text: "Be gentle with yourself. You are a child of the universe, no less than the trees and the stars.", author: "Max Ehrmann" },
+  { text: "You are allowed to be both a masterpiece and a work in progress simultaneously.", author: "Sophia Bush" },
+  { text: "Healing is not linear. Rest, reset, and keep going at your own pace.", author: "Unknown" },
+  { text: "Your mental health is a priority. Your happiness is an essential. Your self-care is a necessity.", author: "Unknown" },
+  { text: "The strongest thing you can do is ask for help when you need it.", author: "Unknown" },
+];
+
+function renderMotivationalQuote() {
+  const quoteEl  = document.getElementById('motivationalQuote');
+  const authorEl = document.getElementById('motivationalAuthor');
+  if (!quoteEl || !authorEl) return;
+  const pick = WEEKLY_QUOTES[new Date().getDay() % WEEKLY_QUOTES.length];
+  quoteEl.textContent  = `"${pick.text}"`;
+  authorEl.textContent = `— ${pick.author}`;
+}
+
+/* ── Load Weekly Summary ── */
 function loadWeeklySummary() {
   const allMoods = (() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY_MOODS)) || []; }
@@ -271,6 +503,9 @@ function loadWeeklySummary() {
   renderSummaryStats(weekly);
   renderPrompt(weekly);
   renderWeeklyHistory(weekly);
+  renderEmojiMoodRow(allMoods);   // pass all moods so we can filter per-day
+  renderMotivationalQuote();
+  renderSavedJournalEntries();
 }
 
 function renderSummaryStats(moods) {
@@ -291,7 +526,7 @@ function renderSummaryStats(moods) {
   moods.forEach(m => freq[m.emoji] = (freq[m.emoji] || 0) + 1);
   const topEmoji = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
 
-  // Streak — consecutive days logged
+  // Unique days logged
   const days = [...new Set(moods.map(m => new Date(m.timestamp).toDateString()))];
 
   setEl('summaryCount',  moods.length.toString());
@@ -348,31 +583,118 @@ function renderWeeklyHistory(moods) {
   }).join('');
 }
 
+/* ── Save Journal Entry (Week 2 NEW) ── */
+function saveJournalEntry() {
+  const textarea = document.getElementById('weeklyJournal');
+  const promptEl = document.getElementById('journalPrompt');
+  if (!textarea) return;
+
+  const text = textarea.value.trim();
+  if (!text) {
+    showToast('📝 Please write something before saving!');
+    return;
+  }
+
+  const entries = getSavedJournalEntries();
+  entries.unshift({
+    id:        Date.now(),
+    text,
+    prompt:    promptEl ? promptEl.textContent : '',
+    timestamp: new Date().toISOString(),
+  });
+
+  // Keep last 20 journal entries
+  localStorage.setItem(STORAGE_KEY_JOURNALS, JSON.stringify(entries.slice(0, 20)));
+  textarea.value = '';
+  renderSavedJournalEntries();
+  showToast('💾 Journal entry saved! 💜');
+}
+
+function getSavedJournalEntries() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_JOURNALS)) || []; }
+  catch { return []; }
+}
+
+function renderSavedJournalEntries() {
+  const container = document.getElementById('savedEntriesList');
+  if (!container) return;
+
+  const entries = getSavedJournalEntries();
+  if (entries.length === 0) {
+    container.innerHTML = `<div class="sei-empty">No saved entries yet. Write something and press <em>Save Entry</em> above! ✍️</div>`;
+    return;
+  }
+
+  container.innerHTML = entries.slice(0, 10).map(e => {
+    const d   = new Date(e.timestamp);
+    const dateStr = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="saved-entry-item">
+        <div class="sei-header">
+          <span class="sei-date">📅 ${dateStr} · ${timeStr}</span>
+        </div>
+        ${e.prompt ? `<div class="sei-prompt">${e.prompt}</div>` : ''}
+        <div class="sei-text">${escapeHtmlSummary(e.text)}</div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtmlSummary(text) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(text));
+  return d.innerHTML;
+}
+
+/* ── Toast (shared with script.js but also defined here for pages that only load features.js) ── */
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
 
 /* ══════════════════════════════════════
    INIT
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Breathing page
-  const startBtn = document.getElementById('breathBtn');
-  if (startBtn) startBtn.onclick = startBreathing;
 
-  // Chat page
+  /* ── Breathing page ── */
+  if (document.getElementById('breathCircle')) {
+    // Render phase guide for default pattern
+    renderPhaseSteps();
+    updateTip();
+    renderSessionHistory();
+
+    // Pattern buttons
+    document.querySelectorAll('.pattern-btn').forEach(btn => {
+      btn.addEventListener('click', () => selectPattern(btn.dataset.pattern));
+    });
+
+    const startBtn = document.getElementById('breathBtn');
+    if (startBtn) startBtn.onclick = startBreathing;
+  }
+
+  /* ── Chat page ── */
   const chatSend = document.getElementById('chatSendBtn');
   if (chatSend) chatSend.onclick = sendMessage;
 
   const chatInput = document.getElementById('chatInput');
   if (chatInput) chatInput.addEventListener('keydown', handleChatKey);
 
-  // Chat welcome message
   if (document.getElementById('chatMessages')) {
     setTimeout(() => {
       renderMessage("Hey! 👋 I'm Placida, your mental wellness companion. How are you feeling today?", 'bot');
     }, 400);
   }
 
-  // Summary page
+  /* ── Summary page ── */
   if (document.getElementById('summaryCount')) {
     loadWeeklySummary();
   }
+
+  const saveBtn = document.getElementById('saveJournalBtn');
+  if (saveBtn) saveBtn.addEventListener('click', saveJournalEntry);
 });
