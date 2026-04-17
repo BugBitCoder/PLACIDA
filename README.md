@@ -23,7 +23,48 @@ Placida focuses on a calm, simple, and supportive user experience while storing 
 ---
 
 ## 🎯 Core Features
-## 👥 Team — Week 1 Contributions
+
+### 😊 Mood Tracking
+Users can log their mood using emoji-based selection on the landing page. These entries are stored in `localStorage` and used across the app to generate insights, history, and real-time dashboard updates.
+
+### 📊 Dashboard v2 (Analytics & Personalization)
+The dashboard provides a deep dive into your emotional well-being:
+- **Mood Trend Chart**: Visual representation of your mood over the last 7 days using Chart.js.
+- **Mood Streak**: A daily counter to encourage consistent self-reflection.
+- **Time-aware Greeting**: Personalized greetings that change based on the time of day (Morning/Afternoon/Evening).
+- **Safe Reset**: A "Clear All Data" feature to maintain privacy and allow for fresh starts.
+
+### 🌬️ Guided Breathing v2
+Customizable stress management tools:
+- **Multiple Patterns**: Choose between 4-7-8, Box Breathing, and Simple modes.
+- **Dynamic Animations**: Visual cues to guide your inhale, hold, and exhale phases.
+- **Session History**: Track your completed cycles to build a mindfulness habit.
+
+### 📝 Weekly Summary & Journaling v2
+- **Emoji Retrospective**: A horizontal view of your mood history for the past week.
+- **Contextual Journaling**: AI-suggested prompts that adapt based on your average mood.
+- **Persistent Journal**: Save and review your reflections with automatic timestamps.
+
+### 💬 AI Chatbot Support v2
+A supportive conversational partner with enhanced UX:
+- **Contextual Awareness**: Shows a badge with your latest mood to personalize the conversation.
+- **Quick-Reply Chips**: Pre-defined buttons for common emotional needs.
+- **Persistence**: Your conversation history is saved locally so you never lose track.
+- **Support Trigger**: Automatically provides links to professional support resources when needed.
+
+---
+
+## 🚀 Week 2 Enhancements Checklist
+- [x] Responsive Mobile Hamburger Navigation
+- [x] Character counter for chatbot inputs
+- [x] Chart.js integration for visual mood trends
+- [x] Alternative breathing pattern selection logic
+- [x] Weekly emoji mood row in Summary
+- [x] Enhanced `localStorage` data integrity and clearing
+
+---
+
+## 👥 Team Contributions
 
 | Member | Role | Files Owned | Status |
 |---|---|---|---|
@@ -53,10 +94,11 @@ The chatbot offers conversational emotional support through the logic implemente
 
 | Technology | Usage |
 |---|---|
-| **HTML5** | Page structure and layout |
-| **CSS3** | Styling, responsiveness, and animations |
-| **Vanilla JavaScript** | App logic and interactivity |
-| **localStorage** | Client-side persistence for moods and journal-related data |
+| **HTML5** | Page structure and semantic layout |
+| **CSS3** | Modern styling, glassmorphism UI, and smooth animations |
+| **Vanilla JavaScript** | Core application logic, event handling, and state management |
+| **Chart.js** | Data visualization for mood trends and analytics |
+| **localStorage** | Secure, client-only persistence for moods, chat, and journaling |
 
 ### Notes
 - No frameworks are used
