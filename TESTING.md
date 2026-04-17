@@ -258,7 +258,41 @@ Week 2 responsive behavior was tested using a narrow browser width / mobile-styl
 
 ---
 
-## 6. Bugs / Notes
+## 6. Security & Data Privacy Testing
+
+- [x] All personal data remains strictly in `localStorage`
+- [x] No data is sent to external servers or third-party APIs
+- [x] "Clear All Data" successfully wipes all user-identifiable mood history
+- [x] Chat history is isolated to the local browser session
+
+---
+
+## 7. Performance & Accessibility Testing
+
+### Performance
+- [x] Dashboard chart renders in <100ms on first load
+- [x] Breathing animations remain smooth (60fps) during long sessions
+- [x] Chatbot provides near-instant replies for local logic
+
+### Accessibility
+- [x] High contrast colors used for text readability
+- [x] All buttons have descriptive alt text or labels
+- [x] Keyboard navigation (Tab/Enter) works for all major interactive elements
+- [x] Font sizes remain legible across different screen sizes
+
+---
+
+## 8. Edge Case Testing
+
+- [x] App behaves gracefully when `localStorage` is empty
+- [x] Dashboard handles cases with "zero" mood entries correctly
+- [x] Chatbot handles empty or excessively long inputs without crashing
+- [x] Breathing exercise handles rapid "Start/Stop" clicking
+- [x] Streak counter correctly resets if a day is missed
+
+---
+
+## 9. Bugs / Notes
 
 - Week 2 testing focused on polish, UX improvements, and richer localStorage-based behavior.
 - Regression testing was performed to ensure Week 1 features still function after new updates.
