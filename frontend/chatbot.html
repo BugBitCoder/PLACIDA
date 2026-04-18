@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Placida Chat — Talk to your AI mental wellness companion anytime, privately and without judgment." />
+  <title>Chat — Placida</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    /* ════════════════════════════════
+       AYUSHI — chatbot.html styles
+       Week 1: Chat UI
+       Week 2: Mobile nav, enhancements,
+               quick-reply chips, mood badge,
+               "Talk to a real person" banner
+       ════════════════════════════════ */
+
+    /* ── Mobile Hamburger (Week 2) ── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 110;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text-soft);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 640px) {
+      .hamburger { display: flex; }
+      .nav-links {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(13, 15, 26, 0.97);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 36px;
+        z-index: 100;
+        animation: fadeIn 0.25s ease both;
+      }
+      .nav-links.mobile-open { display: flex; }
+      .nav-links a { font-size: 1.3rem !important; color: var(--text-primary) !important; }
+    }
+
+    /* ── Chat Page Layout ── */
+    .chat-page {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 0;
+      animation: fadeInUp 0.6s ease both;
+    }
+
+    /* ── Chat Header ── */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .chat-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 20px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .chat-header-info .chat-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .chat-header-info .chat-status {
+      font-size: 0.78rem;
+      color: var(--accent-teal);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent-teal);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+      display: inline-block;
+    }
+
+    /* ── Clear Chat Button (Week 2) ── */
+    #clearChatBtn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #clearChatBtn:hover {
+      border-color: rgba(240,107,139,0.5);
+      color: var(--accent-pink);
+      background: rgba(240,107,139,0.07);
+    }
+
+    /* ── Mood Context Badge (Week 2) ── */
+    .mood-context-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(124,106,247,0.1);
+      border: 1px solid rgba(124,106,247,0.2);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      color: #a89df9;
+      margin-bottom: 14px;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    /* ── Chat Window ── */
+    .chat-window {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px 20px 0 0;
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 360px;
+      max-height: 440px;
+      backdrop-filter: blur(16px);
+      scroll-behavior: smooth;
+    }
+
+    /* ── Chat Messages ── */
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 80%;
+      animation: fadeInUp 0.3s ease both;
+    }
+
+    .chat-msg.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .chat-msg.bot {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .bubble {
+      padding: 12px 18px;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .chat-msg.user .bubble {
+      background: linear-gradient(135deg, var(--accent-purple), #9b6af7);
+      color: #fff;
+      border-radius: 18px 18px 4px 18px;
+    }
+
+    .chat-msg.bot .bubble {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-primary);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px 18px 18px 4px;
+    }
+
+    .msg-time {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    /* ── Typing Indicator ── */
+    .typing-indicator .bubble {
+      padding: 14px 20px;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .typing-indicator .bubble span {
+      width: 7px;
+      height: 7px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.2s ease infinite;
+    }
+
+    .typing-indicator .bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator .bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%           { transform: translateY(-7px); }
+    }
+
+    /* ── Chat Input Area ── */
+    .chat-input-area {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-glass);
+      border-top: none;
+      border-radius: 0 0 20px 20px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      backdrop-filter: blur(16px);
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chatInput {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      outline: none;
+      resize: none;
+      overflow: hidden;
+      min-height: 46px;
+      max-height: 130px;
+      transition: border-color 0.3s ease;
+      line-height: 1.5;
+    }
+
+    #chatInput::placeholder { color: var(--text-muted); }
+    #chatInput:focus { border-color: var(--accent-purple); }
+
+    /* ── Character counter (Week 2) ── */
+    .char-counter {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 4px;
+      padding-right: 4px;
+      transition: color 0.2s ease;
+    }
+    .char-counter.warn  { color: #f0b86b; }
+    .char-counter.limit { color: var(--accent-pink); }
+
+    #chatSendBtn {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-purple), #9b6af7);
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    #chatSendBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 16px rgba(124,106,247,0.4);
+    }
+
+    #chatSendBtn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Quick Prompts ── */
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 24px;
+    }
+
+    .qp-btn {
+      background: rgba(124,106,247,0.1);
+      border: 1px solid rgba(124,106,247,0.25);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 0.8rem;
+      color: #a89df9;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.25s ease;
+    }
+
+    .qp-btn:hover {
+      background: rgba(124,106,247,0.22);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* ── "Talk to a real person" banner (Week 2) ── */
+    .real-person-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(240,107,139,0.12), rgba(124,106,247,0.12));
+      border: 1px solid rgba(240,107,139,0.35);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin: 16px 0 8px;
+      animation: fadeInUp 0.45s ease both;
+      position: relative;
+    }
+    .real-person-banner.visible { display: block; }
+
+    .real-person-banner .rp-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .real-person-banner .rp-sub {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+
+    .real-person-banner .rp-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .real-person-banner .rp-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(240,107,139,0.3);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 0.78rem;
+      color: #f8a3b8;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .real-person-banner .rp-link:hover {
+      background: rgba(240,107,139,0.15);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .real-person-banner .rp-dismiss {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color 0.2s ease;
+    }
+    .real-person-banner .rp-dismiss:hover { color: var(--text-primary); }
+
+    /* ── Disclaimer ── */
+    .chat-disclaimer {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 14px 0 32px;
+      line-height: 1.6;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Persistent badge (Week 2) ── */
+    .persist-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(94,196,182,0.07);
+      border: 1px solid rgba(94,196,182,0.15);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin: 0 0 16px;
+      width: fit-content;
+      align-self: flex-end;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <!-- Hamburger (Week 2 — mobile) -->
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="mobileNav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="summary.html">Journal</a></li>
+      <li><a href="chatbot.html" class="active" aria-current="page">Chat</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-wrapper" style="padding-bottom: 40px;">
+    <div class="chat-page">
+
+      <!-- Mood Context Badge (Week 2) -->
+      <div class="mood-context-badge" id="moodBadge" style="display:none;" aria-live="polite">
+        <span id="moodBadgeEmoji"></span>
+        <span id="moodBadgeText"></span>
+      </div>
+
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="chat-avatar" aria-hidden="true">🧠</div>
+          <div class="chat-header-info">
+            <div class="chat-name">Placida AI</div>
+            <div class="chat-status">
+              <span class="status-dot"></span> Online · Always here for you
+            </div>
+          </div>
+        </div>
+        <!-- Clear Chat button (Week 2) -->
+        <button id="clearChatBtn" title="Start a new conversation" aria-label="Clear chat history">
+          🗑️ New Chat
+        </button>
+      </div>
+
+      <!-- Persist note (Week 2) -->
+      <div class="persist-note" aria-label="Chat persistence info">
+        💾 Conversation saved locally
+      </div>
+
+      <!-- Chat Window -->
+      <div class="chat-window" id="chatMessages" role="log" aria-label="Chat messages" aria-live="polite">
+        <!-- Messages injected by features.js + ayushi-chat.js -->
+      </div>
+
+      <!-- Input Area -->
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <textarea
+            id="chatInput"
+            placeholder="How are you feeling today…"
+            rows="1"
+            maxlength="500"
+            aria-label="Type your message"
+          ></textarea>
+          <!-- Character counter (Week 2) -->
+          <div class="char-counter" id="charCounter" aria-live="polite">0 / 500</div>
+        </div>
+        <button id="chatSendBtn" aria-label="Send message">➤</button>
+      </div>
+
+      <!-- Quick Reply Chips (Week 2) -->
+      <div class="quick-prompts" aria-label="Quick message suggestions" id="quickReplies">
+        <button class="qp-btn" onclick="quickPrompt('I feel anxious')">😟 I feel anxious</button>
+        <button class="qp-btn" onclick="quickPrompt('I am really stressed')">😓 I’m stressed</button>
+        <button class="qp-btn" onclick="quickPrompt('I feel happy today')">😊 I’m happy</button>
+        <button class="qp-btn" onclick="quickPrompt('I feel lonely')">💙 I feel lonely</button>
+        <button class="qp-btn" onclick="quickPrompt('I need help')">🆘 I need help</button>
+        <button class="qp-btn" onclick="quickPrompt('I’m okay')">🙂 I’m okay</button>
+      </div>
+
+      <!-- Talk to a Real Person Banner (Week 2) -->
+      <div class="real-person-banner" id="realPersonBanner" role="complementary" aria-label="Human support options">
+        <button class="rp-dismiss" id="rpDismissBtn" aria-label="Dismiss">✕</button>
+        <div class="rp-title">🤝 Would you like to talk to a real person?</div>
+        <p class="rp-sub">It looks like you’ve been sharing a lot. Sometimes a human connection makes all the difference. These helplines are free, confidential, and available 24/7.</p>
+        <div class="rp-links">
+          <a class="rp-link" href="tel:9152987821" aria-label="Call iCall helpline">📞 iCall — 9152987821</a>
+          <a class="rp-link" href="tel:18602662345" aria-label="Call Vandrevala Foundation">📞 Vandrevala — 1860-2662-345</a>
+          <a class="rp-link" href="tel:18004599019" aria-label="Call NIMHANS helpline">📞 NIMHANS — 080-46110007</a>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <p class="chat-disclaimer">
+        💜 Placida is an AI companion, not a substitute for professional mental health care.<br>
+        If you're in crisis, please call <strong>iCall: 9152987821</strong> or <strong>Vandrevala: 1860-2662-345</strong>
+      </p>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Ayushi</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="summary.html">Journal</a></li>
+    </ul>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Sanchari's core chatbot engine -->
+  <script src="features.js"></script>
+
+  <!-- ════════════════════════════════════════════════
+       AYUSHI — Week 2 Enhancements
+       1. Mobile hamburger nav
+       2. Chat history persistence (localStorage)
+       3. Mood-aware greeting + mood context badge
+       4. Auto-resize textarea
+       5. Character counter
+       6. Clear chat
+       7. Quick-reply chips
+       8. "Talk to a real person" banner (after 5+ bot msgs)
+       ════════════════════════════════════════════════ -->
+  <script>
+    /* ── Storage key for chat history ── */
+    const CHAT_HISTORY_KEY = 'placida_chat_history';
+    const MAX_HISTORY      = 60; // keep last 60 messages
+
+    /* ─────────────────────────────────────
+       1. MOBILE HAMBURGER NAV
+    ───────────────────────────────────── */
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileNav    = document.getElementById('mobileNav');
+
+    hamburgerBtn.addEventListener('click', () => {
+      const isOpen = mobileNav.classList.toggle('mobile-open');
+      hamburgerBtn.classList.toggle('open', isOpen);
+      hamburgerBtn.setAttribute('aria-expanded', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    // Close nav when a link is clicked
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('mobile-open');
+        hamburgerBtn.classList.remove('open');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      });
+    });
+
+    /* ─────────────────────────────────────
+       2. AUTO-RESIZE TEXTAREA
+    ───────────────────────────────────── */
+    const chatInput    = document.getElementById('chatInput');
+    const charCounter  = document.getElementById('charCounter');
+    const chatSendBtn  = document.getElementById('chatSendBtn');
+
+    function autoResize() {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 130) + 'px';
+    }
+
+    /* ─────────────────────────────────────
+       3. CHARACTER COUNTER
+    ───────────────────────────────────── */
+    function updateCharCounter() {
+      const len = chatInput.value.length;
+      const max = 500;
+      charCounter.textContent = `${len} / ${max}`;
+      charCounter.className = 'char-counter';
+      if (len >= max)       charCounter.classList.add('limit');
+      else if (len >= 400)  charCounter.classList.add('warn');
+      chatSendBtn.disabled = len === 0 || len > max;
+    }
+
+    chatInput.addEventListener('input', () => {
+      autoResize();
+      updateCharCounter();
+    });
+
+    /* ─────────────────────────────────────
+       4. CHAT HISTORY PERSISTENCE
+    ───────────────────────────────────── */
+    function saveChatHistory() {
+      const container = document.getElementById('chatMessages');
+      if (!container) return;
+      const messages = [];
+      container.querySelectorAll('.chat-msg').forEach(msgEl => {
+        if (msgEl.id === 'typingIndicator') return;
+        const sender  = msgEl.classList.contains('user') ? 'user' : 'bot';
+        const bubble  = msgEl.querySelector('.bubble');
+        const time    = msgEl.querySelector('.msg-time');
+        if (bubble) {
+          messages.push({
+            sender,
+            text: bubble.innerHTML,
+            time: time ? time.textContent : '',
+          });
+        }
+      });
+      // Keep only the last MAX_HISTORY messages
+      const trimmed = messages.slice(-MAX_HISTORY);
+      try {
+        localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(trimmed));
+      } catch (e) { /* storage full — silently skip */ }
+    }
+
+    function loadChatHistory() {
+      try {
+        const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+        if (!raw) return false;
+        const messages = JSON.parse(raw);
+        if (!messages || messages.length === 0) return false;
+
+        const container = document.getElementById('chatMessages');
+        if (!container) return false;
+
+        messages.forEach(m => {
+          const wrapper = document.createElement('div');
+          wrapper.className = `chat-msg ${m.sender}`;
+          wrapper.innerHTML = `
+            <div class="bubble">${m.text}</div>
+            <div class="msg-time">${m.time}</div>
+          `;
+          container.appendChild(wrapper);
+        });
+        container.scrollTop = container.scrollHeight;
+        return true;
+      } catch { return false; }
+    }
+
+    /* ─────────────────────────────────────
+       5. MOOD-AWARE GREETING
+    ───────────────────────────────────── */
+    function getMoodAwareGreeting() {
+      const MOODS_KEY = 'placida_moods';
+      try {
+        const moods = JSON.parse(localStorage.getItem(MOODS_KEY)) || [];
+        if (moods.length === 0) {
+          return "Hey! 👋 I'm Placida, your mental wellness companion. How are you feeling today?";
+        }
+
+        const latest   = moods[0];
+        const emoji    = latest.emoji;
+        const label    = latest.label;
+        const score    = latest.score;
+
+        // Show mood badge in header
+        const badge     = document.getElementById('moodBadge');
+        const badgeEmoji = document.getElementById('moodBadgeEmoji');
+        const badgeText  = document.getElementById('moodBadgeText');
+        if (badge && badgeEmoji && badgeText) {
+          badgeEmoji.textContent = emoji;
+          badgeText.textContent  = `Last logged: ${label}`;
+          badge.style.display    = 'inline-flex';
+        }
+
+        if (score >= 4) {
+          return `Hey ${emoji}! You were feeling ${label.toLowerCase()} earlier — that's wonderful to see! What's been making your day good?`;
+        } else if (score === 3) {
+          return `Hi there 👋 You logged ${label.toLowerCase()} mood earlier. Some days are just in the middle — and that's completely okay. Want to talk about how you're doing right now?`;
+        } else {
+          return `Hey 💜 I noticed you were feeling ${label.toLowerCase()} earlier. I'm really glad you came to chat. This is a safe space — tell me what's been going on.`;
+        }
+      } catch {
+        return "Hey! 👋 I'm Placida, your mental wellness companion. How are you feeling today?";
+      }
+    }
+
+    /* ─────────────────────────────────────
+       6. CLEAR CHAT
+    ───────────────────────────────────── */
+    document.getElementById('clearChatBtn').addEventListener('click', () => {
+      const container = document.getElementById('chatMessages');
+      if (!container) return;
+      if (!confirm('Start a new conversation? Your current chat will be cleared.')) return;
+      container.innerHTML = '';
+      localStorage.removeItem(CHAT_HISTORY_KEY);
+      // Greet fresh
+      setTimeout(() => {
+        renderMessage(getMoodAwareGreeting(), 'bot');
+        saveChatHistory();
+      }, 300);
+    });
+
+    /* ─────────────────────────────────────
+       7. "TALK TO A REAL PERSON" BANNER
+    ───────────────────────────────────── */
+    let botMessageCount = 0;          // tracks bot replies this session
+    const REAL_PERSON_THRESHOLD = 5;  // show banner after this many bot msgs
+    const RP_DISMISSED_KEY = 'placida_rp_dismissed'; // so we don't re-show after dismiss
+
+    function checkRealPersonBanner() {
+      const banner = document.getElementById('realPersonBanner');
+      if (!banner) return;
+      // Don't re-show if user already dismissed it this session
+      if (sessionStorage.getItem(RP_DISMISSED_KEY)) return;
+      if (botMessageCount >= REAL_PERSON_THRESHOLD) {
+        banner.classList.add('visible');
+        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    document.getElementById('rpDismissBtn').addEventListener('click', () => {
+      const banner = document.getElementById('realPersonBanner');
+      if (banner) {
+        banner.classList.remove('visible');
+        sessionStorage.setItem(RP_DISMISSED_KEY, 'true');
+      }
+    });
+
+    /* ─────────────────────────────────────
+       QUICK PROMPT HANDLER
+    ───────────────────────────────────── */
+    function quickPrompt(text) {
+      const input = document.getElementById('chatInput');
+      if (input) {
+        input.value = text;
+        autoResize();
+        updateCharCounter();
+        input.focus();
+      }
+      sendMessage();
+    }
+
+    /* ─────────────────────────────────────
+       INIT — runs after features.js has
+       already fired its DOMContentLoaded
+       (window load fires later, so safe)
+    ───────────────────────────────────── */
+    window.addEventListener('load', () => {
+
+      // Disable send on start (no text)
+      chatSendBtn.disabled = true;
+
+      /* ── Patch sendMessage to count bot replies ── */
+      const _origSendMessage = sendMessage;
+      window.sendMessage = function () {
+        _origSendMessage();
+        // The bot reply is rendered after ~1200 ms (typing delay in features.js)
+        setTimeout(() => {
+          botMessageCount++;
+          checkRealPersonBanner();
+          saveChatHistory();
+        }, 1800);
+      };
+
+      // Re-wire send button and Enter key to the patched version
+      chatSendBtn.onclick = window.sendMessage;
+      chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          window.sendMessage();
+        }
+      });
+
+      // features.js already fires a default greeting via its own DOMContentLoaded.
+      // We clear that and replace with our mood-aware / history-restored greeting.
+      const container = document.getElementById('chatMessages');
+      if (container) container.innerHTML = '';
+
+      const historyLoaded = loadChatHistory();
+
+      if (!historyLoaded) {
+        setTimeout(() => {
+          renderMessage(getMoodAwareGreeting(), 'bot');
+          saveChatHistory();
+        }, 250);
+      } else {
+        // Count existing bot messages so returning users can still trigger the banner
+        const existingBotMsgs = document.querySelectorAll('#chatMessages .chat-msg.bot').length;
+        botMessageCount = Math.max(0, existingBotMsgs - 1); // -1 for greeting
+        setTimeout(() => {
+          renderMessage("Welcome back 💜 I'm still here. What's on your mind today?", 'bot');
+          saveChatHistory();
+          checkRealPersonBanner();
+        }, 250);
+      }
+    });
+  </script>
+
+</body>
+</html>
