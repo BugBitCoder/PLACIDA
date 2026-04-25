@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Placida Mindful — Daily affirmations, gratitude prompts and mindfulness activities to nurture your mental wellness." />
+  <meta name="theme-color" content="#7c6af7" />
+  <meta property="og:title" content="Mindful — Placida Mental Wellness" />
+  <meta property="og:description" content="Your daily affirmations and gratitude space. Private, calm, and always accessible." />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Mindful — Placida</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    /* ══════════════════════════════════════════════
+       MINDFUL PAGE — Sanchari Week 3
+       ══════════════════════════════════════════════ */
+
+    .mindful-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 52px 24px 24px;
+      animation: fadeInUp 0.7s ease both;
+    }
+
+    .mindful-hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f0f0ff 0%, var(--accent-teal) 50%, var(--accent-purple) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease infinite;
+    }
+
+    .mindful-hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 400px;
+      line-height: 1.7;
+    }
+
+    /* ── Page Content Wrapper ── */
+    .mindful-content {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      animation: fadeInUp 0.8s ease 0.1s both;
+    }
+
+    /* ══════════════════════════
+       SECTION 1 — AFFIRMATION DECK
+       ══════════════════════════ */
+
+    .affirmation-section {
+      background: linear-gradient(135deg, rgba(124,106,247,0.12), rgba(94,196,182,0.07));
+      border: 1px solid rgba(124,106,247,0.25);
+      border-radius: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+    }
+
+    .affirmation-header {
+      padding: 22px 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .affirmation-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .aff-section-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(124,106,247,0.25);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .aff-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .aff-section-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .aff-counter {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border-glass);
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    /* ── Affirmation Card ── */
+    .affirmation-card-wrap {
+      padding: 20px 28px 10px;
+      position: relative;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .affirmation-card {
+      background: linear-gradient(135deg, rgba(124,106,247,0.18), rgba(94,196,182,0.12), rgba(240,107,139,0.08));
+      border: 1px solid rgba(124,106,247,0.3);
+      border-radius: 20px;
+      padding: 36px 32px;
+      text-align: center;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .affirmation-card::before {
+      content: '❝';
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      font-size: 3rem;
+      color: rgba(124,106,247,0.18);
+      line-height: 1;
+      font-family: Georgia, serif;
+    }
+
+    .affirmation-card.fade-out {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    .affirmation-card.fade-in {
+      animation: affFadeIn 0.4s ease both;
+    }
+
+    @keyframes affFadeIn {
+      from { opacity: 0; transform: scale(0.97) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    #affirmationText {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.75;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    .today-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 16px;
+      padding: 5px 14px;
+      background: rgba(94,196,182,0.12);
+      border: 1px solid rgba(94,196,182,0.3);
+      border-radius: 100px;
+      font-size: 0.72rem;
+      color: var(--accent-teal);
+      font-weight: 600;
+    }
+
+    /* ── Affirmation Actions ── */
+    .affirmation-actions {
+      padding: 12px 28px 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    #nextAffirmationBtn {
+      background: linear-gradient(135deg, var(--accent-purple), #9b6af7);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #nextAffirmationBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(124,106,247,0.4);
+    }
+
+    #todayAffirmationBtn {
+      background: transparent;
+      border: 1px solid rgba(94,196,182,0.35);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--accent-teal);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #todayAffirmationBtn:hover {
+      background: rgba(94,196,182,0.09);
+      border-color: rgba(94,196,182,0.6);
+    }
+
+    /* Dots indicator */
+    .aff-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      padding-bottom: 8px;
+    }
+
+    .aff-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border-glass);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .aff-dot.active {
+      background: var(--accent-purple);
+      transform: scale(1.35);
+    }
+
+    /* ══════════════════════════
+       SECTION 2 — GRATITUDE PROMPT
+       ══════════════════════════ */
+
+    .gratitude-section {
+      background: linear-gradient(135deg, rgba(240,107,139,0.08), rgba(124,106,247,0.06));
+      border: 1px solid rgba(240,107,139,0.18);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(14px);
+    }
+
+    .grat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .grat-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(240,107,139,0.18);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .grat-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .grat-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .grat-prompt {
+      font-size: 1rem;
+      color: var(--text-soft);
+      font-style: italic;
+      margin-bottom: 16px;
+      line-height: 1.65;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid rgba(240,107,139,0.5);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .gratitude-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      resize: none;
+      transition: border-color 0.3s ease;
+      line-height: 1.6;
+      box-sizing: border-box;
+    }
+
+    .gratitude-textarea::placeholder { color: var(--text-muted); }
+
+    .gratitude-textarea:focus {
+      border-color: var(--accent-pink);
+      box-shadow: 0 0 0 3px rgba(240,107,139,0.12);
+    }
+
+    .grat-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .grat-save-note {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    #saveGratitudeBtn {
+      background: linear-gradient(135deg, var(--accent-pink), #f09a6b);
+      border: none;
+      border-radius: 12px;
+      padding: 11px 22px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #saveGratitudeBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(240,107,139,0.4);
+    }
+
+    /* ── Saved Gratitude Entries (collapsible) ── */
+    .grat-history {
+      margin-top: 20px;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 16px;
+    }
+
+    .grat-history-toggle {
+      background: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .grat-history-toggle:hover { color: var(--text-primary); }
+
+    .grat-history-toggle .toggle-arrow {
+      font-size: 0.7rem;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .grat-history-toggle.open .toggle-arrow {
+      transform: rotate(90deg);
+    }
+
+    .grat-entries-list {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .grat-entries-list.visible { display: flex; }
+
+    .grat-entry-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 13px 15px;
+      animation: fadeInUp 0.35s ease both;
+    }
+
+    .grat-entry-date {
+      font-size: 0.72rem;
+      color: var(--accent-pink);
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .grat-entry-text {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .grat-empty {
+      text-align: center;
+      padding: 16px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+    }
+
+    /* ── Shortcut hint (match breathe.html style) ── */
+    .shortcut-hint-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(124,106,247,0.18);
+      border: 1px solid rgba(124,106,247,0.35);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      z-index: 50;
+      color: var(--accent-purple);
+    }
+
+    .shortcut-hint-btn:hover {
+      background: rgba(124,106,247,0.3);
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(124,106,247,0.3);
+    }
+
+    /* ── Back link ── */
+    .mindful-back-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+      <li><a href="insights.html">Insights</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-wrapper">
+
+    <!-- Hero -->
+    <section class="mindful-hero" aria-labelledby="mindful-title">
+      <div class="hero-badge">🌿 Mindfulness Space</div>
+      <h1 id="mindful-title">Daily Mindfulness</h1>
+      <p>Affirmations and gratitude — small daily rituals that build a kinder relationship with yourself.</p>
+    </section>
+
+    <div class="mindful-content">
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 1: DAILY AFFIRMATION DECK
+           ══════════════════════════════════════════════ -->
+      <section class="affirmation-section" aria-labelledby="aff-title">
+
+        <div class="affirmation-header">
+          <div class="affirmation-header-left">
+            <div class="aff-section-icon">✨</div>
+            <div>
+              <div class="aff-section-title" id="aff-title">Daily Affirmation Deck</div>
+              <div class="aff-section-sub">One card at a time — hold it, breathe, believe it</div>
+            </div>
+          </div>
+          <div class="aff-counter" id="affCounter" aria-live="polite">1 / 10</div>
+        </div>
+
+        <div class="affirmation-card-wrap">
+          <div class="affirmation-card" id="affirmationCard" role="region" aria-label="Current affirmation" aria-live="polite">
+            <p id="affirmationText">Loading your affirmation…</p>
+            <div class="today-badge" id="todayBadge" style="display:none;">⭐ Today's pick</div>
+          </div>
+        </div>
+
+        <div class="aff-dots" id="affDots" aria-hidden="true">
+          <!-- 10 dots populated by JS -->
+        </div>
+
+        <div class="affirmation-actions">
+          <button id="nextAffirmationBtn" aria-label="Next affirmation">
+            Next Affirmation <span aria-hidden="true">→</span>
+          </button>
+          <button id="todayAffirmationBtn" aria-label="Return to today's affirmation">
+            📅 Today's Pick
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 2: GRATITUDE PROMPT
+           ══════════════════════════════════════════════ -->
+      <section class="gratitude-section" aria-labelledby="grat-title">
+
+        <div class="grat-header">
+          <div class="grat-icon">🙏</div>
+          <div>
+            <div class="grat-title" id="grat-title">Daily Gratitude</div>
+            <div class="grat-sub">A moment to notice what's good</div>
+          </div>
+        </div>
+
+        <p class="grat-prompt">What are 3 things you're grateful for today?</p>
+
+        <textarea
+          class="gratitude-textarea"
+          id="gratitudeInput"
+          rows="5"
+          placeholder="1. I'm grateful for…&#10;2. I appreciate…&#10;3. I feel thankful for…"
+          aria-label="Gratitude journal input"
+        ></textarea>
+
+        <div class="grat-actions">
+          <p class="grat-save-note">💾 Saved privately — never leaves your device</p>
+          <button id="saveGratitudeBtn" aria-label="Save gratitude entry">
+            Save Gratitude ✨
+          </button>
+        </div>
+
+        <!-- Saved Gratitude Entries (collapsible) -->
+        <div class="grat-history" id="gratHistorySection" style="display:none;">
+          <button class="grat-history-toggle" id="gratHistoryToggle" aria-expanded="false" aria-controls="gratEntriesList">
+            <span class="toggle-arrow" aria-hidden="true">▶</span>
+            <span id="gratHistoryLabel">Past Entries</span>
+          </button>
+          <div class="grat-entries-list" id="gratEntriesList" role="list" aria-label="Saved gratitude entries">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </section>
+
+    </div><!-- /mindful-content -->
+
+    <!-- Back links -->
+    <div class="mindful-back-row" style="padding-bottom: 60px;">
+      <a href="breathe.html" class="btn-secondary" style="text-decoration:none; display:inline-block; padding: 13px 28px;">
+        ← Back to Breathe
+      </a>
+      <a href="index.html" class="btn-secondary" style="text-decoration:none; display:inline-block; padding: 13px 28px;">
+        🏠 Home
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Sanchari</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+    </ul>
+  </footer>
+
+  <!-- Shortcut hint floating button -->
+  <button class="shortcut-hint-btn" id="shortcutHintBtn" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="features.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
+</body>
+</html>

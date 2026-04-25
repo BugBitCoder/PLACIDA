@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Placida Breathing Exercise — Choose 4-7-8, Box Breathing or Simple breathing to calm anxiety and stress." />
+  <meta name="theme-color" content="#7c6af7" />
+  <meta property="og:title" content="Breathe — Placida Mental Wellness" />
+  <meta property="og:description" content="Guided breathing exercises for anxiety, sleep and calm. 4-7-8, Box, and Simple patterns." />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Breathe — Placida</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    /* ── Breathing Page Extras ── */
+    .breathe-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 52px 24px 24px;
+      animation: fadeInUp 0.7s ease both;
+    }
+
+    .breathe-hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f0f0ff 0%, var(--accent-purple) 60%, var(--accent-teal) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease infinite;
+    }
+
+    .breathe-hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 380px;
+      line-height: 1.7;
+    }
+
+    /* ── Pattern Selector ── */
+    .pattern-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 18px 24px 0;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 0.8s ease 0.05s both;
+    }
+
+    .pattern-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-glass);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      min-width: 130px;
+    }
+
+    .pattern-btn .pb-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .pattern-btn .pb-timing {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    .pattern-btn .pb-icon {
+      font-size: 1.3rem;
+      margin-bottom: 2px;
+    }
+
+    .pattern-btn:hover {
+      background: rgba(124,106,247,0.12);
+      border-color: rgba(124,106,247,0.4);
+      transform: translateY(-2px);
+    }
+
+    .pattern-btn.active {
+      background: rgba(124,106,247,0.2);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 20px rgba(124,106,247,0.25);
+    }
+
+    /* ── The Breathing Circle ── */
+    .circle-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 24px 24px;
+      gap: 28px;
+    }
+
+    .breath-ring {
+      position: relative;
+      width: 230px;
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #breathCircle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px solid var(--accent-purple);
+      background: radial-gradient(circle, rgba(124,106,247,0.12) 0%, rgba(13,15,26,0.8) 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 1s ease, box-shadow 1s ease, border-color 1s ease;
+      box-shadow: 0 0 60px rgba(124,106,247,0.3);
+      cursor: default;
+    }
+
+    #breathLabel {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    #breathCounter {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--accent-purple);
+      line-height: 1;
+      margin-top: 4px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Stats row ── */
+    .breath-stats {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .breath-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 130px;
+      backdrop-filter: blur(10px);
+    }
+
+    .breath-stat .bs-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .breath-stat .bs-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ── Phase steps ── */
+    .phase-steps {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0 24px;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .phase-step {
+      flex: 1;
+      min-width: 120px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 16px 12px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.4s ease, background 0.4s ease;
+    }
+
+    .phase-step.active-phase {
+      border-color: var(--accent-purple);
+      background: rgba(124,106,247,0.1);
+    }
+
+    .phase-step .ps-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .phase-step .ps-name { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+    .phase-step .ps-dur  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Btn area ── */
+    .btn-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 24px 28px;
+      max-width: 360px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tip-box {
+      background: rgba(94,196,182,0.08);
+      border: 1px solid rgba(94,196,182,0.25);
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 0.83rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      text-align: center;
+      max-width: 560px;
+      margin: 8px auto 0;
+    }
+    .tip-box strong { color: var(--accent-teal); }
+
+    /* ── Session History ── */
+    .session-history-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 24px 28px;
+      animation: fadeInUp 0.7s ease 0.15s both;
+    }
+
+    .session-history-section .sh-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-log {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .session-item .si-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+    .session-item .si-info { flex: 1; }
+    .session-item .si-main {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .session-item .si-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .session-item .si-time {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .sh-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+    }
+
+    .sh-today-summary {
+      background: rgba(94,196,182,0.08);
+      border: 1px solid rgba(94,196,182,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sh-today-summary strong { color: var(--accent-teal); }
+
+    /* ── Ambient Sound Toggle (Task 6) ── */
+    .sound-section {
+      max-width: 600px;
+      margin: 20px auto 0;
+      padding: 0 24px;
+      animation: fadeInUp 0.7s ease 0.1s both;
+    }
+
+    .sound-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sound-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sound-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-glass);
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      transition: all 0.28s ease;
+    }
+
+    .sound-btn:hover {
+      background: rgba(124,106,247,0.1);
+      border-color: rgba(124,106,247,0.4);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .sound-btn.active {
+      background: rgba(124,106,247,0.18);
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+      box-shadow: 0 0 14px rgba(124,106,247,0.22);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="breathe.html" class="active" aria-current="page">Breathe</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+      <li><a href="insights.html">Insights</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-wrapper">
+
+    <!-- Hero -->
+    <section class="breathe-hero" aria-labelledby="breathe-title">
+      <div class="hero-badge">🌬️ Guided Breathing</div>
+      <h1 id="breathe-title">Breathing Exercises</h1>
+      <p>Choose a pattern, press start, and let your breath guide you back to calm.</p>
+    </section>
+
+    <!-- ── Pattern Selector ── -->
+    <div class="pattern-selector" role="group" aria-label="Choose a breathing pattern">
+      <button class="pattern-btn active" id="btn-478" data-pattern="478" aria-pressed="true">
+        <span class="pb-icon">🌬️</span>
+        <span class="pb-name">4 · 7 · 8</span>
+        <span class="pb-timing">Inhale · Hold · Exhale</span>
+      </button>
+      <button class="pattern-btn" id="btn-box" data-pattern="box" aria-pressed="false">
+        <span class="pb-icon">📦</span>
+        <span class="pb-name">Box Breathing</span>
+        <span class="pb-timing">4 · 4 · 4 · 4</span>
+      </button>
+      <button class="pattern-btn" id="btn-simple" data-pattern="simple" aria-pressed="false">
+        <span class="pb-icon">✨</span>
+        <span class="pb-name">Simple Calm</span>
+        <span class="pb-timing">4 in · 4 out</span>
+      </button>
+    </div>
+
+    <!-- Circle -->
+    <div class="circle-wrapper">
+      <div class="breath-ring">
+        <div id="breathCircle" role="status" aria-live="polite" aria-label="Breathing guide">
+          <div id="breathLabel">Ready when you are</div>
+          <div id="breathCounter"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="breath-stats">
+        <div class="breath-stat">
+          <div class="bs-label">Phase</div>
+          <div class="bs-value" id="breathPhase">—</div>
+        </div>
+        <div class="breath-stat">
+          <div class="bs-label">Cycles Done</div>
+          <div class="bs-value" id="breathCycles">0 cycles completed</div>
+        </div>
+        <div class="breath-stat">
+          <div class="bs-label">Pattern</div>
+          <div class="bs-value" id="breathPatternLabel">4-7-8</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase Guide — updated dynamically by JS -->
+    <div class="phase-steps" id="phaseStepsContainer" aria-label="Breathing phases">
+      <!-- Populated by features.js -->
+    </div>
+
+    <!-- Tip -->
+    <p class="tip-box" style="margin-top:24px;" id="breathTip">
+      <strong>Tip:</strong> Do at least <strong>3–4 cycles</strong> for best results.
+      The 4-7-8 pattern is great for anxiety and sleep 📚
+    </p>
+
+    <!-- ── Ambient Sound Toggle (Task 6) ── -->
+    <div class="sound-section" aria-label="Ambient background sound">
+      <div class="sound-title">🎧 Ambient Sound</div>
+      <div class="sound-selector" role="group" aria-label="Choose background sound">
+        <button class="sound-btn" id="snd-rain" data-sound="rain" aria-pressed="false">
+          🌧️ Rain
+        </button>
+        <button class="sound-btn" id="snd-white" data-sound="white" aria-pressed="false">
+          🌊 White Noise
+        </button>
+        <button class="sound-btn active" id="snd-off" data-sound="off" aria-pressed="true">
+          🔇 Off
+        </button>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-area">
+      <button id="breathBtn" class="btn-primary" aria-label="Start breathing session">
+        Start Breathing
+      </button>
+      <a href="mindful.html" class="btn-secondary" style="text-align:center; text-decoration:none; display:block; padding:13px 24px; border-radius:12px;">
+        ✨ Try Mindfulness
+      </a>
+      <a href="index.html" class="btn-secondary" style="text-align:center; text-decoration:none; display:block; padding:13px 24px; border-radius:12px;">
+        ← Back to Home
+      </a>
+    </div>
+
+    <!-- ── Session History ── -->
+    <section class="session-history-section" aria-label="Today's breathing sessions">
+      <div class="sh-title">📋 Today's Sessions</div>
+      <div id="todaySummaryBadge" style="display:none;" class="sh-today-summary">
+        <span>🎉</span>
+        <span>You completed <strong id="todayCycleCount">0</strong> cycles across <strong id="todaySessionCount">0</strong> session(s) today — great work!</span>
+      </div>
+      <div class="session-log" id="sessionLog">
+        <div class="sh-empty">No sessions yet — press <em>Start Breathing</em> above to begin! 🌬️</div>
+      </div>
+    </section>
+
+    <!-- Crisis Banner -->
+    <div style="max-width:600px; margin: 0 auto 60px; padding: 0 24px;">
+      <div class="crisis-banner" role="alert">
+        <div class="crisis-icon">🆘</div>
+        <div>
+          <strong>Need immediate help?</strong>
+          <a href="tel:9152987821">iCall: 9152987821</a> ·
+          <a href="tel:18602662345">Vandrevala: 1860-2662-345</a> — free &amp; confidential.
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Sanchari</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+    </ul>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="features.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
+</body>
+</html>
