@@ -1,0 +1,47 @@
+/* ============================================
+   PLACIDA — supabase.js
+   Supabase client initialisation
+   ⚠️  Replace the two placeholder values below
+       with your real project URL and anon key.
+       Get them from: supabase.com → Project Settings → API
+   ============================================ */
+
+const SUPABASE_URL  = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
+
+/* Load Supabase JS SDK from CDN then expose `supabase` globally */
+(function loadSupabase() {
+  if (window.supabase) return;          // already loaded
+
+  const script  = document.createElement('script');
+  script.src    = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = () => {
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.dispatchEvent(new Event('supabase:ready'));
+  };
+  script.onerror = () => {
+    console.warn('[Placida] Supabase SDK failed to load — falling back to localStorage only.');
+    document.dispatchEvent(new Event('supabase:ready'));   // fire anyway so pages still init
+  };
+  document.head.appendChild(script);
+})();
+
+/* ─── Helper: wait for SDK then run callback ─── */
+function withSupabase(cb) {
+  if (window.supabase?.from) { cb(window.supabase); return; }
+  document.addEventListener('supabase:ready', () => cb(window.supabase), { once: true });
+}
+
+/* ─── Auth helpers ─── */
+async function getSession()  { return window.supabase?.auth.getSession();   }
+async function getUser()     { return window.supabase?.auth.getUser();       }
+async function signOut()     { await window.supabase?.auth.signOut(); window.location.href = 'auth.html'; }
+
+/* ─── Auth guard: call on every protected page ─── */
+function requireAuth() {
+  withSupabase(async (sb) => {
+    if (!sb) return;                     // offline / SDK failed → allow access
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) window.location.href = 'auth.html';
+  });
+}

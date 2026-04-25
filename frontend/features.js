@@ -96,104 +96,205 @@ function updateBreathUI() {
 
 
 /* ══════════════════════════════════════
-   SECTION 2 — CHATBOT (rule-based)
+   SECTION 2 — CHATBOT (Gemini AI + rule fallback)
    ══════════════════════════════════════ */
 
+/* ⚠️  Replace with your free key from https://aistudio.google.com/app/apikey */
+const GEMINI_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+
+const GEMINI_SYSTEM = `You are Placida, a warm, empathetic AI mental wellness companion.
+You help users with mood tracking, stress, anxiety, breathing, and emotional support.
+RULES:
+- Keep every reply SHORT — 2 to 4 sentences maximum.
+- Write conversationally, like a caring friend, not a therapist.
+- Never diagnose or replace professional help.
+- If the user mentions self-harm or suicide, gently share: iCall 9152987821 (free, confidential).
+- Use 1-2 emojis per reply at most.
+- Vary your phrasing — never repeat the exact same opening twice.
+- Naturally mention Placida features when relevant: breathing exercises (Breathe page), mood insights (Insights), journaling (Summary).`;
+
+/* — No-repeat tracker — */
+const recentBotReplies = [];
+function trackReply(text) {
+  recentBotReplies.push(text);
+  if (recentBotReplies.length > 5) recentBotReplies.shift();
+}
+function pickUnique(arr) {
+  const fresh = arr.filter(r => !recentBotReplies.includes(r));
+  const pool  = fresh.length ? fresh : arr;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/* — Conversation history for context — */
+const chatHistory = [];
+
+/* — Gemini API call — */
+async function getGeminiResponse(userMessage) {
+  if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) return null;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: GEMINI_SYSTEM }] },
+          contents: [
+            ...chatHistory.slice(-6).map(m => ({
+              role: m.role === 'bot' ? 'model' : 'user',
+              parts: [{ text: m.content }]
+            })),
+            { role: 'user', parts: [{ text: userMessage }] }
+          ]
+        })
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+  } catch { return null; }
+}
+
+/* — Rich rule-based fallback — */
 const BOT_RULES = [
-  { keys: ['anxious', 'anxiety', 'nervous', 'panic', 'worry', 'worried'],
+  {
+    keys: ['hi','hello','hey','hii','helo','howdy','good morning','good evening','sup','yo'],
     replies: [
-      "I hear you. Anxiety can feel overwhelming. Would you like to try a quick breathing exercise? It really helps calm the nervous system 🌬️",
-      "That's completely valid. Take a slow breath with me — inhale for 4 counts, hold for 7, exhale for 8. You've got this 💙",
-      "Anxiety is your mind trying to protect you — but sometimes it overdoes it. Let's take this one moment at a time. What's on your mind?"
+      "Hey there! 👋 How are you feeling today?",
+      "Hello! I'm really glad you're here. What's on your mind?",
+      "Hi! This is your safe space — how are you doing right now?",
+      "Hey 😊 Hope you're doing okay. Tell me how things are going!"
     ]
   },
-  { keys: ['sad', 'crying', 'cry', 'depressed', 'hopeless', 'empty'],
+  {
+    keys: ['anxious','anxiety','panic','nervous','worry','worried','overthinking','dread'],
     replies: [
-      "I'm really sorry you're feeling this way. You don't have to go through it alone. I'm right here with you 💜",
-      "It's okay to feel sad. Let yourself feel it — emotions are valid. Would you like to journal about it?",
-      "Being sad doesn't mean something is broken about you. You're human, and this will pass. What happened today?"
+      "Anxiety can feel really overwhelming 💙 Try breathing with me — press B to open the guided breathe page.",
+      "When anxiety hits, sometimes just naming it helps. What’s triggering it right now?",
+      "That unsettled feeling is your mind working overtime. What’s weighing on you most right now?",
+      "Take one slow breath 🌬️ You don’t have to solve everything right now. What’s the main thing on your mind?"
     ]
   },
-  { keys: ['happy', 'great', 'amazing', 'wonderful', 'excited', 'joy', 'good'],
+  {
+    keys: ['sad','unhappy','depressed','down','low','crying','tears','hopeless','heartbroken','empty'],
     replies: [
-      "That's so beautiful to hear! 😊 What made your day so good? I'd love to know!",
-      "You deserve every bit of happiness! Celebrate yourself today 🎉",
-      "Happiness looks great on you! Tell me what made you smile today."
+      "I’m really sorry you’re feeling this way 💜 You’re not alone in this.",
+      "It’s completely okay to feel sad. Would you like to talk about what’s going on?",
+      "Sending you warmth right now 🌿 What’s weighing on you today?",
+      "You reached out, and that takes courage. Tell me — what happened?"
     ]
   },
-  { keys: ['stressed', 'stress', 'overwhelmed', 'pressure', 'burnout', 'exhausted'],
+  {
+    keys: ['happy','great','amazing','wonderful','fantastic','excited','joy','blessed','content'],
     replies: [
-      "Stress can feel like carrying the whole world. Take a breath — you don't have to solve everything at once 🌿",
-      "You're doing a lot. It's okay to pause. Try the 4-7-8 breathing on the Breathe page — it really works.",
-      "Overwhelm often means you care a lot. But you matter more than any deadline. What can we let go of today?"
+      "That’s wonderful to hear! 🌟 What made today so good?",
+      "Love that energy! 😊 Want to log this mood so you can look back on it?",
+      "So glad you’re feeling good — those moments are worth savouring. What sparked it?",
+      "Yes! That’s the vibe 🎉 Celebrate yourself for a second."
     ]
   },
-  { keys: ['tired', 'sleep', 'exhausted', 'fatigue', 'sleepy'],
+  {
+    keys: ['stressed','stress','overwhelmed','pressure','burnout','too much','can\'t cope'],
     replies: [
-      "Rest is not a luxury, it's a necessity. Your body is telling you something important 💤",
-      "Have you been sleeping okay? Sometimes our minds race too much. A breathing exercise before bed can help.",
-      "Being tired often means you've been strong for too long. It's okay to rest today."
+      "Stress is your mind saying you’re carrying a lot. What’s the biggest thing piling up right now?",
+      "You don’t have to solve everything at once 🌿 Even a 5-minute breathing session can create space.",
+      "Overwhelm often means you care deeply. What can we take off your plate, even mentally?",
+      "Take it one moment at a time. What’s genuinely urgent vs what can wait?"
     ]
   },
-  { keys: ['lonely', 'alone', 'isolated', 'no one', 'nobody'],
+  {
+    keys: ['tired','exhausted','drained','fatigue','sleepy','no energy','burnt out','burned out'],
     replies: [
-      "Feeling lonely is one of the hardest feelings. But I'm here, right now, with you 💙",
-      "You reached out — that takes courage. You're not as alone as it might feel right now.",
-      "Loneliness is painful. Would it help to write about what kind of connection you're missing?"
+      "Rest isn’t a weakness — it’s necessary 💤 Have you had a chance to slow down today?",
+      "Feeling this drained often means you’ve been giving a lot. What’s taking the most out of you?",
+      "Even 5 minutes of guided breathing can help reset your nervous system. Want to try?",
+      "Your body is sending you a message. What does rest look like for you right now?"
     ]
   },
-  { keys: ['angry', 'anger', 'frustrated', 'rage', 'annoyed', 'mad'],
+  {
+    keys: ['angry','anger','mad','furious','frustrated','irritated','annoyed','rage','pissed'],
     replies: [
-      "Anger is a completely valid emotion. It's telling you something bothered you. Want to talk about what happened?",
-      "Let it out here — this is a safe space. What's frustrating you right now?",
-      "Anger often hides hurt underneath. Take a breath, and when you're ready, tell me what's going on."
+      "Anger is completely valid — let it out here 💬 What happened?",
+      "Frustration often signals that something matters to you. What’s behind it?",
+      "It’s safe to feel angry here. Take a breath, then tell me what’s going on.",
+      "Anger often hides something underneath — hurt, disappointment, or feeling unheard. What is it for you?"
     ]
   },
-  { keys: ['hi', 'hello', 'hey', 'hii', 'helo'],
+  {
+    keys: ['lonely','alone','isolated','no one','nobody','no friends','no one cares','left out'],
     replies: [
-      "Hey there! 👋 I'm Placida, your mental wellness companion. How are you feeling today?",
-      "Hello! 😊 I'm so glad you're here. What's on your mind today?",
-      "Hi! This is a safe space. How are you doing right now?"
+      "I’m right here with you 💙 You’re not as alone as it might feel right now.",
+      "Loneliness is one of the heaviest feelings. You reached out — that took courage.",
+      "You matter, even when it doesn’t feel that way. What’s making you feel this way?",
+      "Just so you know — reaching out here is a real step. I’m listening."
     ]
   },
-  { keys: ['thank', 'thanks', 'thankyou'],
+  {
+    keys: ['help','need help','support','talk to someone','need someone'],
     replies: [
-      "Always here for you 💜 You're not alone in this.",
-      "Of course! Take care of yourself today 🌿",
-      "That means a lot. Remember — you deserve support too."
+      "I’m right here and I’m listening 💙 What do you need right now?",
+      "You don’t have to face this alone. Tell me what’s going on.",
+      "Of course — I’m here for you. Start wherever feels easiest."
     ]
   },
-  { keys: ['help', 'crisis', 'harm', 'hurt myself', 'end it', 'give up'],
+  {
+    keys: ['breathe','breathing','breath','calm down','relax','calm'],
     replies: [
-      "⚠️ I'm really concerned about you right now. Please reach out to iCall: 9152987821 — they're free, confidential, and available to talk. You matter deeply.",
-      "Please don't go through this alone. Call Vandrevala Foundation: 1860-2662-345 — they're available 24/7. I care about your safety 💙"
+      "Let’s slow down together 🌬️ Head to the Breathe page (press B) for a guided session.",
+      "Box breathing works great: 4 in, hold 4, out 4, hold 4. Or try our guided 4-7-8 on the Breathe page!",
+      "Even one deep breath changes your chemistry. Press B to open the breathing guide anytime."
+    ]
+  },
+  {
+    keys: ['journal','write','diary','express','reflect','thoughts','note'],
+    replies: [
+      "Writing is powerful for processing emotions 📓 Hit S to open your journal on the Summary page!",
+      "Getting it out of your head and onto the screen really helps. Head to the Summary page when you’re ready.",
+      "Journaling can turn confusion into clarity. Press S to open your private journal."
+    ]
+  },
+  {
+    keys: ['harm','hurt myself','end it','give up','kill','suicide','suicidal','self harm','want to die'],
+    replies: [
+      "🚨 I’m genuinely concerned right now. Please reach out to iCall: 9152987821 — they’re free, confidential, and available to talk. You matter deeply.",
+      "Please don’t go through this alone 💙 Vandrevala Foundation is available 24/7: 1860-2662-345. Reaching out takes courage, and I’m proud of you for doing it."
+    ]
+  },
+  {
+    keys: ['thank','thanks','thank you','thankyou','appreciate'],
+    replies: [
+      "Always here for you 💜 Take care of yourself today.",
+      "Of course! You deserve support too 🌿",
+      "That means a lot. Remember — checking in with yourself is always worth it."
     ]
   },
 ];
 
 const DEFAULT_REPLIES = [
-  "I'm here and I'm listening. Tell me more about how you're feeling 💜",
-  "Thank you for sharing that with me. Would you like to talk more about it?",
-  "You're brave for expressing yourself. What else is on your mind?",
-  "I may not have all the answers, but I'm here with you. What do you need right now?",
+  "I’m here and listening 💙 Tell me more.",
+  "Thanks for sharing that. How does it make you feel?",
+  "I want to understand better — can you tell me more about that?",
+  "That sounds like a lot to carry. I’m with you.",
+  "I hear you. What would feel most helpful right now?",
+  "You’re doing the right thing by talking it out. What else is on your mind?"
 ];
 
-function getBotReply(message) {
+function getRuleBasedReply(message) {
   const lower = message.toLowerCase();
   for (const rule of BOT_RULES) {
     if (rule.keys.some(k => lower.includes(k))) {
-      return rule.replies[Math.floor(Math.random() * rule.replies.length)];
+      return pickUnique(rule.replies);
     }
   }
-  return DEFAULT_REPLIES[Math.floor(Math.random() * DEFAULT_REPLIES.length)];
+  return pickUnique(DEFAULT_REPLIES);
 }
 
 function renderMessage(text, sender) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
-
   const wrapper = document.createElement('div');
   wrapper.className = `chat-msg ${sender}`;
+  wrapper.style.animation = 'fadeInUp 0.3s ease both';
   wrapper.innerHTML = `
     <div class="bubble">${escapeHtmlChat(text)}</div>
     <div class="msg-time">${formatChatTime()}</div>
@@ -218,20 +319,29 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
-function sendMessage() {
+async function sendMessage() {
   const input = document.getElementById('chatInput');
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
 
   renderMessage(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
   input.value = '';
-
   showTypingIndicator();
+
+  /* Try Gemini first, then fall back to rules */
+  let reply = await getGeminiResponse(text);
+  if (!reply) reply = getRuleBasedReply(text);
+
+  /* Proportional delay: feels natural without being slow */
+  const delay = Math.min(reply.length * 14, 2400);
   setTimeout(() => {
     removeTypingIndicator();
-    renderMessage(getBotReply(text), 'bot');
-  }, 1200);
+    renderMessage(reply, 'bot');
+    chatHistory.push({ role: 'bot', content: reply });
+    trackReply(reply);
+  }, delay);
 }
 
 function handleChatKey(e) {
