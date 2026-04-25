@@ -75,15 +75,32 @@ function saveMood() {
     timestamp: new Date().toISOString(),
   };
 
+  // ── Always save to localStorage first (works offline) ──
   const existing = getMoods();
   existing.unshift(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+
+  // ── Also sync to Supabase if user is logged in ──
+  withSupabase && withSupabase(async (sb) => {
+    if (!sb) return;
+    const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
+    if (!user) return;
+    await sb.from('moods').insert({
+      user_id:   user.id,
+      score:     entry.score,
+      label:     entry.label,
+      emoji:     entry.emoji,
+      note:      entry.note,
+      created_at: entry.timestamp,
+    }).catch(() => {}); // silent fail — localStorage already saved
+  });
 
   selectedMood = null;
   document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
   if (noteInput) noteInput.value = '';
   showToast('✨ Mood saved! Keep going.');
 }
+
 
 /* ─────────────────────────────────────────────
    WEEK 1 — Dashboard stats & history
