@@ -9,23 +9,23 @@
    ══════════════════════════════════════ */
 
 const BREATH_PHASES = [
-  { label: 'Inhale',  emoji: '🌬️', duration: 4, color: '#7c6af7' },
-  { label: 'Hold',    emoji: '🤚', duration: 7, color: '#5ec4b6' },
-  { label: 'Exhale',  emoji: '💨', duration: 8, color: '#f06b8b' },
+  { label: 'Inhale', emoji: '🌬️', duration: 4, color: '#7c6af7' },
+  { label: 'Hold', emoji: '🤚', duration: 7, color: '#5ec4b6' },
+  { label: 'Exhale', emoji: '💨', duration: 8, color: '#f06b8b' },
 ];
 
-let breathInterval  = null;
-let breathPhaseIdx  = 0;
+let breathInterval = null;
+let breathPhaseIdx = 0;
 let breathCountdown = BREATH_PHASES[0].duration;
-let breathCycles    = 0;
-let breathRunning   = false;
+let breathCycles = 0;
+let breathRunning = false;
 
 function startBreathing() {
   if (breathRunning) return;
-  breathRunning   = true;
-  breathPhaseIdx  = 0;
+  breathRunning = true;
+  breathPhaseIdx = 0;
   breathCountdown = BREATH_PHASES[0].duration;
-  breathCycles    = 0;
+  breathCycles = 0;
 
   updateBreathUI();
   setBreathStart();
@@ -37,20 +37,20 @@ function startBreathing() {
 function stopBreathing() {
   clearInterval(breathInterval);
   breathRunning = false;
-  breathPhaseIdx  = 0;
+  breathPhaseIdx = 0;
   breathCountdown = BREATH_PHASES[0].duration;
 
-  const label   = document.getElementById('breathLabel');
+  const label = document.getElementById('breathLabel');
   const counter = document.getElementById('breathCounter');
-  const circle  = document.getElementById('breathCircle');
-  const cycles  = document.getElementById('breathCycles');
-  const btn     = document.getElementById('breathBtn');
+  const circle = document.getElementById('breathCircle');
+  const cycles = document.getElementById('breathCycles');
+  const btn = document.getElementById('breathBtn');
 
-  if (label)   label.textContent   = 'Ready when you are';
+  if (label) label.textContent = 'Ready when you are';
   if (counter) counter.textContent = '';
-  if (circle)  { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; }
-  if (cycles)  cycles.textContent  = '0 cycles completed';
-  if (btn)     { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
+  if (circle) { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; }
+  if (cycles) cycles.textContent = '0 cycles completed';
+  if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
 }
 
 function setBreathStart() {
@@ -67,28 +67,28 @@ function setBreathStart() {
 }
 
 function updateBreathUI() {
-  const phase   = BREATH_PHASES[breathPhaseIdx];
-  const label   = document.getElementById('breathLabel');
+  const phase = BREATH_PHASES[breathPhaseIdx];
+  const label = document.getElementById('breathLabel');
   const counter = document.getElementById('breathCounter');
-  const circle  = document.getElementById('breathCircle');
-  const cycles  = document.getElementById('breathCycles');
+  const circle = document.getElementById('breathCircle');
+  const cycles = document.getElementById('breathCycles');
   const phaseEl = document.getElementById('breathPhase');
 
-  if (label)   label.textContent   = `${phase.emoji}  ${phase.label}`;
+  if (label) label.textContent = `${phase.emoji}  ${phase.label}`;
   if (counter) counter.textContent = breathCountdown + 's';
-  if (cycles)  cycles.textContent  = `${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed`;
+  if (cycles) cycles.textContent = `${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed`;
   if (phaseEl) phaseEl.textContent = `Phase ${breathPhaseIdx + 1}/3`;
 
   if (circle) {
     if (phase.label === 'Inhale') {
-      circle.style.transform  = 'scale(1.35)';
-      circle.style.boxShadow  = `0 0 80px rgba(124,106,247,0.55)`;
+      circle.style.transform = 'scale(1.35)';
+      circle.style.boxShadow = `0 0 80px rgba(124,106,247,0.55)`;
     } else if (phase.label === 'Hold') {
-      circle.style.transform  = 'scale(1.35)';
-      circle.style.boxShadow  = `0 0 80px rgba(94,196,182,0.55)`;
+      circle.style.transform = 'scale(1.35)';
+      circle.style.boxShadow = `0 0 80px rgba(94,196,182,0.55)`;
     } else {
-      circle.style.transform  = 'scale(0.85)';
-      circle.style.boxShadow  = `0 0 60px rgba(240,107,139,0.45)`;
+      circle.style.transform = 'scale(0.85)';
+      circle.style.boxShadow = `0 0 60px rgba(240,107,139,0.45)`;
     }
     circle.style.borderColor = phase.color;
   }
@@ -100,7 +100,7 @@ function updateBreathUI() {
    ══════════════════════════════════════ */
 
 /* ⚠️  Replace with your free key from https://aistudio.google.com/app/apikey */
-const GEMINI_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+const GEMINI_KEY = 'AIzaSyBnIBJkfGh7vq7-DV7QzEesEA6u-7SIKLcE';
 
 const GEMINI_SYSTEM = `You are Placida, a warm, empathetic AI mental wellness companion.
 You help users with mood tracking, stress, anxiety, breathing, and emotional support.
@@ -121,7 +121,7 @@ function trackReply(text) {
 }
 function pickUnique(arr) {
   const fresh = arr.filter(r => !recentBotReplies.includes(r));
-  const pool  = fresh.length ? fresh : arr;
+  const pool = fresh.length ? fresh : arr;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -158,7 +158,7 @@ async function getGeminiResponse(userMessage) {
 /* — Rich rule-based fallback — */
 const BOT_RULES = [
   {
-    keys: ['hi','hello','hey','hii','helo','howdy','good morning','good evening','sup','yo'],
+    keys: ['hi', 'hello', 'hey', 'hii', 'helo', 'howdy', 'good morning', 'good evening', 'sup', 'yo'],
     replies: [
       "Hey there! 👋 How are you feeling today?",
       "Hello! I'm really glad you're here. What's on your mind?",
@@ -167,7 +167,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['anxious','anxiety','panic','nervous','worry','worried','overthinking','dread'],
+    keys: ['anxious', 'anxiety', 'panic', 'nervous', 'worry', 'worried', 'overthinking', 'dread'],
     replies: [
       "Anxiety can feel really overwhelming 💙 Try breathing with me — press B to open the guided breathe page.",
       "When anxiety hits, sometimes just naming it helps. What’s triggering it right now?",
@@ -176,7 +176,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['sad','unhappy','depressed','down','low','crying','tears','hopeless','heartbroken','empty'],
+    keys: ['sad', 'unhappy', 'depressed', 'down', 'low', 'crying', 'tears', 'hopeless', 'heartbroken', 'empty'],
     replies: [
       "I’m really sorry you’re feeling this way 💜 You’re not alone in this.",
       "It’s completely okay to feel sad. Would you like to talk about what’s going on?",
@@ -185,7 +185,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['happy','great','amazing','wonderful','fantastic','excited','joy','blessed','content'],
+    keys: ['happy', 'great', 'amazing', 'wonderful', 'fantastic', 'excited', 'joy', 'blessed', 'content'],
     replies: [
       "That’s wonderful to hear! 🌟 What made today so good?",
       "Love that energy! 😊 Want to log this mood so you can look back on it?",
@@ -194,7 +194,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['stressed','stress','overwhelmed','pressure','burnout','too much','can\'t cope'],
+    keys: ['stressed', 'stress', 'overwhelmed', 'pressure', 'burnout', 'too much', 'can\'t cope'],
     replies: [
       "Stress is your mind saying you’re carrying a lot. What’s the biggest thing piling up right now?",
       "You don’t have to solve everything at once 🌿 Even a 5-minute breathing session can create space.",
@@ -203,7 +203,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['tired','exhausted','drained','fatigue','sleepy','no energy','burnt out','burned out'],
+    keys: ['tired', 'exhausted', 'drained', 'fatigue', 'sleepy', 'no energy', 'burnt out', 'burned out'],
     replies: [
       "Rest isn’t a weakness — it’s necessary 💤 Have you had a chance to slow down today?",
       "Feeling this drained often means you’ve been giving a lot. What’s taking the most out of you?",
@@ -212,7 +212,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['angry','anger','mad','furious','frustrated','irritated','annoyed','rage','pissed'],
+    keys: ['angry', 'anger', 'mad', 'furious', 'frustrated', 'irritated', 'annoyed', 'rage', 'pissed'],
     replies: [
       "Anger is completely valid — let it out here 💬 What happened?",
       "Frustration often signals that something matters to you. What’s behind it?",
@@ -221,7 +221,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['lonely','alone','isolated','no one','nobody','no friends','no one cares','left out'],
+    keys: ['lonely', 'alone', 'isolated', 'no one', 'nobody', 'no friends', 'no one cares', 'left out'],
     replies: [
       "I’m right here with you 💙 You’re not as alone as it might feel right now.",
       "Loneliness is one of the heaviest feelings. You reached out — that took courage.",
@@ -230,7 +230,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['help','need help','support','talk to someone','need someone'],
+    keys: ['help', 'need help', 'support', 'talk to someone', 'need someone'],
     replies: [
       "I’m right here and I’m listening 💙 What do you need right now?",
       "You don’t have to face this alone. Tell me what’s going on.",
@@ -238,7 +238,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['breathe','breathing','breath','calm down','relax','calm'],
+    keys: ['breathe', 'breathing', 'breath', 'calm down', 'relax', 'calm'],
     replies: [
       "Let’s slow down together 🌬️ Head to the Breathe page (press B) for a guided session.",
       "Box breathing works great: 4 in, hold 4, out 4, hold 4. Or try our guided 4-7-8 on the Breathe page!",
@@ -246,7 +246,7 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['journal','write','diary','express','reflect','thoughts','note'],
+    keys: ['journal', 'write', 'diary', 'express', 'reflect', 'thoughts', 'note'],
     replies: [
       "Writing is powerful for processing emotions 📓 Hit S to open your journal on the Summary page!",
       "Getting it out of your head and onto the screen really helps. Head to the Summary page when you’re ready.",
@@ -254,14 +254,14 @@ const BOT_RULES = [
     ]
   },
   {
-    keys: ['harm','hurt myself','end it','give up','kill','suicide','suicidal','self harm','want to die'],
+    keys: ['harm', 'hurt myself', 'end it', 'give up', 'kill', 'suicide', 'suicidal', 'self harm', 'want to die'],
     replies: [
       "🚨 I’m genuinely concerned right now. Please reach out to iCall: 9152987821 — they’re free, confidential, and available to talk. You matter deeply.",
       "Please don’t go through this alone 💙 Vandrevala Foundation is available 24/7: 1860-2662-345. Reaching out takes courage, and I’m proud of you for doing it."
     ]
   },
   {
-    keys: ['thank','thanks','thank you','thankyou','appreciate'],
+    keys: ['thank', 'thanks', 'thank you', 'thankyou', 'appreciate'],
     replies: [
       "Always here for you 💜 Take care of yourself today.",
       "Of course! You deserve support too 🌿",
@@ -388,8 +388,8 @@ function renderSummaryStats(moods) {
 
   if (moods.length === 0) {
     setEl('summaryCount', '0');
-    setEl('summaryAvg',   '—');
-    setEl('summaryTop',   '—');
+    setEl('summaryAvg', '—');
+    setEl('summaryTop', '—');
     setEl('summaryStreak', '0');
     return;
   }
@@ -404,9 +404,9 @@ function renderSummaryStats(moods) {
   // Streak — consecutive days logged
   const days = [...new Set(moods.map(m => new Date(m.timestamp).toDateString()))];
 
-  setEl('summaryCount',  moods.length.toString());
-  setEl('summaryAvg',    avg.toFixed(1));
-  setEl('summaryTop',    topEmoji);
+  setEl('summaryCount', moods.length.toString());
+  setEl('summaryAvg', avg.toFixed(1));
+  setEl('summaryTop', topEmoji);
   setEl('summaryStreak', days.length + ' day' + (days.length !== 1 ? 's' : ''));
 }
 
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Week 3: Keyboard shortcuts (all pages loading features.js)
   (function initKeyboardShortcuts() {
     document.addEventListener('keydown', e => {
-      if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const map = {
         m: 'index.html', b: 'breathe.html', c: 'chatbot.html',
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       if (map[e.key.toLowerCase()]) window.location.href = map[e.key.toLowerCase()];
     });
-    const hint  = document.getElementById('shortcutHint');
+    const hint = document.getElementById('shortcutHint');
     const panel = document.getElementById('shortcutPanel');
     if (hint && panel) {
       hint.addEventListener('click', () => {
@@ -513,4 +513,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   })();
-});
+});
