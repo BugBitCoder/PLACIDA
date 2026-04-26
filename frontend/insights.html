@@ -405,7 +405,7 @@
 
   <!-- Footer -->
   <footer>
-    <p class="footer-brand">Made with 💜 by <strong>Sahil</strong> &amp; Team · © 2026 Placida</p>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil, Ayushi, Sanchari &amp; Divyans</strong> · © 2026 Placida</p>
     <ul class="footer-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
@@ -428,6 +428,7 @@
   </div>
 
   <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="script.js"></script>
 
 </body>

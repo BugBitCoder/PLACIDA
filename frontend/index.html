@@ -199,6 +199,7 @@
   </div>
 
   <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="script.js"></script>
 
 </body>

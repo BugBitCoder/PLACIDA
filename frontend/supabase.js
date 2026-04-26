@@ -13,6 +13,14 @@ const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
 (function loadSupabase() {
   if (window.supabase) return;          // already loaded
 
+  // ⚠️ Skip if keys are still placeholders — app works offline
+  if (SUPABASE_URL.includes('YOUR_PROJECT_ID') || SUPABASE_ANON.includes('YOUR_ANON_KEY')) {
+    console.warn('[Placida] Supabase keys not set — running in offline/localStorage mode.');
+    window.supabase = null;
+    document.dispatchEvent(new Event('supabase:ready'));
+    return;
+  }
+
   const script  = document.createElement('script');
   script.src    = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
   script.onload = () => {
