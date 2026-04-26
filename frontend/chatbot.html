@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -472,7 +472,7 @@
     <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">??</button>`n    <ul class="nav-links" id="mobileNav">
+    <div id="userBadge" class="user-badge"></div>`n      <button class="user-badge-signout" onclick="signOut()" aria-label="Sign out">Sign out</button>`n      <button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">??</button>`n    <ul class="nav-links" id="mobileNav">
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
@@ -584,7 +584,35 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Sanchari's core chatbot engine -->
-  <script src="features.js"></script>
+  <script src="supabase.js"></script>
+    <script src="features.js"></script>
+    <script>
+      document.addEventListener('supabase:ready', async () => {
+        requireAuth();
+        if (!window.supabase) return;
+        const { data: { user } } = await window.supabase.auth.getUser();
+        if (!user) return;
+        const badge = document.getElementById('userBadge');
+        if (badge) badge.textContent = user.email.split('@')[0];
+      });
+
+      document.addEventListener('supabase:ready', async () => {
+        if (!window.supabase) return;
+        const { data: { user } } = await window.supabase.auth.getUser().catch(() => ({ data: {} }));
+        if (!user) return;
+        const { data: msgs } = await window.supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true })
+          .limit(20);
+        if (msgs && msgs.length > 0) {
+          const container = document.getElementById('chatMessages');
+          if (container) container.innerHTML = ''; // clear welcome msg
+          msgs.forEach(m => renderMessage(m.content, m.role));
+        }
+      });
+    </script>
 
   <!-- ════════════════════════════════════════════════
        AYUSHI — Week 2 Enhancements
@@ -735,7 +763,7 @@
             else timeAgo = Math.floor(diffMins / 1440) + 'd ago';
           }
           badgeEmoji.textContent = 'Last mood: ' + emoji;
-          badgeText.textContent  = label + ' � ' + timeAgo;
+          badgeText.textContent  = label + ' � ' + timeAgo;
           badge.style.display    = 'inline-flex';
         }
 

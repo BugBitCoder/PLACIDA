@@ -1,4 +1,4 @@
-/* ============================================
+﻿/* ============================================
    PLACIDA — features.js
    Week 1 Features Logic — Sanchari
    Breathing Timer | Chatbot | Weekly Summary
@@ -250,10 +250,27 @@ function sendMessage() {
   }
 
   showTypingIndicator();
-  setTimeout(() => {
+  const reply = getBotReply(text);
+  const delay = Math.min(reply.length * 14, 2400);
+  setTimeout(async () => {
     removeTypingIndicator();
-    renderMessage(getBotReply(text), 'bot');
-  }, 1200);
+    renderMessage(reply, 'bot');
+    if (typeof chatHistory !== 'undefined') chatHistory.push({ role: 'bot', content: reply });
+    if (typeof trackReply === 'function') trackReply(reply);
+
+    // Save both messages to Supabase
+    if (typeof withSupabase !== 'undefined') {
+      withSupabase(async (sb) => {
+        if (!sb) return;
+        const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
+        if (!user) return;
+        await sb.from('chat_messages').insert([
+          { user_id: user.id, role: 'user', content: text },
+          { user_id: user.id, role: 'bot',  content: reply }
+        ]).catch(() => {});
+      });
+    }
+  }, delay);
 }
 
 function handleChatKey(e) {
