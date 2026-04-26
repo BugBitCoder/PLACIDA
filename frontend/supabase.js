@@ -6,8 +6,8 @@
        Get them from: supabase.com → Project Settings → API
    ============================================ */
 
-const SUPABASE_URL  = 'https://YOUR_PROJECT_ID.supabase.co';
-const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
+const SUPABASE_URL  = 'https://snmfdktkjggsszziexsz.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_ZspyU3qfMZwqYIfVtrA1-g_K9Vz_c9c';
 
 /* Load Supabase JS SDK from CDN then expose `supabase` globally */
 (function loadSupabase() {
