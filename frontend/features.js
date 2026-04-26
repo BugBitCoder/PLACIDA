@@ -143,6 +143,20 @@ function stopBreathing() {
 
   const btn = document.getElementById('breathBtn');
   if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
+
+  // Sync session to Supabase
+  if (breathCycles > 0) {
+    withSupabase && withSupabase(async (sb) => {
+      if (!sb) return;
+      const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
+      if (!user) return;
+      await sb.from('breathe_sessions').insert({
+        user_id: user.id,
+        pattern: currentPattern || '478',
+        cycles: breathCycles,
+      }).catch(() => {});
+    });
+  }
 }
 
 function breathTick() {
@@ -609,6 +623,20 @@ function saveJournalEntry() {
   textarea.value = '';
   renderSavedJournalEntries();
   showToast('💾 Journal entry saved! 💜');
+
+  withSupabase && withSupabase(async (sb) => {
+    if (!sb) return;
+    const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
+    if (!user) return;
+    const journalText = document.getElementById('journalEntry')?.value?.trim() || text;
+    const promptText  = document.getElementById('journalPrompt')?.textContent?.trim() || (promptEl ? promptEl.textContent : '');
+    if (!journalText) return;
+    await sb.from('journals').insert({
+      user_id: user.id,
+      prompt_text: promptText || '',
+      content: journalText,
+    }).catch(() => {});
+  });
 }
 
 function getSavedJournalEntries() {
