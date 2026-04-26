@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Placida — Your private AI mental wellness companion. Log moods, breathe, and reflect anytime." />
-  <meta name="theme-color" content="#7c6af7" />
-  <meta property="og:title" content="Placida — AI Mental Health Companion" />
-  <meta property="og:description" content="Your private AI mental wellness companion. Log moods, breathe, chat and reflect — 100% private, offline-ready." />
+  <meta name="description"
+    content="Placida — Your private AI mental wellness companion. Log moods, breathe, and reflect anytime." />
+  <!-- OG / Social Sharing (Week 3) -->
+  <meta property="og:title" content="Placida — AI Mental Wellness Companion" />
+  <meta property="og:description" content="Log moods, breathe, chat, and track your mental wellness — privately, offline." />
   <meta property="og:type" content="website" />
-  <link rel="manifest" href="manifest.json" />
+  <meta property="og:url" content="https://bugbitcoder.github.io/PLACIDA/" />
+  <meta property="og:site_name" content="Placida" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Placida — AI Mental Wellness Companion" />
+  <meta name="twitter:description" content="Your private mental wellness companion. Log moods, breathe, chat, reflect." />
   <title>Placida — AI Mental Health Companion</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 </head>
+
 <body>
 
   <!-- ── Navbar ── -->
@@ -40,7 +47,8 @@
         <span>✨</span> Your safe space, anytime
       </div>
       <h1 id="hero-title">How are you<br>feeling today?</h1>
-      <p>Placida listens without judgment. Log your mood, reflect on your day, and take care of your mind — one moment at a time.</p>
+      <p>Placida listens without judgment. Log your mood, reflect on your day, and take care of your mind — one moment
+        at a time.</p>
     </section>
 
     <!-- ── Main Content ── -->
@@ -85,21 +93,12 @@
         <!-- Optional Note -->
         <div class="input-group">
           <label for="moodNote">Add a note <span style="opacity:.5;">(optional)</span></label>
-          <textarea
-            id="moodNote"
-            rows="3"
-            placeholder="What's on your mind? Even a few words help…"
-            aria-label="Mood note"
-          ></textarea>
+          <textarea id="moodNote" rows="3" placeholder="What's on your mind? Even a few words help…"
+            aria-label="Mood note"></textarea>
         </div>
 
         <!-- Save Button -->
-        <button
-          id="saveMoodBtn"
-          class="btn-primary"
-          onclick="saveMood()"
-          aria-label="Save mood entry"
-        >
+        <button id="saveMoodBtn" class="btn-primary" onclick="saveMood()" aria-label="Save mood entry">
           Save Mood ✦
         </button>
       </div>
@@ -159,7 +158,50 @@
   <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <!-- Week 3: Onboarding Modal (shown once on first visit) -->
+  <div id="onboardModal" class="onboard-modal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
+    <div class="onboard-dialog">
+      <div class="od-logo">🌿</div>
+      <h2 id="onboardTitle">Welcome to Placida!</h2>
+      <p>Your private mental wellness companion. Track moods, breathe, chat — all offline, no account needed.</p>
+      <div class="onboard-features">
+        <div class="of-item">
+          <div class="of-icon">🌙</div>
+          <div class="of-label">Log Your Mood</div>
+        </div>
+        <div class="of-item">
+          <div class="of-icon">🌬️</div>
+          <div class="of-label">Breathe &amp; Calm</div>
+        </div>
+        <div class="of-item">
+          <div class="of-icon">💬</div>
+          <div class="of-label">Chat with AI</div>
+        </div>
+        <div class="of-item">
+          <div class="of-icon">📊</div>
+          <div class="of-label">Track Insights</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="dismissOnboarding()" style="width:100%;">Get Started 🌿</button>
+    </div>
+  </div>
+
+  <!-- Week 3: Keyboard Shortcut Hint -->
+  <div id="shortcutHint" class="shortcut-hint" title="Keyboard Shortcuts" aria-label="Show keyboard shortcuts">?</div>
+  <div id="shortcutPanel" class="shortcut-panel" aria-hidden="true">
+    <div class="sp-title">⌨️ Shortcuts</div>
+    <div class="sp-row"><kbd>M</kbd><span>Log Mood</span></div>
+    <div class="sp-row"><kbd>B</kbd><span>Breathe</span></div>
+    <div class="sp-row"><kbd>C</kbd><span>Chat</span></div>
+    <div class="sp-row"><kbd>D</kbd><span>Dashboard</span></div>
+    <div class="sp-row"><kbd>I</kbd><span>Insights</span></div>
+    <div class="sp-row"><kbd>S</kbd><span>Summary</span></div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="script.js"></script>
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
+
 </body>
+
 </html>

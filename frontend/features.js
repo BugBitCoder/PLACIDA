@@ -1,123 +1,34 @@
 /* ============================================
    PLACIDA — features.js
-   Week 1 + Week 2 + Week 3 Logic — Sanchari
+   Week 1 Features Logic — Sanchari
    Breathing Timer | Chatbot | Weekly Summary
-   Ambient Sound | Mindfulness Page
    ============================================ */
 
-/* ══════════════════════════════════════════════════
-   SECTION 1 — BREATHING TIMER (Week 1 + Week 2)
-   Patterns: 4-7-8 | Box (4-4-4-4) | Simple (4-4)
-   + Session history saved to localStorage
-   ══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   SECTION 1 — BREATHING TIMER (4-7-8)
+   ══════════════════════════════════════ */
 
-const BREATH_PATTERNS = {
-  '478': {
-    name:  '4-7-8',
-    tip:   'Best for anxiety relief and falling asleep. Do 3–4 cycles for full effect 📚',
-    phases: [
-      { label: 'Inhale',  emoji: '🌬️', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — through nose' },
-      { label: 'Hold',    emoji: '🤚', duration: 7, color: '#5ec4b6', icon: '🤚', desc: '7 seconds — hold gently' },
-      { label: 'Exhale',  emoji: '💨', duration: 8, color: '#f06b8b', icon: '💨', desc: '8 seconds — through mouth' },
-    ],
-  },
-  'box': {
-    name: 'Box Breathing',
-    tip:  'Used by Navy SEALs! Equalises your nervous system. Great for stress and focus 🎯',
-    phases: [
-      { label: 'Inhale',  emoji: '⬆️', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — through nose' },
-      { label: 'Hold In', emoji: '➡️', duration: 4, color: '#5ec4b6', icon: '🤚', desc: '4 seconds — hold' },
-      { label: 'Exhale',  emoji: '⬇️', duration: 4, color: '#f06b8b', icon: '💨', desc: '4 seconds — through mouth' },
-      { label: 'Hold Out',emoji: '⬅️', duration: 4, color: '#f0a06b', icon: '⏸️', desc: '4 seconds — hold empty' },
-    ],
-  },
-  'simple': {
-    name: 'Simple Calm',
-    tip:  'A gentle 4-4 rhythm — perfect for beginners or a quick reset anytime 🌿',
-    phases: [
-      { label: 'Inhale',  emoji: '🌱', duration: 4, color: '#7c6af7', icon: '🌬️', desc: '4 seconds — breathe in slowly' },
-      { label: 'Exhale',  emoji: '🍃', duration: 4, color: '#5ec4b6', icon: '💨', desc: '4 seconds — breathe out slowly' },
-    ],
-  },
-};
+const BREATH_PHASES = [
+  { label: 'Inhale', emoji: '🌬️', duration: 4, color: '#7c6af7' },
+  { label: 'Hold', emoji: '🤚', duration: 7, color: '#5ec4b6' },
+  { label: 'Exhale', emoji: '💨', duration: 8, color: '#f06b8b' },
+];
 
-const STORAGE_KEY_SESSIONS = 'placida_breathe_sessions';
+let breathInterval = null;
+let breathPhaseIdx = 0;
+let breathCountdown = BREATH_PHASES[0].duration;
+let breathCycles = 0;
+let breathRunning = false;
 
-let breathInterval   = null;
-let breathPhaseIdx   = 0;
-let breathCountdown  = 0;
-let breathCycles     = 0;
-let breathRunning    = false;
-let currentPattern   = '478';
-
-/* ── Pattern switching ── */
-function selectPattern(patternKey) {
-  if (breathRunning) stopBreathing();
-  currentPattern = patternKey;
-
-  // Update button states
-  document.querySelectorAll('.pattern-btn').forEach(btn => {
-    const active = btn.dataset.pattern === patternKey;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-  });
-
-  // Update tip and phase steps
-  renderPhaseSteps();
-  updateTip();
-
-  // Update pattern label in stats
-  const labelEl = document.getElementById('breathPatternLabel');
-  if (labelEl) labelEl.textContent = BREATH_PATTERNS[patternKey].name;
-
-  resetBreathCircle();
-}
-
-function getPhases() {
-  return BREATH_PATTERNS[currentPattern].phases;
-}
-
-function renderPhaseSteps() {
-  const container = document.getElementById('phaseStepsContainer');
-  if (!container) return;
-  const phases = getPhases();
-  container.innerHTML = phases.map((p, i) => `
-    <div class="phase-step" id="phaseStep${i}">
-      <div class="ps-icon">${p.icon}</div>
-      <div class="ps-name">${p.label}</div>
-      <div class="ps-dur">${p.desc}</div>
-    </div>`).join('');
-}
-
-function updateTip() {
-  const tipEl = document.getElementById('breathTip');
-  if (!tipEl) return;
-  tipEl.innerHTML = `<strong>Tip:</strong> ${BREATH_PATTERNS[currentPattern].tip}`;
-}
-
-function resetBreathCircle() {
-  const label   = document.getElementById('breathLabel');
-  const counter = document.getElementById('breathCounter');
-  const circle  = document.getElementById('breathCircle');
-  const cycles  = document.getElementById('breathCycles');
-  const phase   = document.getElementById('breathPhase');
-  if (label)   label.textContent   = 'Ready when you are';
-  if (counter) counter.textContent = '';
-  if (circle)  { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; circle.style.borderColor = '#7c6af7'; }
-  if (cycles)  cycles.textContent  = '0 cycles completed';
-  if (phase)   phase.textContent   = '—';
-}
-
-/* ── Start / Stop ── */
 function startBreathing() {
   if (breathRunning) return;
-  breathRunning   = true;
-  breathPhaseIdx  = 0;
-  breathCycles    = 0;
-  breathCountdown = getPhases()[0].duration;
+  breathRunning = true;
+  breathPhaseIdx = 0;
+  breathCountdown = BREATH_PHASES[0].duration;
+  breathCycles = 0;
 
   updateBreathUI();
-  breathInterval = setInterval(breathTick, 1000);
+  setBreathStart();
 
   const btn = document.getElementById('breathBtn');
   if (btn) { btn.textContent = 'Stop Session'; btn.onclick = stopBreathing; }
@@ -126,255 +37,264 @@ function startBreathing() {
 function stopBreathing() {
   clearInterval(breathInterval);
   breathRunning = false;
+  breathPhaseIdx = 0;
+  breathCountdown = BREATH_PHASES[0].duration;
 
-  // Save session to localStorage if at least 1 cycle was done
-  if (breathCycles > 0) {
-    saveBreathSession(breathCycles, currentPattern);
-    renderSessionHistory();
-    showToast(`✨ Session saved! ${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed.`);
-  }
-
-  resetBreathCircle();
-  breathPhaseIdx  = 0;
-  breathCountdown = getPhases()[0].duration;
-
-  // Deactivate phase highlights
-  document.querySelectorAll('.phase-step').forEach(el => el.classList.remove('active-phase'));
-
+  const label = document.getElementById('breathLabel');
+  const counter = document.getElementById('breathCounter');
+  const circle = document.getElementById('breathCircle');
+  const cycles = document.getElementById('breathCycles');
   const btn = document.getElementById('breathBtn');
-  if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
 
-  // Sync session to Supabase
-  if (breathCycles > 0) {
-    withSupabase && withSupabase(async (sb) => {
-      if (!sb) return;
-      const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
-      if (!user) return;
-      await sb.from('breathe_sessions').insert({
-        user_id: user.id,
-        pattern: currentPattern || '478',
-        cycles: breathCycles,
-      }).catch(() => {});
-    });
-  }
+  if (label) label.textContent = 'Ready when you are';
+  if (counter) counter.textContent = '';
+  if (circle) { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; }
+  if (cycles) cycles.textContent = '0 cycles completed';
+  if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
 }
 
-function breathTick() {
-  breathCountdown--;
-  updateBreathUI();
+function setBreathStart() {
+  breathInterval = setInterval(() => {
+    breathCountdown--;
+    updateBreathUI();
 
-  if (breathCountdown <= 0) {
-    const phases = getPhases();
-    breathPhaseIdx = (breathPhaseIdx + 1) % phases.length;
-    if (breathPhaseIdx === 0) breathCycles++;
-    breathCountdown = phases[breathPhaseIdx].duration;
-  }
+    if (breathCountdown <= 0) {
+      breathPhaseIdx = (breathPhaseIdx + 1) % BREATH_PHASES.length;
+      if (breathPhaseIdx === 0) breathCycles++;
+      breathCountdown = BREATH_PHASES[breathPhaseIdx].duration;
+    }
+  }, 1000);
 }
 
 function updateBreathUI() {
-  const phases  = getPhases();
-  const phase   = phases[breathPhaseIdx];
-  const label   = document.getElementById('breathLabel');
+  const phase = BREATH_PHASES[breathPhaseIdx];
+  const label = document.getElementById('breathLabel');
   const counter = document.getElementById('breathCounter');
-  const circle  = document.getElementById('breathCircle');
-  const cycles  = document.getElementById('breathCycles');
+  const circle = document.getElementById('breathCircle');
+  const cycles = document.getElementById('breathCycles');
   const phaseEl = document.getElementById('breathPhase');
 
-  if (label)   label.textContent   = `${phase.emoji}  ${phase.label}`;
+  if (label) label.textContent = `${phase.emoji}  ${phase.label}`;
   if (counter) counter.textContent = breathCountdown + 's';
-  if (cycles)  cycles.textContent  = `${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed`;
-  if (phaseEl) phaseEl.textContent = `Phase ${breathPhaseIdx + 1}/${phases.length}`;
-
-  // Highlight active phase step card
-  document.querySelectorAll('.phase-step').forEach((el, i) => {
-    el.classList.toggle('active-phase', i === breathPhaseIdx);
-  });
+  if (cycles) cycles.textContent = `${breathCycles} cycle${breathCycles !== 1 ? 's' : ''} completed`;
+  if (phaseEl) phaseEl.textContent = `Phase ${breathPhaseIdx + 1}/3`;
 
   if (circle) {
-    if (phase.label === 'Inhale' || phase.label.startsWith('Inhale')) {
-      circle.style.transform  = 'scale(1.35)';
-      circle.style.boxShadow  = `0 0 80px rgba(124,106,247,0.55)`;
-    } else if (phase.label.startsWith('Hold') || phase.label === 'Hold In') {
-      circle.style.transform  = 'scale(1.35)';
-      circle.style.boxShadow  = `0 0 80px rgba(94,196,182,0.55)`;
-    } else if (phase.label === 'Hold Out') {
-      circle.style.transform  = 'scale(0.85)';
-      circle.style.boxShadow  = `0 0 60px rgba(240,160,107,0.5)`;
+    if (phase.label === 'Inhale') {
+      circle.style.transform = 'scale(1.35)';
+      circle.style.boxShadow = `0 0 80px rgba(124,106,247,0.55)`;
+    } else if (phase.label === 'Hold') {
+      circle.style.transform = 'scale(1.35)';
+      circle.style.boxShadow = `0 0 80px rgba(94,196,182,0.55)`;
     } else {
-      circle.style.transform  = 'scale(0.85)';
-      circle.style.boxShadow  = `0 0 60px rgba(240,107,139,0.45)`;
+      circle.style.transform = 'scale(0.85)';
+      circle.style.boxShadow = `0 0 60px rgba(240,107,139,0.45)`;
     }
     circle.style.borderColor = phase.color;
   }
 }
 
-/* ── Session History (localStorage) ── */
-function saveBreathSession(cycles, patternKey) {
-  const sessions = getBreathSessions();
-  sessions.unshift({
-    id:        Date.now(),
-    pattern:   BREATH_PATTERNS[patternKey].name,
-    cycles,
-    timestamp: new Date().toISOString(),
-  });
-  // Keep only last 30 sessions
-  localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions.slice(0, 30)));
-}
-
-function getBreathSessions() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS)) || []; }
-  catch { return []; }
-}
-
-function renderSessionHistory() {
-  const logEl    = document.getElementById('sessionLog');
-  const badgeEl  = document.getElementById('todaySummaryBadge');
-  if (!logEl) return;
-
-  const sessions = getBreathSessions();
-  const todayStr = new Date().toDateString();
-  const todaySessions = sessions.filter(s => new Date(s.timestamp).toDateString() === todayStr);
-
-  // Today's summary badge
-  if (todaySessions.length > 0 && badgeEl) {
-    const totalCycles = todaySessions.reduce((sum, s) => sum + s.cycles, 0);
-    document.getElementById('todayCycleCount').textContent   = totalCycles;
-    document.getElementById('todaySessionCount').textContent = todaySessions.length;
-    badgeEl.style.display = 'flex';
-  } else if (badgeEl) {
-    badgeEl.style.display = 'none';
-  }
-
-  if (sessions.length === 0) {
-    logEl.innerHTML = `<div class="sh-empty">No sessions yet — press <em>Start Breathing</em> above to begin! 🌬️</div>`;
-    return;
-  }
-
-  // Show last 10 sessions
-  logEl.innerHTML = sessions.slice(0, 10).map(s => {
-    const d   = new Date(s.timestamp);
-    const ago = formatSessionTime(d);
-    return `
-      <div class="session-item">
-        <span class="si-icon">🌬️</span>
-        <div class="si-info">
-          <div class="si-main">${s.cycles} cycle${s.cycles !== 1 ? 's' : ''} — ${s.pattern}</div>
-          <div class="si-sub">${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-        </div>
-        <div class="si-time">${ago}</div>
-      </div>`;
-  }).join('');
-}
-
-function formatSessionTime(date) {
-  const now  = new Date();
-  const diff = (now - date) / 1000;
-  if (diff < 60)    return 'Just now';
-  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
-
 
 /* ══════════════════════════════════════
-   SECTION 2 — CHATBOT (rule-based)
+   SECTION 2 — CHATBOT (Gemini AI + rule fallback)
    ══════════════════════════════════════ */
 
+/* ⚠️  Replace with your free key from https://aistudio.google.com/app/apikey */
+const GEMINI_KEY = 'AIzaSyBnIBJkfGh7vq7-DV7QzEesEA6u-7SIKLcE';
+
+const GEMINI_SYSTEM = `You are Placida, a warm, empathetic AI mental wellness companion.
+You help users with mood tracking, stress, anxiety, breathing, and emotional support.
+RULES:
+- Keep every reply SHORT — 2 to 4 sentences maximum.
+- Write conversationally, like a caring friend, not a therapist.
+- Never diagnose or replace professional help.
+- If the user mentions self-harm or suicide, gently share: iCall 9152987821 (free, confidential).
+- Use 1-2 emojis per reply at most.
+- Vary your phrasing — never repeat the exact same opening twice.
+- Naturally mention Placida features when relevant: breathing exercises (Breathe page), mood insights (Insights), journaling (Summary).`;
+
+/* — No-repeat tracker — */
+const recentBotReplies = [];
+function trackReply(text) {
+  recentBotReplies.push(text);
+  if (recentBotReplies.length > 5) recentBotReplies.shift();
+}
+function pickUnique(arr) {
+  const fresh = arr.filter(r => !recentBotReplies.includes(r));
+  const pool = fresh.length ? fresh : arr;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/* — Conversation history for context — */
+const chatHistory = [];
+
+/* — Gemini API call — */
+async function getGeminiResponse(userMessage) {
+  if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) return null;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: GEMINI_SYSTEM }] },
+          contents: [
+            ...chatHistory.slice(-6).map(m => ({
+              role: m.role === 'bot' ? 'model' : 'user',
+              parts: [{ text: m.content }]
+            })),
+            { role: 'user', parts: [{ text: userMessage }] }
+          ]
+        })
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+  } catch { return null; }
+}
+
+/* — Rich rule-based fallback — */
 const BOT_RULES = [
-  { keys: ['anxious', 'anxiety', 'nervous', 'panic', 'worry', 'worried'],
+  {
+    keys: ['hi', 'hello', 'hey', 'hii', 'helo', 'howdy', 'good morning', 'good evening', 'sup', 'yo'],
     replies: [
-      "I hear you. Anxiety can feel overwhelming. Would you like to try a quick breathing exercise? It really helps calm the nervous system 🌬️",
-      "That's completely valid. Take a slow breath with me — inhale for 4 counts, hold for 7, exhale for 8. You've got this 💙",
-      "Anxiety is your mind trying to protect you — but sometimes it overdoes it. Let's take this one moment at a time. What's on your mind?"
+      "Hey there! 👋 How are you feeling today?",
+      "Hello! I'm really glad you're here. What's on your mind?",
+      "Hi! This is your safe space — how are you doing right now?",
+      "Hey 😊 Hope you're doing okay. Tell me how things are going!"
     ]
   },
-  { keys: ['sad', 'crying', 'cry', 'depressed', 'hopeless', 'empty'],
+  {
+    keys: ['anxious', 'anxiety', 'panic', 'nervous', 'worry', 'worried', 'overthinking', 'dread'],
     replies: [
-      "I'm really sorry you're feeling this way. You don't have to go through it alone. I'm right here with you 💜",
-      "It's okay to feel sad. Let yourself feel it — emotions are valid. Would you like to journal about it?",
-      "Being sad doesn't mean something is broken about you. You're human, and this will pass. What happened today?"
+      "Anxiety can feel really overwhelming 💙 Try breathing with me — press B to open the guided breathe page.",
+      "When anxiety hits, sometimes just naming it helps. What’s triggering it right now?",
+      "That unsettled feeling is your mind working overtime. What’s weighing on you most right now?",
+      "Take one slow breath 🌬️ You don’t have to solve everything right now. What’s the main thing on your mind?"
     ]
   },
-  { keys: ['happy', 'great', 'amazing', 'wonderful', 'excited', 'joy', 'good'],
+  {
+    keys: ['sad', 'unhappy', 'depressed', 'down', 'low', 'crying', 'tears', 'hopeless', 'heartbroken', 'empty'],
     replies: [
-      "That's so beautiful to hear! 😊 What made your day so good? I'd love to know!",
-      "You deserve every bit of happiness! Celebrate yourself today 🎉",
-      "Happiness looks great on you! Tell me what made you smile today."
+      "I’m really sorry you’re feeling this way 💜 You’re not alone in this.",
+      "It’s completely okay to feel sad. Would you like to talk about what’s going on?",
+      "Sending you warmth right now 🌿 What’s weighing on you today?",
+      "You reached out, and that takes courage. Tell me — what happened?"
     ]
   },
-  { keys: ['stressed', 'stress', 'overwhelmed', 'pressure', 'burnout', 'exhausted'],
+  {
+    keys: ['happy', 'great', 'amazing', 'wonderful', 'fantastic', 'excited', 'joy', 'blessed', 'content'],
     replies: [
-      "Stress can feel like carrying the whole world. Take a breath — you don't have to solve everything at once 🌿",
-      "You're doing a lot. It's okay to pause. Try the 4-7-8 breathing on the Breathe page — it really works.",
-      "Overwhelm often means you care a lot. But you matter more than any deadline. What can we let go of today?"
+      "That’s wonderful to hear! 🌟 What made today so good?",
+      "Love that energy! 😊 Want to log this mood so you can look back on it?",
+      "So glad you’re feeling good — those moments are worth savouring. What sparked it?",
+      "Yes! That’s the vibe 🎉 Celebrate yourself for a second."
     ]
   },
-  { keys: ['tired', 'sleep', 'exhausted', 'fatigue', 'sleepy'],
+  {
+    keys: ['stressed', 'stress', 'overwhelmed', 'pressure', 'burnout', 'too much', 'can\'t cope'],
     replies: [
-      "Rest is not a luxury, it's a necessity. Your body is telling you something important 💤",
-      "Have you been sleeping okay? Sometimes our minds race too much. A breathing exercise before bed can help.",
-      "Being tired often means you've been strong for too long. It's okay to rest today."
+      "Stress is your mind saying you’re carrying a lot. What’s the biggest thing piling up right now?",
+      "You don’t have to solve everything at once 🌿 Even a 5-minute breathing session can create space.",
+      "Overwhelm often means you care deeply. What can we take off your plate, even mentally?",
+      "Take it one moment at a time. What’s genuinely urgent vs what can wait?"
     ]
   },
-  { keys: ['lonely', 'alone', 'isolated', 'no one', 'nobody'],
+  {
+    keys: ['tired', 'exhausted', 'drained', 'fatigue', 'sleepy', 'no energy', 'burnt out', 'burned out'],
     replies: [
-      "Feeling lonely is one of the hardest feelings. But I'm here, right now, with you 💙",
-      "You reached out — that takes courage. You're not as alone as it might feel right now.",
-      "Loneliness is painful. Would it help to write about what kind of connection you're missing?"
+      "Rest isn’t a weakness — it’s necessary 💤 Have you had a chance to slow down today?",
+      "Feeling this drained often means you’ve been giving a lot. What’s taking the most out of you?",
+      "Even 5 minutes of guided breathing can help reset your nervous system. Want to try?",
+      "Your body is sending you a message. What does rest look like for you right now?"
     ]
   },
-  { keys: ['angry', 'anger', 'frustrated', 'rage', 'annoyed', 'mad'],
+  {
+    keys: ['angry', 'anger', 'mad', 'furious', 'frustrated', 'irritated', 'annoyed', 'rage', 'pissed'],
     replies: [
-      "Anger is a completely valid emotion. It's telling you something bothered you. Want to talk about what happened?",
-      "Let it out here — this is a safe space. What's frustrating you right now?",
-      "Anger often hides hurt underneath. Take a breath, and when you're ready, tell me what's going on."
+      "Anger is completely valid — let it out here 💬 What happened?",
+      "Frustration often signals that something matters to you. What’s behind it?",
+      "It’s safe to feel angry here. Take a breath, then tell me what’s going on.",
+      "Anger often hides something underneath — hurt, disappointment, or feeling unheard. What is it for you?"
     ]
   },
-  { keys: ['hi', 'hello', 'hey', 'hii', 'helo'],
+  {
+    keys: ['lonely', 'alone', 'isolated', 'no one', 'nobody', 'no friends', 'no one cares', 'left out'],
     replies: [
-      "Hey there! 👋 I'm Placida, your mental wellness companion. How are you feeling today?",
-      "Hello! 😊 I'm so glad you're here. What's on your mind today?",
-      "Hi! This is a safe space. How are you doing right now?"
+      "I’m right here with you 💙 You’re not as alone as it might feel right now.",
+      "Loneliness is one of the heaviest feelings. You reached out — that took courage.",
+      "You matter, even when it doesn’t feel that way. What’s making you feel this way?",
+      "Just so you know — reaching out here is a real step. I’m listening."
     ]
   },
-  { keys: ['thank', 'thanks', 'thankyou'],
+  {
+    keys: ['help', 'need help', 'support', 'talk to someone', 'need someone'],
     replies: [
-      "Always here for you 💜 You're not alone in this.",
-      "Of course! Take care of yourself today 🌿",
-      "That means a lot. Remember — you deserve support too."
+      "I’m right here and I’m listening 💙 What do you need right now?",
+      "You don’t have to face this alone. Tell me what’s going on.",
+      "Of course — I’m here for you. Start wherever feels easiest."
     ]
   },
-  { keys: ['help', 'crisis', 'harm', 'hurt myself', 'end it', 'give up'],
+  {
+    keys: ['breathe', 'breathing', 'breath', 'calm down', 'relax', 'calm'],
     replies: [
-      "⚠️ I'm really concerned about you right now. Please reach out to iCall: 9152987821 — they're free, confidential, and available to talk. You matter deeply.",
-      "Please don't go through this alone. Call Vandrevala Foundation: 1860-2662-345 — they're available 24/7. I care about your safety 💙"
+      "Let’s slow down together 🌬️ Head to the Breathe page (press B) for a guided session.",
+      "Box breathing works great: 4 in, hold 4, out 4, hold 4. Or try our guided 4-7-8 on the Breathe page!",
+      "Even one deep breath changes your chemistry. Press B to open the breathing guide anytime."
+    ]
+  },
+  {
+    keys: ['journal', 'write', 'diary', 'express', 'reflect', 'thoughts', 'note'],
+    replies: [
+      "Writing is powerful for processing emotions 📓 Hit S to open your journal on the Summary page!",
+      "Getting it out of your head and onto the screen really helps. Head to the Summary page when you’re ready.",
+      "Journaling can turn confusion into clarity. Press S to open your private journal."
+    ]
+  },
+  {
+    keys: ['harm', 'hurt myself', 'end it', 'give up', 'kill', 'suicide', 'suicidal', 'self harm', 'want to die'],
+    replies: [
+      "🚨 I’m genuinely concerned right now. Please reach out to iCall: 9152987821 — they’re free, confidential, and available to talk. You matter deeply.",
+      "Please don’t go through this alone 💙 Vandrevala Foundation is available 24/7: 1860-2662-345. Reaching out takes courage, and I’m proud of you for doing it."
+    ]
+  },
+  {
+    keys: ['thank', 'thanks', 'thank you', 'thankyou', 'appreciate'],
+    replies: [
+      "Always here for you 💜 Take care of yourself today.",
+      "Of course! You deserve support too 🌿",
+      "That means a lot. Remember — checking in with yourself is always worth it."
     ]
   },
 ];
 
 const DEFAULT_REPLIES = [
-  "I'm here and I'm listening. Tell me more about how you're feeling 💜",
-  "Thank you for sharing that with me. Would you like to talk more about it?",
-  "You're brave for expressing yourself. What else is on your mind?",
-  "I may not have all the answers, but I'm here with you. What do you need right now?",
+  "I’m here and listening 💙 Tell me more.",
+  "Thanks for sharing that. How does it make you feel?",
+  "I want to understand better — can you tell me more about that?",
+  "That sounds like a lot to carry. I’m with you.",
+  "I hear you. What would feel most helpful right now?",
+  "You’re doing the right thing by talking it out. What else is on your mind?"
 ];
 
-function getBotReply(message) {
+function getRuleBasedReply(message) {
   const lower = message.toLowerCase();
   for (const rule of BOT_RULES) {
     if (rule.keys.some(k => lower.includes(k))) {
-      return rule.replies[Math.floor(Math.random() * rule.replies.length)];
+      return pickUnique(rule.replies);
     }
   }
-  return DEFAULT_REPLIES[Math.floor(Math.random() * DEFAULT_REPLIES.length)];
+  return pickUnique(DEFAULT_REPLIES);
 }
 
 function renderMessage(text, sender) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
-
   const wrapper = document.createElement('div');
   wrapper.className = `chat-msg ${sender}`;
+  wrapper.style.animation = 'fadeInUp 0.3s ease both';
   wrapper.innerHTML = `
     <div class="bubble">${escapeHtmlChat(text)}</div>
     <div class="msg-time">${formatChatTime()}</div>
@@ -399,20 +319,29 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
-function sendMessage() {
+async function sendMessage() {
   const input = document.getElementById('chatInput');
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
 
   renderMessage(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
   input.value = '';
-
   showTypingIndicator();
+
+  /* Try Gemini first, then fall back to rules */
+  let reply = await getGeminiResponse(text);
+  if (!reply) reply = getRuleBasedReply(text);
+
+  /* Proportional delay: feels natural without being slow */
+  const delay = Math.min(reply.length * 14, 2400);
   setTimeout(() => {
     removeTypingIndicator();
-    renderMessage(getBotReply(text), 'bot');
-  }, 1200);
+    renderMessage(reply, 'bot');
+    chatHistory.push({ role: 'bot', content: reply });
+    trackReply(reply);
+  }, delay);
 }
 
 function handleChatKey(e) {
@@ -434,78 +363,12 @@ function escapeHtmlChat(text) {
 }
 
 
-/* ══════════════════════════════════════════════════
-   SECTION 3 — WEEKLY SUMMARY (Week 1 + Week 2)
-   + Emoji mood row for last 7 days
-   + Save Journal Entry with timestamp
-   ══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   SECTION 3 — WEEKLY SUMMARY
+   ══════════════════════════════════════ */
 
-const STORAGE_KEY_MOODS    = 'placida_moods';
-const STORAGE_KEY_JOURNALS = 'placida_journal_entries';
+const STORAGE_KEY_MOODS = 'placida_moods';
 
-/* ── Day-name helpers ── */
-const DAY_NAMES_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function getLast7Days() {
-  const days = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - i);
-    days.push(d);
-  }
-  return days;
-}
-
-/* ── Emoji Mood Row ── */
-function renderEmojiMoodRow(allMoods) {
-  const container = document.getElementById('emojiMoodRow');
-  if (!container) return;
-
-  const days    = getLast7Days();
-  const todayStr = new Date().toDateString();
-
-  container.innerHTML = days.map(day => {
-    const dayStr    = day.toDateString();
-    const shortName = DAY_NAMES_SHORT[day.getDay()];
-    const isToday   = dayStr === todayStr;
-
-    // Find all moods for this day, pick last logged one
-    const dayMoods = allMoods.filter(m => new Date(m.timestamp).toDateString() === dayStr);
-    const lastMood = dayMoods.length > 0 ? dayMoods[0] : null; // already sorted newest-first
-
-    return `
-      <div class="emoji-day ${isToday ? 'today' : ''} ${lastMood ? 'has-entry' : ''}">
-        <span class="ed-label">${isToday ? 'Today' : shortName}</span>
-        ${lastMood
-          ? `<span class="ed-emoji" title="${lastMood.label}">${lastMood.emoji}</span>`
-          : `<span class="ed-empty ed-emoji">·</span>`}
-        <div class="ed-dot"></div>
-      </div>`;
-  }).join('');
-}
-
-/* ── Rotating motivational quotes ── */
-const WEEKLY_QUOTES = [
-  { text: "You don't have to be positive all the time. It's okay to feel sad, angry, annoyed, or scared. Having feelings doesn't make you a negative person. It makes you human.", author: "Lori Deschene" },
-  { text: "One small crack does not mean that you are broken, it means that you were put to the test and you didn't fall apart.", author: "Linda Poindexter" },
-  { text: "Be gentle with yourself. You are a child of the universe, no less than the trees and the stars.", author: "Max Ehrmann" },
-  { text: "You are allowed to be both a masterpiece and a work in progress simultaneously.", author: "Sophia Bush" },
-  { text: "Healing is not linear. Rest, reset, and keep going at your own pace.", author: "Unknown" },
-  { text: "Your mental health is a priority. Your happiness is an essential. Your self-care is a necessity.", author: "Unknown" },
-  { text: "The strongest thing you can do is ask for help when you need it.", author: "Unknown" },
-];
-
-function renderMotivationalQuote() {
-  const quoteEl  = document.getElementById('motivationalQuote');
-  const authorEl = document.getElementById('motivationalAuthor');
-  if (!quoteEl || !authorEl) return;
-  const pick = WEEKLY_QUOTES[new Date().getDay() % WEEKLY_QUOTES.length];
-  quoteEl.textContent  = `"${pick.text}"`;
-  authorEl.textContent = `— ${pick.author}`;
-}
-
-/* ── Load Weekly Summary ── */
 function loadWeeklySummary() {
   const allMoods = (() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY_MOODS)) || []; }
@@ -518,9 +381,6 @@ function loadWeeklySummary() {
   renderSummaryStats(weekly);
   renderPrompt(weekly);
   renderWeeklyHistory(weekly);
-  renderEmojiMoodRow(allMoods);   // pass all moods so we can filter per-day
-  renderMotivationalQuote();
-  renderSavedJournalEntries();
 }
 
 function renderSummaryStats(moods) {
@@ -528,8 +388,8 @@ function renderSummaryStats(moods) {
 
   if (moods.length === 0) {
     setEl('summaryCount', '0');
-    setEl('summaryAvg',   '—');
-    setEl('summaryTop',   '—');
+    setEl('summaryAvg', '—');
+    setEl('summaryTop', '—');
     setEl('summaryStreak', '0');
     return;
   }
@@ -541,12 +401,12 @@ function renderSummaryStats(moods) {
   moods.forEach(m => freq[m.emoji] = (freq[m.emoji] || 0) + 1);
   const topEmoji = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
 
-  // Unique days logged
+  // Streak — consecutive days logged
   const days = [...new Set(moods.map(m => new Date(m.timestamp).toDateString()))];
 
-  setEl('summaryCount',  moods.length.toString());
-  setEl('summaryAvg',    avg.toFixed(1));
-  setEl('summaryTop',    topEmoji);
+  setEl('summaryCount', moods.length.toString());
+  setEl('summaryAvg', avg.toFixed(1));
+  setEl('summaryTop', topEmoji);
   setEl('summaryStreak', days.length + ' day' + (days.length !== 1 ? 's' : ''));
 }
 
@@ -598,446 +458,59 @@ function renderWeeklyHistory(moods) {
   }).join('');
 }
 
-/* ── Save Journal Entry (Week 2 NEW) ── */
-function saveJournalEntry() {
-  const textarea = document.getElementById('weeklyJournal');
-  const promptEl = document.getElementById('journalPrompt');
-  if (!textarea) return;
-
-  const text = textarea.value.trim();
-  if (!text) {
-    showToast('📝 Please write something before saving!');
-    return;
-  }
-
-  const entries = getSavedJournalEntries();
-  entries.unshift({
-    id:        Date.now(),
-    text,
-    prompt:    promptEl ? promptEl.textContent : '',
-    timestamp: new Date().toISOString(),
-  });
-
-  // Keep last 20 journal entries
-  localStorage.setItem(STORAGE_KEY_JOURNALS, JSON.stringify(entries.slice(0, 20)));
-  textarea.value = '';
-  renderSavedJournalEntries();
-  showToast('💾 Journal entry saved! 💜');
-
-  withSupabase && withSupabase(async (sb) => {
-    if (!sb) return;
-    const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
-    if (!user) return;
-    const journalText = document.getElementById('journalEntry')?.value?.trim() || text;
-    const promptText  = document.getElementById('journalPrompt')?.textContent?.trim() || (promptEl ? promptEl.textContent : '');
-    if (!journalText) return;
-    await sb.from('journals').insert({
-      user_id: user.id,
-      prompt_text: promptText || '',
-      content: journalText,
-    }).catch(() => {});
-  });
-}
-
-function getSavedJournalEntries() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_JOURNALS)) || []; }
-  catch { return []; }
-}
-
-function renderSavedJournalEntries() {
-  const container = document.getElementById('savedEntriesList');
-  if (!container) return;
-
-  const entries = getSavedJournalEntries();
-  if (entries.length === 0) {
-    container.innerHTML = `<div class="sei-empty">No saved entries yet. Write something and press <em>Save Entry</em> above! ✍️</div>`;
-    return;
-  }
-
-  container.innerHTML = entries.slice(0, 10).map(e => {
-    const d   = new Date(e.timestamp);
-    const dateStr = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    return `
-      <div class="saved-entry-item">
-        <div class="sei-header">
-          <span class="sei-date">📅 ${dateStr} · ${timeStr}</span>
-        </div>
-        ${e.prompt ? `<div class="sei-prompt">${e.prompt}</div>` : ''}
-        <div class="sei-text">${escapeHtmlSummary(e.text)}</div>
-      </div>`;
-  }).join('');
-}
-
-function escapeHtmlSummary(text) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(text));
-  return d.innerHTML;
-}
-
-/* ── Toast (shared with script.js but also defined here for pages that only load features.js) ── */
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2800);
-}
-
-
-/* ══════════════════════════════════════════════════
-   SECTION 4 — AMBIENT SOUND (Week 3)
-   Rain | White Noise | Off
-   Uses Web Audio API — zero external URLs
-   ══════════════════════════════════════════════════ */
-
-let _ambCtx          = null;
-let _ambSourceNode   = null;
-let _ambGainNode     = null;
-let _ambCurrentType  = null;
-
-function _getAmbCtx() {
-  if (!_ambCtx) {
-    _ambCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return _ambCtx;
-}
-
-/* ── Generate a loopable noise buffer ── */
-function _makeNoiseBuffer(ctx, durationSec, applyPink) {
-  const sr  = ctx.sampleRate;
-  const buf = ctx.createBuffer(1, sr * durationSec, sr);
-  const d   = buf.getChannelData(0);
-
-  if (applyPink) {
-    // Paul Kellet's pink-noise algorithm
-    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-    for (let i = 0; i < d.length; i++) {
-      const w = Math.random() * 2 - 1;
-      b0 = 0.99886*b0 + w*0.0555179;
-      b1 = 0.99332*b1 + w*0.0750759;
-      b2 = 0.96900*b2 + w*0.1538520;
-      b3 = 0.86650*b3 + w*0.3104856;
-      b4 = 0.55000*b4 + w*0.5329522;
-      b5 = -0.7616*b5 - w*0.0168980;
-      d[i] = (b0+b1+b2+b3+b4+b5+b6+w*0.5362) / 7;
-      b6 = w * 0.115926;
-    }
-  } else {
-    // White noise
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  }
-  return buf;
-}
-
-/* ── Build Rain sound: pink-noise + lowpass filter ── */
-function _playRain(ctx) {
-  const buf    = _makeNoiseBuffer(ctx, 3, true);
-  const source = ctx.createBufferSource();
-  source.buffer = buf;
-  source.loop   = true;
-
-  const lpf = ctx.createBiquadFilter();
-  lpf.type            = 'lowpass';
-  lpf.frequency.value = 700;
-  lpf.Q.value         = 0.4;
-
-  const gain = ctx.createGain();
-  gain.gain.value = 0.22;
-
-  source.connect(lpf);
-  lpf.connect(gain);
-  gain.connect(ctx.destination);
-  source.start(0);
-  return { source, gain };
-}
-
-/* ── Build White Noise: flat spectrum ── */
-function _playWhiteNoise(ctx) {
-  const buf    = _makeNoiseBuffer(ctx, 2, false);
-  const source = ctx.createBufferSource();
-  source.buffer = buf;
-  source.loop   = true;
-
-  const gain = ctx.createGain();
-  gain.gain.value = 0.12;
-
-  source.connect(gain);
-  gain.connect(ctx.destination);
-  source.start(0);
-  return { source, gain };
-}
-
-/* ── Public: select ambient sound ── */
-function setAmbientSound(type) {
-  // Stop any running node
-  if (_ambSourceNode) {
-    try { _ambSourceNode.stop(); } catch(_) {}
-    _ambSourceNode = null;
-    _ambGainNode   = null;
-  }
-
-  // Update button states
-  document.querySelectorAll('.sound-btn').forEach(btn => {
-    const isActive = btn.dataset.sound === type;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-  });
-
-  _ambCurrentType = type;
-
-  if (type === 'off') {
-    localStorage.removeItem('placida_sound');
-    return;
-  }
-
-  try {
-    const ctx = _getAmbCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    let nodes;
-    if (type === 'rain')  nodes = _playRain(ctx);
-    if (type === 'white') nodes = _playWhiteNoise(ctx);
-
-    if (nodes) {
-      _ambSourceNode = nodes.source;
-      _ambGainNode   = nodes.gain;
-      localStorage.setItem('placida_sound', type);
-    }
-  } catch (err) {
-    console.warn('[Placida] AudioContext error:', err);
-    showToast('⚠️ Audio not supported on this browser');
-  }
-}
-
-/* ── Restore saved sound preference ── */
-function restoreSoundPreference() {
-  const saved = localStorage.getItem('placida_sound');
-  if (saved && saved !== 'off') {
-    // Delay so AudioContext is created after a user-gesture has occurred
-    // (gesture requirement satisfied by page load on most modern browsers)
-    setTimeout(() => setAmbientSound(saved), 300);
-  }
-}
-
-
-/* ══════════════════════════════════════════════════
-   SECTION 5 — MINDFUL PAGE (Week 3)
-   Daily Affirmation Deck | Gratitude Prompt
-   ══════════════════════════════════════════════════ */
-
-const AFFIRMATIONS = [
-  "You are enough, exactly as you are right now. Your worth is not measured by your productivity.",
-  "Every breath you take is a gentle reminder that you are still here, still growing, still worthy.",
-  "It's okay to not be okay. Healing isn't linear — and today, you're doing the best you can.",
-  "You have survived every difficult day so far. That is something worth celebrating.",
-  "Your feelings are valid. You don't need to justify why you feel the way you do.",
-  "Small steps are still steps forward. Progress, no matter how quiet, is still progress.",
-  "You deserve the same kindness and compassion you so freely give to others.",
-  "Rest is not a reward — it is a necessity. You are allowed to pause and just be.",
-  "Your mind, your heart, and your body are working hard for you. Be gentle with them today.",
-  "Today, choose one small act of self-care. You are worth every moment of it."
-];
-
-const STORAGE_KEY_AFF      = 'placida_affirmation_idx';
-const STORAGE_KEY_GRATITUDE = 'placida_gratitude';
-
-let _currentAffIdx = 0;
-
-/* ── Pick today's affirmation index (same all day) ── */
-function _todayAffIdx() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((now - start) / 86400000);
-  return dayOfYear % AFFIRMATIONS.length;
-}
-
-function initAffirmationDeck() {
-  const todayIdx = _todayAffIdx();
-
-  // Restore saved index or fall back to today's pick
-  const saved = parseInt(localStorage.getItem(STORAGE_KEY_AFF), 10);
-  _currentAffIdx = Number.isFinite(saved) ? saved : todayIdx;
-
-  renderAffirmation(todayIdx);
-  renderAffDots();
-
-  const nextBtn  = document.getElementById('nextAffirmationBtn');
-  const todayBtn = document.getElementById('todayAffirmationBtn');
-
-  if (nextBtn) nextBtn.addEventListener('click', () => {
-    _currentAffIdx = (_currentAffIdx + 1) % AFFIRMATIONS.length;
-    localStorage.setItem(STORAGE_KEY_AFF, _currentAffIdx);
-    renderAffirmation(todayIdx);
-    renderAffDots();
-  });
-
-  if (todayBtn) todayBtn.addEventListener('click', () => {
-    _currentAffIdx = todayIdx;
-    localStorage.setItem(STORAGE_KEY_AFF, _currentAffIdx);
-    renderAffirmation(todayIdx);
-    renderAffDots();
-  });
-}
-
-function renderAffirmation(todayIdx) {
-  const card    = document.getElementById('affirmationCard');
-  const textEl  = document.getElementById('affirmationText');
-  const badge   = document.getElementById('todayBadge');
-  const counter = document.getElementById('affCounter');
-
-  if (!card || !textEl) return;
-
-  // Fade out
-  card.classList.add('fade-out');
-
-  setTimeout(() => {
-    textEl.textContent = AFFIRMATIONS[_currentAffIdx];
-    if (badge) badge.style.display = _currentAffIdx === todayIdx ? 'inline-flex' : 'none';
-    if (counter) counter.textContent = `${_currentAffIdx + 1} / ${AFFIRMATIONS.length}`;
-
-    card.classList.remove('fade-out');
-    card.classList.remove('fade-in');
-    void card.offsetWidth; // force reflow
-    card.classList.add('fade-in');
-  }, 180);
-}
-
-function renderAffDots() {
-  const container = document.getElementById('affDots');
-  if (!container) return;
-  container.innerHTML = AFFIRMATIONS.map((_, i) =>
-    `<div class="aff-dot ${i === _currentAffIdx ? 'active' : ''}"></div>`
-  ).join('');
-}
-
-/* ── Gratitude ── */
-function saveGratitudeEntry() {
-  const textarea = document.getElementById('gratitudeInput');
-  if (!textarea) return;
-
-  const text = textarea.value.trim();
-  if (!text) {
-    showToast('🙏 Please write something before saving!');
-    return;
-  }
-
-  const entries = getGratitudeEntries();
-  entries.unshift({
-    id:        Date.now(),
-    text,
-    date: new Date().toISOString(),
-  });
-
-  localStorage.setItem(STORAGE_KEY_GRATITUDE, JSON.stringify(entries.slice(0, 30)));
-  textarea.value = '';
-  renderGratitudeEntries();
-  showToast('✨ Gratitude saved! Keep shining 🌟');
-}
-
-function getGratitudeEntries() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_GRATITUDE)) || []; }
-  catch { return []; }
-}
-
-function renderGratitudeEntries() {
-  const section   = document.getElementById('gratHistorySection');
-  const list      = document.getElementById('gratEntriesList');
-  const countEl   = document.getElementById('gratHistoryLabel');
-  if (!list) return;
-
-  const entries = getGratitudeEntries();
-
-  if (entries.length === 0) {
-    if (section) section.style.display = 'none';
-    return;
-  }
-
-  if (section) section.style.display = 'block';
-  if (countEl) countEl.textContent = `Past Entries (${Math.min(entries.length, 3)})`;
-
-  list.innerHTML = entries.slice(0, 3).map(e => {
-    const d = new Date(e.date);
-    const dateStr = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    const safeText = (() => { const el = document.createElement('div'); el.appendChild(document.createTextNode(e.text)); return el.innerHTML; })();
-    return `
-      <div class="grat-entry-item" role="listitem">
-        <div class="grat-entry-date">✨ ${dateStr} · ${timeStr}</div>
-        <div class="grat-entry-text">${safeText}</div>
-      </div>`;
-  }).join('');
-}
-
-/* ── Gratitude history toggle ── */
-function initGratitudeToggle() {
-  const btn  = document.getElementById('gratHistoryToggle');
-  const list = document.getElementById('gratEntriesList');
-  if (!btn || !list) return;
-
-  btn.addEventListener('click', () => {
-    const isOpen = btn.classList.toggle('open');
-    list.classList.toggle('visible', isOpen);
-    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  });
-}
-
 
 /* ══════════════════════════════════════
    INIT
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  // Breathing page
+  const startBtn = document.getElementById('breathBtn');
+  if (startBtn) startBtn.onclick = startBreathing;
 
-  /* ── Breathing page ── */
-  if (document.getElementById('breathCircle')) {
-    // Render phase guide for default pattern
-    renderPhaseSteps();
-    updateTip();
-    renderSessionHistory();
-
-    // Pattern buttons
-    document.querySelectorAll('.pattern-btn').forEach(btn => {
-      btn.addEventListener('click', () => selectPattern(btn.dataset.pattern));
-    });
-
-    const startBtn = document.getElementById('breathBtn');
-    if (startBtn) startBtn.onclick = startBreathing;
-
-    // Ambient sound buttons (Task 6)
-    document.querySelectorAll('.sound-btn').forEach(btn => {
-      btn.addEventListener('click', () => setAmbientSound(btn.dataset.sound));
-    });
-    restoreSoundPreference();
-  }
-
-  /* ── Chat page ── */
+  // Chat page
   const chatSend = document.getElementById('chatSendBtn');
   if (chatSend) chatSend.onclick = sendMessage;
 
   const chatInput = document.getElementById('chatInput');
   if (chatInput) chatInput.addEventListener('keydown', handleChatKey);
 
+  // Chat welcome message
   if (document.getElementById('chatMessages')) {
     setTimeout(() => {
       renderMessage("Hey! 👋 I'm Placida, your mental wellness companion. How are you feeling today?", 'bot');
     }, 400);
   }
 
-  /* ── Summary page ── */
+  // Summary page
   if (document.getElementById('summaryCount')) {
     loadWeeklySummary();
   }
 
-  const saveBtn = document.getElementById('saveJournalBtn');
-  if (saveBtn) saveBtn.addEventListener('click', saveJournalEntry);
-
-  /* ── Mindful page (Task 5) ── */
-  if (document.getElementById('affirmationCard')) {
-    initAffirmationDeck();
-    renderGratitudeEntries();
-    initGratitudeToggle();
-
-    const saveGratBtn = document.getElementById('saveGratitudeBtn');
-    if (saveGratBtn) saveGratBtn.addEventListener('click', saveGratitudeEntry);
-  }
+  // Week 3: Keyboard shortcuts (all pages loading features.js)
+  (function initKeyboardShortcuts() {
+    document.addEventListener('keydown', e => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const map = {
+        m: 'index.html', b: 'breathe.html', c: 'chatbot.html',
+        d: 'dashboard.html', i: 'insights.html', s: 'summary.html',
+      };
+      if (map[e.key.toLowerCase()]) window.location.href = map[e.key.toLowerCase()];
+    });
+    const hint = document.getElementById('shortcutHint');
+    const panel = document.getElementById('shortcutPanel');
+    if (hint && panel) {
+      hint.addEventListener('click', () => {
+        const visible = panel.style.display === 'block';
+        panel.style.display = visible ? 'none' : 'block';
+        panel.setAttribute('aria-hidden', String(visible));
+      });
+      document.addEventListener('click', e => {
+        if (!hint.contains(e.target) && !panel.contains(e.target)) {
+          panel.style.display = 'none';
+          panel.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+  })();
 });

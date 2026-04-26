@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Placida Weekly Summary — Review your mood patterns, weekly emoji row, insights, and guided journaling with save." />
-  <meta name="theme-color" content="#7c6af7" />
-  <meta property="og:title" content="Weekly Summary — Placida Mental Wellness" />
-  <meta property="og:description" content="Review your emotional patterns and journal privately. Your data never leaves your device." />
+  <meta name="description" content="Placida Weekly Summary — Review your mood patterns, weekly insights, and guided journaling prompts." />
+  <!-- OG / Social Sharing (Week 3) -->
+  <meta property="og:title" content="Weekly Summary — Placida" />
+  <meta property="og:description" content="Review your mood patterns and weekly insights with guided journaling prompts." />
   <meta property="og:type" content="website" />
-  <link rel="manifest" href="manifest.json" />
+  <meta property="og:url" content="https://bugbitcoder.github.io/PLACIDA/summary.html" />
+  <meta property="og:site_name" content="Placida" />
   <title>Weekly Summary — Placida</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -97,79 +98,6 @@
       color: var(--text-muted);
     }
 
-    /* ── Emoji Mood Row (Week 2 new!) ── */
-    .emoji-row-card {
-      background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(94,196,182,0.06));
-      border: 1px solid rgba(124,106,247,0.22);
-      border-radius: 18px;
-      padding: 22px 24px;
-      backdrop-filter: blur(14px);
-    }
-
-    .emoji-row-card .er-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .emoji-row {
-      display: flex;
-      gap: 6px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .emoji-day {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      flex: 1;
-      min-width: 38px;
-    }
-
-    .emoji-day .ed-label {
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .emoji-day .ed-emoji {
-      font-size: 1.6rem;
-      line-height: 1;
-    }
-
-    .emoji-day.today .ed-label {
-      color: var(--accent-teal);
-    }
-
-    .emoji-day .ed-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--border-glass);
-    }
-
-    .emoji-day.has-entry .ed-dot {
-      background: var(--accent-purple);
-    }
-
-    .emoji-day.today .ed-dot {
-      background: var(--accent-teal);
-      box-shadow: 0 0 6px rgba(94,196,182,0.6);
-    }
-
-    .ed-empty {
-      font-size: 1.5rem;
-      opacity: 0.25;
-    }
-
     /* ── Prompt box ── */
     .prompt-card {
       background: linear-gradient(135deg, rgba(124,106,247,0.12), rgba(94,196,182,0.07));
@@ -239,103 +167,11 @@
       box-shadow: 0 0 0 3px rgba(124,106,247,0.12);
     }
 
-    /* ── Save Journal Entry button area ── */
-    .journal-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 12px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
     .journal-save-note {
       font-size: 0.73rem;
       color: var(--text-muted);
-    }
-
-    #saveJournalBtn {
-      padding: 10px 22px;
-      background: linear-gradient(135deg, var(--accent-purple), #9b6af7);
-      border: none;
-      border-radius: 10px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.84rem;
-      font-weight: 600;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    #saveJournalBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(124,106,247,0.4);
-    }
-
-    #saveJournalBtn:active { transform: translateY(0); }
-
-    /* ── Saved entries list ── */
-    .saved-entries-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      padding: 22px 24px;
-      backdrop-filter: blur(14px);
-    }
-
-    .saved-entries-card .sec-title {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .saved-entry-item {
-      background: rgba(255,255,255,0.04);
-      border-radius: 12px;
-      padding: 13px 15px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border-glass);
-      animation: fadeInUp 0.4s ease both;
-    }
-
-    .saved-entry-item:last-child { margin-bottom: 0; }
-
-    .saved-entry-item .sei-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .saved-entry-item .sei-date {
-      font-size: 0.72rem;
-      color: var(--accent-teal);
-      font-weight: 600;
-    }
-
-    .saved-entry-item .sei-prompt {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    .saved-entry-item .sei-text {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      line-height: 1.6;
-    }
-
-    .sei-empty {
-      text-align: center;
-      padding: 20px;
-      color: var(--text-muted);
-      font-size: 0.85rem;
+      margin-top: 8px;
+      text-align: right;
     }
 
     /* ── History card ── */
@@ -404,7 +240,6 @@
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
       <li><a href="chatbot.html">Chat</a></li>
-      <li><a href="summary.html" class="active" aria-current="page">Summary</a></li>
       <li><a href="insights.html">Insights</a></li>
     </ul>
   </nav>
@@ -446,14 +281,6 @@
         <div class="ss-sub">unique days with entries</div>
       </div>
 
-      <!-- ── Emoji Mood Row (Week 2 NEW) — full width ── -->
-      <div class="emoji-row-card sum-span-2" aria-label="Mood emoji for each day this week">
-        <div class="er-title">🗓️ Your Week at a Glance</div>
-        <div class="emoji-row" id="emojiMoodRow" aria-live="polite">
-          <!-- Populated by features.js -->
-        </div>
-      </div>
-
       <!-- Journal Prompt — full width -->
       <div class="prompt-card sum-span-2" aria-label="Journaling prompt and textarea">
         <div class="pc-header">
@@ -473,21 +300,7 @@
           placeholder="Write your thoughts here… this is just for you 💜"
           aria-label="Weekly journal entry"
         ></textarea>
-
-        <div class="journal-actions">
-          <p class="journal-save-note">💜 Your writing is saved locally — never leaves your device.</p>
-          <button id="saveJournalBtn" aria-label="Save journal entry">
-            💾 Save Entry
-          </button>
-        </div>
-      </div>
-
-      <!-- ── Saved Journal Entries (Week 2 NEW) — full width ── -->
-      <div class="saved-entries-card sum-span-2" aria-label="Previously saved journal entries" id="savedEntriesSection">
-        <div class="sec-title">📖 Saved Journal Entries</div>
-        <div id="savedEntriesList" aria-live="polite">
-          <div class="sei-empty">No saved entries yet. Write something and press <em>Save Entry</em> above! ✍️</div>
-        </div>
+        <p class="journal-save-note">Your writing stays private — not saved to any server.</p>
       </div>
 
       <!-- Mood History — full width -->
@@ -503,8 +316,8 @@
       <!-- Motivational Quote — full width -->
       <div class="quote-card sum-span-2" role="complementary" aria-label="Motivational quote">
         <div class="quote-icon">💬</div>
-        <p class="quote-text" id="motivationalQuote">"You don't have to be positive all the time. It's perfectly okay to feel sad, angry, annoyed, frustrated, scared, or anxious. Having feelings doesn't make you a negative person. It makes you human."</p>
-        <p class="quote-author" id="motivationalAuthor">— Lori Deschene</p>
+        <p class="quote-text">"You don't have to be positive all the time. It's perfectly okay to feel sad, angry, annoyed, frustrated, scared, or anxious. Having feelings doesn't make you a negative person. It makes you human."</p>
+        <p class="quote-author">— Lori Deschene</p>
       </div>
 
       <!-- Crisis Banner -->
@@ -533,7 +346,7 @@
 
   <!-- Footer -->
   <footer>
-    <p class="footer-brand">Made with 💜 by <strong>Sanchari</strong> &amp; Team · © 2026 Placida</p>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil, Ayushi, Sanchari &amp; Divyans</strong> · © 2026 Placida</p>
     <ul class="footer-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="breathe.html">Breathe</a></li>
@@ -542,8 +355,22 @@
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Week 3: Keyboard Shortcut Hint -->
+  <div id="shortcutHint" class="shortcut-hint" title="Keyboard Shortcuts" aria-label="Show keyboard shortcuts">?</div>
+  <div id="shortcutPanel" class="shortcut-panel" aria-hidden="true">
+    <div class="sp-title">⌨️ Shortcuts</div>
+    <div class="sp-row"><kbd>M</kbd><span>Log Mood</span></div>
+    <div class="sp-row"><kbd>B</kbd><span>Breathe</span></div>
+    <div class="sp-row"><kbd>C</kbd><span>Chat</span></div>
+    <div class="sp-row"><kbd>D</kbd><span>Dashboard</span></div>
+    <div class="sp-row"><kbd>I</kbd><span>Insights</span></div>
+    <div class="sp-row"><kbd>S</kbd><span>Summary</span></div>
+  </div>
+
   <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="features.js"></script>
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
+
 </body>
 </html>

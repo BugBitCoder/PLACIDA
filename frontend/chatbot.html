@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Placida Chat — Talk to your AI mental wellness companion anytime, privately and without judgment." />
-  <meta name="theme-color" content="#7c6af7" />
-  <meta property="og:title" content="Chat — Placida Mental Wellness" />
-  <meta property="og:description" content="Talk to Placida AI — your private, empathetic mental wellness companion. No judgment, always available." />
+  <!-- OG / Social Sharing (Week 3) -->
+  <meta property="og:title" content="Chat — Placida" />
+  <meta property="og:description" content="Talk to Placida AI — your private, judgment-free mental wellness companion." />
   <meta property="og:type" content="website" />
-  <link rel="manifest" href="manifest.json" />
+  <meta property="og:url" content="https://bugbitcoder.github.io/PLACIDA/chatbot.html" />
+  <meta property="og:site_name" content="Placida" />
   <title>Chat — Placida</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -314,16 +315,30 @@
 
   <!-- Footer -->
   <footer>
-    <p class="footer-brand">Made with 💜 by <strong>Sanchari</strong> &amp; Team · © 2026 Placida</p>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil, Ayushi, Sanchari &amp; Divyans</strong> · © 2026 Placida</p>
     <ul class="footer-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="breathe.html">Breathe</a></li>
       <li><a href="summary.html">Summary</a></li>
     </ul>
   </footer>
-
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Week 3: Keyboard Shortcut Hint -->
+  <div id="shortcutHint" class="shortcut-hint" title="Keyboard Shortcuts" aria-label="Show keyboard shortcuts">?</div>
+  <div id="shortcutPanel" class="shortcut-panel" aria-hidden="true">
+    <div class="sp-title">⌨️ Shortcuts</div>
+    <div class="sp-row"><kbd>M</kbd><span>Log Mood</span></div>
+    <div class="sp-row"><kbd>B</kbd><span>Breathe</span></div>
+    <div class="sp-row"><kbd>C</kbd><span>Chat</span></div>
+    <div class="sp-row"><kbd>D</kbd><span>Dashboard</span></div>
+    <div class="sp-row"><kbd>I</kbd><span>Insights</span></div>
+    <div class="sp-row"><kbd>S</kbd><span>Summary</span></div>
+  </div>
+
+  <script src="supabase.js"></script>
   <script src="features.js"></script>
+
   <script>
     function quickPrompt(text) {
       const input = document.getElementById('chatInput');
@@ -331,6 +346,5 @@
       sendMessage();
     }
   </script>
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
 </body>
-</html>
+</html>
