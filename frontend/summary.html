@@ -284,14 +284,31 @@
         <div class="ss-sub">unique days with entries</div>
       </div>
 
+      <!-- Week 4: Top Feature This Week card (Sanchari) -->
+      <div class="sum-stat" aria-label="Most used feature this week" style="grid-column: 1 / -1;">
+        <div class="ss-label">🏆 Top Feature This Week</div>
+        <div class="ss-value" id="summaryTopFeature" style="font-size:1.5rem; color:var(--accent-teal)">—</div>
+        <div class="ss-sub" id="summaryTopFeatureSub">most opened page this week</div>
+      </div>
+
       <!-- Journal Prompt — full width -->
       <div class="prompt-card sum-span-2" aria-label="Journaling prompt and textarea">
-        <div class="pc-header">
-          <div class="pc-icon">✍️</div>
-          <div>
-            <div class="pc-title">Weekly Journaling Prompt</div>
-            <div class="pc-subtitle">Reflect on your week — no right or wrong answers</div>
+        <div class="pc-header" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="pc-icon">✍️</div>
+            <div>
+              <div class="pc-title">Weekly Journaling Prompt</div>
+              <div class="pc-subtitle">Reflect on your week — no right or wrong answers</div>
+            </div>
           </div>
+          <!-- Week 4: New Prompt button (Sanchari) -->
+          <button id="newPromptBtn" onclick="cyclePrompt()" aria-label="Get a new journal prompt"
+            style="background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.35);border-radius:10px;
+                   padding:8px 14px;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;
+                   color:#a89df9;cursor:pointer;transition:all 0.3s ease;flex-shrink:0;"
+            onmouseover="this.style.background='rgba(124,106,247,0.28)'" onmouseout="this.style.background='rgba(124,106,247,0.15)'">
+            🔄 New Prompt
+          </button>
         </div>
 
         <p id="journalPrompt" aria-live="polite">Loading your personalised prompt…</p>
@@ -390,6 +407,103 @@
   <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="features.js"></script>
   <script>
+    /* ── Week 4 (Sanchari): page-visit tracking ── */
+    (function trackVisit() {
+      const visits = JSON.parse(localStorage.getItem('placida_page_visits') || '{}');
+      visits['Summary'] = (visits['Summary'] || 0) + 1;
+      localStorage.setItem('placida_page_visits', JSON.stringify(visits));
+    })();
+
+    /* ── Week 4 (Sanchari): top-feature card ── */
+    (function renderTopFeature() {
+      const PAGE_LABELS = {
+        'Dashboard': 'Dashboard 📊', 'Breathe': 'Breathing 🌬️',
+        'Chat': 'AI Chat 💬', 'Insights': 'Insights 📈',
+        'Summary': 'Summary 📅', 'Mindful': 'Mindful 🌿',
+        'Relax': 'Relax 🫧', 'Feedback': 'Feedback ⭐'
+      };
+      const visits = JSON.parse(localStorage.getItem('placida_page_visits') || '{}');
+      const entries = Object.entries(visits);
+      const valEl  = document.getElementById('summaryTopFeature');
+      const subEl  = document.getElementById('summaryTopFeatureSub');
+      if (!valEl) return;
+      if (entries.length === 0) {
+        valEl.textContent = 'Dashboard 📊';
+        if (subEl) subEl.textContent = 'fallback — no visits tracked yet';
+        return;
+      }
+      const [topKey, topCount] = entries.sort((a, b) => b[1] - a[1])[0];
+      valEl.textContent = PAGE_LABELS[topKey] || topKey;
+      if (subEl) subEl.textContent = `opened ${topCount} time${topCount !== 1 ? 's' : ''} this session`;
+    })();
+
+    /* ── Week 4 (Sanchari): 12-prompt system ── */
+    const PROMPTS_LOW = [
+      '🌸 What is one small thing that brought you comfort this week?',
+      '💜 When did you show yourself kindness this week, even in a small way?',
+      '🕯️ What helped you get through the hardest moment this week?',
+      '🌧️ What emotion visited you most this week, and what was it trying to tell you?',
+      '🤍 What is one thing you need right now that you haven\'t asked for yet?',
+      '🌱 Even in a tough week, what is one tiny thing that grew or improved?'
+    ];
+    const PROMPTS_HIGH = [
+      '✨ What made you feel most alive this week?',
+      '🌟 Which moment are you most proud of from this week?',
+      '🎯 What habit or choice this week do you want to carry into next week?',
+      '💛 Who or what energised you the most this week?',
+      '🚀 What did you do this week that felt like the best version of you?',
+      '🌈 Describe one moment this week that you want to remember forever.'
+    ];
+
+    let _promptIdx = null;
+
+    function renderPromptWeek4(moods) {
+      const el = document.getElementById('journalPrompt');
+      if (!el) return;
+      if (!moods || moods.length === 0) {
+        el.textContent = '🌙 This is your space to reflect. Start logging moods on the home page — your summary will appear here.';
+        return;
+      }
+      const avg = moods.reduce((s, m) => s + m.score, 0) / moods.length;
+      const pool = avg < 3 ? PROMPTS_LOW : PROMPTS_HIGH;
+      if (_promptIdx === null) {
+        _promptIdx = new Date().getDay() % pool.length; // deterministic by day
+      }
+      el.textContent = pool[_promptIdx % pool.length];
+    }
+
+    function cyclePrompt() {
+      const moods = (() => { try { return JSON.parse(localStorage.getItem('placida_moods')) || []; } catch { return []; } })();
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const weekly = moods.filter(m => new Date(m.timestamp).getTime() > oneWeekAgo);
+      const avg = weekly.length ? weekly.reduce((s, m) => s + m.score, 0) / weekly.length : 3;
+      const pool = avg < 3 ? PROMPTS_LOW : PROMPTS_HIGH;
+      _promptIdx = ((_promptIdx ?? 0) + 1) % pool.length;
+      const el = document.getElementById('journalPrompt');
+      if (el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        setTimeout(() => {
+          el.textContent = pool[_promptIdx];
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, 250);
+      }
+    }
+
+    /* Override features.js renderPrompt after DOM ready */
+    document.addEventListener('DOMContentLoaded', () => {
+      const origLoad = window.loadWeeklySummary;
+      if (typeof origLoad === 'function') {
+        const moods = (() => { try { return JSON.parse(localStorage.getItem('placida_moods')) || []; } catch { return []; } })();
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const weekly = moods.filter(m => new Date(m.timestamp).getTime() > oneWeekAgo);
+        renderPromptWeek4(weekly);
+      }
+    });
+
+    /* SOS helpers */
     function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.body.style.overflow='hidden'; }
     function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.body.style.overflow=''; }
     document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });

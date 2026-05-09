@@ -55,10 +55,25 @@
       gap: 32px;
     }
 
+    /* Week 4: glow ring keyframes (Sanchari) */
+    @keyframes glowPulseInhale {
+      0%   { box-shadow: 0 0 0 0 rgba(124,106,247,0), 0 0 60px rgba(124,106,247,0.3); }
+      50%  { box-shadow: 0 0 0 28px rgba(124,106,247,0.10), 0 0 80px rgba(124,106,247,0.5); }
+      100% { box-shadow: 0 0 0 44px rgba(124,106,247,0), 0 0 80px rgba(124,106,247,0.5); }
+    }
+    @keyframes glowPulseHold {
+      0%, 100% { box-shadow: 0 0 0 22px rgba(94,196,182,0.08), 0 0 80px rgba(94,196,182,0.45); }
+      50%  { box-shadow: 0 0 0 26px rgba(94,196,182,0.14), 0 0 80px rgba(94,196,182,0.55); }
+    }
+    @keyframes glowPulseExhale {
+      0%   { box-shadow: 0 0 0 22px rgba(240,107,139,0.12), 0 0 60px rgba(240,107,139,0.4); }
+      100% { box-shadow: 0 0 0 0  rgba(240,107,139,0), 0 0 30px rgba(240,107,139,0.15); }
+    }
+
     .breath-ring {
       position: relative;
-      width: 220px;
-      height: 220px;
+      width: 260px;
+      height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -74,13 +89,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: transform 1s ease, box-shadow 1s ease, border-color 1s ease;
+      transition: transform 1s ease, border-color 1s ease;
       box-shadow: 0 0 60px rgba(124,106,247,0.3);
       cursor: default;
+      /* Week 4: glow ring is animated via JS class toggling */
     }
 
+    /* Week 4 (c): larger instruction text */
     #breathLabel {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: var(--text-primary);
       text-align: center;
@@ -97,6 +114,34 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    /* Week 4 (b): session progress bar */
+    .breath-progress-wrap {
+      width: 260px;
+      margin: 0 auto;
+    }
+    .breath-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .breath-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .breath-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-teal));
+      border-radius: 100px;
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
     }
 
     /* ── Stats row ── */
@@ -223,6 +268,17 @@
         </div>
       </div>
 
+      <!-- Week 4 (b): Session Progress Bar (Sanchari) -->
+      <div class="breath-progress-wrap" aria-label="Session progress">
+        <div class="breath-progress-label">
+          <span>Session Progress</span>
+          <span id="breathProgressText">0 / 4 cycles</span>
+        </div>
+        <div class="breath-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="breath-progress-fill" id="breathProgressFill"></div>
+        </div>
+      </div>
+
       <!-- Stats -->
       <div class="breath-stats">
         <div class="breath-stat">
@@ -328,6 +384,66 @@
   <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="features.js"></script>
   <script>
+    /* ── Week 4 (Sanchari): page-visit tracking ── */
+    (function() {
+      const visits = JSON.parse(localStorage.getItem('placida_page_visits') || '{}');
+      visits['Breathe'] = (visits['Breathe'] || 0) + 1;
+      localStorage.setItem('placida_page_visits', JSON.stringify(visits));
+    })();
+
+    /* ── Week 4 (Sanchari): progress bar + glow ring hooks ──
+       We patch updateBreathUI after features.js loads, so we
+       extend glow-ring and progress bar without touching features.js */
+    const BREATH_TARGET_CYCLES = 4;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      /* Store reference to original updateBreathUI */
+      const _originalUpdateBreathUI = window.updateBreathUI;
+
+      window.updateBreathUI = function () {
+        /* Call the original from features.js */
+        if (typeof _originalUpdateBreathUI === 'function') _originalUpdateBreathUI();
+
+        /* --- (b) Progress bar --- */
+        const cycles = window.breathCycles ?? 0;
+        const pct = Math.min((cycles / BREATH_TARGET_CYCLES) * 100, 100);
+        const fill = document.getElementById('breathProgressFill');
+        const txt  = document.getElementById('breathProgressText');
+        const bar  = fill && fill.parentElement;
+        if (fill) fill.style.width = pct + '%';
+        if (txt)  txt.textContent = `${cycles} / ${BREATH_TARGET_CYCLES} cycles`;
+        if (bar)  bar.setAttribute('aria-valuenow', Math.round(pct));
+
+        /* --- (a) Glow ring animation via box-shadow --- */
+        const circle = document.getElementById('breathCircle');
+        if (!circle) return;
+        const phases = window.BREATH_PHASES;
+        const idx    = window.breathPhaseIdx ?? 0;
+        if (!phases) return;
+        const phase = phases[idx];
+        if (phase.label === 'Inhale') {
+          circle.style.animation = 'glowPulseInhale 4s ease forwards';
+        } else if (phase.label === 'Hold') {
+          circle.style.animation = 'glowPulseHold 7s ease infinite';
+        } else {
+          circle.style.animation = 'glowPulseExhale 8s ease forwards';
+        }
+      };
+
+      /* Reset progress bar on stop */
+      const _originalStop = window.stopBreathing;
+      window.stopBreathing = function () {
+        if (typeof _originalStop === 'function') _originalStop();
+        const fill = document.getElementById('breathProgressFill');
+        const txt  = document.getElementById('breathProgressText');
+        const circle = document.getElementById('breathCircle');
+        if (fill) fill.style.width = '0%';
+        if (txt)  txt.textContent = '0 / 4 cycles';
+        if (circle) circle.style.animation = 'none';
+      };
+    });
+
+    /* SOS helpers */
     function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.body.style.overflow='hidden'; }
     function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.body.style.overflow=''; }
     document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });

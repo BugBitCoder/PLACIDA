@@ -160,16 +160,35 @@ body::after {
   list-style: none;
 }
 
+/* Week 4 (c): active link underline animates scaleX 0→1 (Sanchari) */
 .nav-links a {
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
   transition: color var(--transition);
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-purple);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--text-primary);
+}
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  transform: scaleX(1);
 }
 
 /* ── Hero Section ── */
@@ -241,10 +260,11 @@ body::after {
   box-shadow: var(--shadow-card);
   transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
 }
+/* Week 4 (a): richer hover shadow with purple ring (Sanchari) */
 .glass-card:hover {
   transform: translateY(-3px);
   background: var(--bg-card-hover);
-  box-shadow: var(--shadow-card), var(--shadow-glow);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,106,247,0.15), var(--shadow-glow);
 }
 
 .card-header {
@@ -373,6 +393,12 @@ body::after {
 }
 
 /* ── Buttons ── */
+/* Week 4 (b): btn-primary shimmer sweep on hover (Sanchari) */
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%)  skewX(-15deg); }
+}
+
 .btn-primary {
   width: 100%;
   padding: 15px 24px;
@@ -392,16 +418,20 @@ body::after {
 .btn-primary::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0);
-  transition: background var(--transition);
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: translateX(-100%) skewX(-15deg);
+  transition: none;
 }
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(124,106,247,0.4);
 }
 .btn-primary:hover::after {
-  background: rgba(255,255,255,0.06);
+  animation: shimmerSweep 0.65s ease forwards;
 }
 .btn-primary:active { transform: translateY(0); }
 
