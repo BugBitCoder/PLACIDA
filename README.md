@@ -1,5 +1,7 @@
 # 🌿 Placida
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-7c6af7?style=for-the-badge)](https://bugbitcoder.github.io/PLACIDA/frontend/index.html)
+
 **Placida** is a human-centered mental health companion built using **design thinking principles**. It helps users track moods, manage stress, and access emotional support privately within the browser.
 
 ---
@@ -34,6 +36,13 @@ Mental health support should feel approachable, safe, and easy to use. Placida a
 - **Adaptive Prompts**: Journaling prompts that change based on your mood.
 - **Private Journal**: Save your thoughts with automatic timestamps.
 
+### 🌟 Week 4 Features
+- **SOS popup**: 8 govt helplines.
+- **Feedback form**: Submit user feedback and ratings.
+- **Relax page**: 3 games to relieve stress.
+- **Onboarding modal**: Welcome and guide new users.
+- **Logout button**: Secure session termination.
+
 ## 🛠️ Tech Stack
 - **Frontend**: HTML5, CSS3 (Glassmorphism), Vanilla JavaScript.
 - **Library**: [Chart.js v4.4.0](https://www.chartjs.org/).
@@ -65,10 +74,13 @@ Mental health support should feel approachable, safe, and easy to use. Placida a
 3.  *(Optional)* Use the **Live Server** extension in VS Code for a better experience.
 
 ## 📸 Screenshots
-*[Screenshots to be added in Week 4]*
+Screenshots coming soon
 
-## 🌐 Live Demo
-*[Pending Deployment]*
+## 🤝 How to Contribute
+1. Work on your own branch.
+2. Submit a Pull Request (PR).
+3. Divyans reviews the PR.
+4. Merge into `main`.
 
 ## 📅 Project Status
 | Week | Status | Key Deliverables |
