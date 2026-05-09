@@ -16,7 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
@@ -24,8 +23,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 📦 Install Dependencies
-        run: npm install
+      - name: 📦 Install Capacitor Dependencies
+        run: npm install @capacitor/cli @capacitor/core @capacitor/android --legacy-peer-deps
 
       - name: 🔄 Sync Capacitor
         run: npx cap sync android
