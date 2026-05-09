@@ -345,4 +345,17 @@ Tested areas include:
 | Quick chips | Open chat, click "I feel anxious" chip | Message sent, bot responds | ✅ |
 | Chat persistence | Send messages, close tab, reopen | Messages still there | ⏳ |
 | Mood badge | Check top of chatbot | Last mood shown | ⏳ |
-
+
+---
+
+## 🧪 Week 4 Testing Checklist
+- [ ] SOS popup opens on all 7 pages
+- [ ] All 8 helpline numbers are correct (KIRAN: 1800-599-0019, NIMHANS: 080-4611-0007, etc.)
+- [ ] Logout button redirects to auth.html
+- [ ] Feedback form saves to localStorage
+- [ ] Bubble Pop game works (48 bubbles pop)
+- [ ] Zen Canvas draws on all browsers
+- [ ] Sound Tiles play audio tones
+- [ ] Onboarding modal shows only on first visit
+- [ ] 404 page loads correctly
+- [ ] Relax, Feedback pages accessible from navbar
