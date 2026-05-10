@@ -2,8 +2,8 @@
   "name": "Placida — Mental Wellness",
   "short_name": "Placida",
   "description": "Your private mental wellness companion. Log moods, breathe, chat, and track your journey — offline first.",
-  "start_url": "/PLACIDA/auth.html",
-  "scope": "/PLACIDA/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d0f1a",
@@ -29,21 +29,21 @@
       "name": "Log Mood",
       "short_name": "Mood",
       "description": "Quickly log how you feel",
-      "url": "/PLACIDA/index.html",
+      "url": "./index.html",
       "icons": [{ "src": "icon-512.png", "sizes": "192x192" }]
     },
     {
       "name": "Breathe",
       "short_name": "Breathe",
       "description": "Start a breathing session",
-      "url": "/PLACIDA/breathe.html",
+      "url": "./breathe.html",
       "icons": [{ "src": "icon-512.png", "sizes": "192x192" }]
     },
     {
       "name": "Relax",
       "short_name": "Relax",
       "description": "Stress relief games",
-      "url": "/PLACIDA/relax.html",
+      "url": "./relax.html",
       "icons": [{ "src": "icon-512.png", "sizes": "192x192" }]
     }
   ]
