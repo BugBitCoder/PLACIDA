@@ -589,28 +589,79 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // PWA Installation Button Logic
+  // ── Mobile Bottom Navigation Bar ──
+  // Injected once via JS so every page gets it automatically
+  (function injectMobileNav() {
+    if (document.getElementById('mobileBottomNav')) return;
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    function isActive(page) { return currentPage === page ? 'active' : ''; }
+
+    const nav = document.createElement('nav');
+    nav.id = 'mobileBottomNav';
+    nav.className = 'mobile-bottom-nav';
+    nav.setAttribute('aria-label', 'Mobile navigation');
+    nav.innerHTML = `
+      <a href="index.html"    class="mob-nav-item ${isActive('index.html')}">
+        <span class="mob-nav-icon">🏠</span><span>Home</span>
+      </a>
+      <a href="breathe.html"  class="mob-nav-item ${isActive('breathe.html')}">
+        <span class="mob-nav-icon">🌬️</span><span>Breathe</span>
+      </a>
+      <a href="relax.html"    class="mob-nav-item ${isActive('relax.html')}">
+        <span class="mob-nav-icon">🎮</span><span>Relax</span>
+      </a>
+      <a href="chatbot.html"  class="mob-nav-item ${isActive('chatbot.html')}">
+        <span class="mob-nav-icon">💬</span><span>Chat</span>
+      </a>
+      <button class="mob-nav-item mob-nav-install" id="mobInstallBtn" style="display:none;" aria-label="Install app">
+        <span class="mob-nav-icon">📲</span><span>Install</span>
+      </button>
+      <a href="dashboard.html" class="mob-nav-item ${isActive('dashboard.html')}" id="mobDashLink">
+        <span class="mob-nav-icon">📊</span><span>Stats</span>
+      </a>
+    `;
+    document.body.appendChild(nav);
+  })();
+
+  // PWA Installation Logic — hooks into mobile bottom nav button
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
-    // Add "Install App" button to navbar dynamically
+
+    // Show the Install button in the bottom nav
+    const mobBtn = document.getElementById('mobInstallBtn');
+    if (mobBtn) {
+      mobBtn.style.display = 'flex';
+      // Hide the Stats link to keep 5 items
+      const statsLink = document.getElementById('mobDashLink');
+      if (statsLink) statsLink.style.display = 'none';
+
+      mobBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            mobBtn.style.display = 'none';
+            if (statsLink) statsLink.style.display = 'flex';
+          }
+          deferredPrompt = null;
+        }
+      }, { once: true });
+    }
+
+    // Also add to desktop navbar
     if (!document.getElementById('pwaInstallBtn')) {
-      const nav = document.querySelector('.nav-links');
-      if (nav) {
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks) {
         const li = document.createElement('li');
-        li.innerHTML = '<button id="pwaInstallBtn" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; margin-left: 10px;">📲 Install App</button>';
-        nav.appendChild(li);
-        
-        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+        li.innerHTML = '<button id="pwaInstallBtn" class="btn-secondary" style="padding:6px 14px;font-size:0.8rem;border-radius:8px;">📲 Install</button>';
+        navLinks.appendChild(li);
+        li.querySelector('button').addEventListener('click', async () => {
           if (deferredPrompt) {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to install prompt: ${outcome}`);
-            if (outcome === 'accepted') {
-              li.remove();
-            }
+            if (outcome === 'accepted') li.remove();
             deferredPrompt = null;
           }
         });
