@@ -351,15 +351,18 @@
     async function handleSignIn(e) {
       e.preventDefault();
       clearMessages();
-      if (!window.supabase) { showError('Supabase not configured yet. Ask Sahil to add the project keys!'); return; }
+      if (!window.supabase) { showError('Connection error. Please refresh and try again.'); return; }
       const email    = document.getElementById('siEmail').value.trim();
       const password = document.getElementById('siPassword').value;
       if (!email || !password) { showError('Please fill in both fields.'); return; }
       setLoading('siBtn', true, 'Sign In →');
       try {
-        const { error } = await window.supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
         setLoading('siBtn', false, 'Sign In →');
         if (error) { showError(error.message); return; }
+        // Save user's name so dashboard shows it immediately
+        const name = data?.user?.user_metadata?.full_name || email.split('@')[0];
+        localStorage.setItem('placida_user_name', name);
         window.location.href = 'index.html';
       } catch (e) {
         setLoading('siBtn', false, 'Sign In →');
@@ -371,7 +374,7 @@
     async function handleSignUp(e) {
       e.preventDefault();
       clearMessages();
-      if (!window.supabase) { showError('Supabase not configured yet. Ask Sahil to add the project keys!'); return; }
+      if (!window.supabase) { showError('Connection error. Please refresh and try again.'); return; }
       const name     = document.getElementById('suName').value.trim();
       const email    = document.getElementById('suEmail').value.trim();
       const password = document.getElementById('suPassword').value;
@@ -384,6 +387,8 @@
       });
       setLoading('suBtn', false, 'Create Account 🌿');
       if (error) { showError(error.message); return; }
+      // Save name immediately so dashboard uses it right away
+      localStorage.setItem('placida_user_name', name);
       // Auto sign-in after signup (works when email confirmation is OFF)
       if (data?.session) {
         window.location.href = 'index.html';
