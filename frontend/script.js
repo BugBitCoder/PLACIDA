@@ -379,15 +379,28 @@ function initKeyboardShortcuts() {
 ───────────────────────────────────────────── */
 
 function checkOnboarding() {
-  if (localStorage.getItem('placida_onboarded')) return;
+  if (localStorage.getItem('placida_onboarded')) {
+    // Already onboarded — ensure body scroll is never locked on load
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    return;
+  }
   const modal = document.getElementById('onboardModal');
-  if (modal) setTimeout(() => modal.classList.add('show'), 700);
+  if (modal) {
+    setTimeout(() => {
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }, 700);
+  }
 }
 
 function dismissOnboarding() {
   localStorage.setItem('placida_onboarded', '1');
   const modal = document.getElementById('onboardModal');
   if (modal) modal.classList.remove('show');
+  // Always unlock scroll — this is the main fix for the mobile scroll bug
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
 }
 
 /* ─────────────────────────────────────────────

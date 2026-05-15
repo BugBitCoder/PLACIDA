@@ -155,33 +155,7 @@
   <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- Week 3: Onboarding Modal (shown once on first visit) -->
-  <div id="onboardModal" class="onboard-modal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
-    <div class="onboard-dialog">
-      <div class="od-logo">🌿</div>
-      <h2 id="onboardTitle">Welcome to Placida!</h2>
-      <p>Your private mental wellness companion. Track moods, breathe, chat — all offline, no account needed.</p>
-      <div class="onboard-features">
-        <div class="of-item">
-          <div class="of-icon">🌙</div>
-          <div class="of-label">Log Your Mood</div>
-        </div>
-        <div class="of-item">
-          <div class="of-icon">🌬️</div>
-          <div class="of-label">Breathe &amp; Calm</div>
-        </div>
-        <div class="of-item">
-          <div class="of-icon">💬</div>
-          <div class="of-label">Chat with AI</div>
-        </div>
-        <div class="of-item">
-          <div class="of-icon">📊</div>
-          <div class="of-label">Track Insights</div>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="dismissOnboarding()" style="width:100%;">Get Started 🌿</button>
-    </div>
-  </div>
+  <!-- Onboarding Modal — defined once below (duplicate removed to fix scroll lock bug) -->
 
   <!-- Week 3: Keyboard Shortcut Hint -->
   <div id="shortcutHint" class="shortcut-hint" title="Keyboard Shortcuts" aria-label="Show keyboard shortcuts">?</div>
@@ -333,17 +307,25 @@
     function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.body.style.overflow=''; }
     document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });
     document.addEventListener('keydown', e => { if(e.key==='Escape') closeSOS(); });
-    // Onboarding
+    // Onboarding — uses the single #onboardModal below
     function closeOnboard(){
-      document.getElementById('onboardModal').style.display='none';
-      document.body.style.overflow='';
+      const m = document.getElementById('onboardModal');
+      if(m) m.style.display='none';
+      document.body.style.overflow='';  // always unlock scroll
+      document.documentElement.style.overflow=''; // belt-and-suspenders for iOS
       localStorage.setItem('placida_welcomed','1');
     }
     if(!localStorage.getItem('placida_welcomed')){
       const m=document.getElementById('onboardModal');
-      m.style.display='flex';
-      document.body.style.overflow='hidden';
-      m.addEventListener('click',e=>{if(e.target===m)closeOnboard();});
+      if(m){
+        m.style.display='flex';
+        document.body.style.overflow='hidden';
+        m.addEventListener('click',e=>{if(e.target===m)closeOnboard();});
+      }
+    } else {
+      // Already welcomed — make absolutely sure scroll is not locked
+      document.body.style.overflow='';
+      document.documentElement.style.overflow='';
     }
   </script>
 
