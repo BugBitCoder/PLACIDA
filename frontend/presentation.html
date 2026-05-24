@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Placida — Pitch Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --purple:#7c6af7;--teal:#5ec4b6;--pink:#f06b8b;
+  --bg:#0d0f1a;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#f0f0ff;overflow:hidden;height:100vh}
+.deck{width:100%;height:100vh;position:relative}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:60px;
+  opacity:0;pointer-events:none;transition:opacity .5s ease,transform .5s ease;
+  transform:translateX(60px);
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateX(0)}
+.slide.prev{opacity:0;transform:translateX(-60px)}
+
+/* BG orbs */
+.slide::before,.slide::after{
+  content:'';position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;
+}
+.slide::before{width:500px;height:500px;background:rgba(124,106,247,.12);top:-100px;right:-100px}
+.slide::after{width:400px;height:400px;background:rgba(94,196,182,.08);bottom:-100px;left:-100px}
+
+.slide>*{position:relative;z-index:1}
+
+/* NAV */
+.nav{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:16px;z-index:100;
+  background:rgba(13,15,26,.8);border:1px solid var(--border);
+  border-radius:100px;padding:10px 24px;backdrop-filter:blur(12px);
+}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
+.nav-dot.active{background:var(--purple);width:24px;border-radius:4px}
+.nav-btn{background:none;border:1px solid var(--border);color:#888;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;transition:all .2s}
+.nav-btn:hover{border-color:var(--purple);color:var(--purple)}
+.slide-num{font-size:.7rem;color:#666;min-width:40px;text-align:center}
+
+/* TYPOGRAPHY */
+.badge{display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:20px}
+.badge-purple{background:rgba(124,106,247,.15);border:1px solid rgba(124,106,247,.3);color:var(--purple)}
+.badge-teal{background:rgba(94,196,182,.15);border:1px solid rgba(94,196,182,.3);color:var(--teal)}
+.badge-pink{background:rgba(240,107,139,.15);border:1px solid rgba(240,107,139,.3);color:var(--pink)}
+
+h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-2px;line-height:1.05}
+h2{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:16px}
+.gradient{background:linear-gradient(135deg,#f0f0ff 0%,var(--teal) 50%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{color:#8888aa;font-size:1.05rem;line-height:1.7;max-width:600px;text-align:center}
+.sub-left{color:#8888aa;font-size:1rem;line-height:1.7}
+
+/* CARDS */
+.grid{display:grid;gap:20px;width:100%;max-width:1000px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;backdrop-filter:blur(16px);transition:transform .3s}
+.card:hover{transform:translateY(-4px)}
+.card-icon{font-size:2rem;margin-bottom:12px}
+.card h3{font-size:1rem;font-weight:700;margin-bottom:8px}
+.card p{font-size:.82rem;color:#8888aa;line-height:1.6}
+
+/* STAT */
+.stat-big{font-size:3rem;font-weight:900;letter-spacing:-1px}
+.stat-label{font-size:.78rem;color:#8888aa;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* PROBLEM */
+.problem-item{display:flex;align-items:flex-start;gap:16px;padding:20px;background:rgba(240,107,139,.05);border:1px solid rgba(240,107,139,.15);border-radius:16px}
+.problem-num{font-size:1.8rem;font-weight:900;color:var(--pink);line-height:1}
+.problem-text h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.problem-text p{font-size:.8rem;color:#8888aa}
+
+/* FEATURE */
+.feat{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.feat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.feat-icon.p{background:rgba(124,106,247,.15)}
+.feat-icon.t{background:rgba(94,196,182,.15)}
+.feat-icon.pk{background:rgba(240,107,139,.15)}
+.feat h4{font-size:.9rem;font-weight:700}
+.feat p{font-size:.75rem;color:#8888aa}
+
+/* TEAM */
+.team-card{text-align:center;padding:24px 16px}
+.avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;border:2px solid var(--border)}
+.av-p{background:linear-gradient(135deg,rgba(124,106,247,.3),rgba(124,106,247,.1))}
+.av-t{background:linear-gradient(135deg,rgba(94,196,182,.3),rgba(94,196,182,.1))}
+.av-pk{background:linear-gradient(135deg,rgba(240,107,139,.3),rgba(240,107,139,.1))}
+.av-y{background:linear-gradient(135deg,rgba(240,200,107,.3),rgba(240,200,107,.1))}
+.team-card h3{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.team-card .role{font-size:.72rem;color:var(--purple);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.team-card p{font-size:.72rem;color:#8888aa;line-height:1.5}
+
+/* TECH PILL */
+.pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.pill{padding:8px 18px;border-radius:100px;font-size:.78rem;font-weight:600;border:1px solid var(--border);background:var(--card)}
+
+/* METRIC */
+.metric-bar{height:8px;border-radius:100px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:8px}
+.metric-fill{height:100%;border-radius:100px;transition:width 1s ease}
+
+/* QR placeholder */
+.qr-box{width:160px;height:160px;border:2px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--card)}
+
+/* SLIDE 1 — TITLE */
+#s1{text-align:center}
+.logo-big{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,var(--purple),var(--teal));display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 24px;box-shadow:0 0 60px rgba(124,106,247,.4)}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.slide.active .anim{animation:fadeUp .6s ease both}
+.slide.active .anim:nth-child(2){animation-delay:.1s}
+.slide.active .anim:nth-child(3){animation-delay:.2s}
+.slide.active .anim:nth-child(4){animation-delay:.3s}
+.slide.active .anim:nth-child(5){animation-delay:.4s}
+.slide.active .anim:nth-child(6){animation-delay:.5s}
+.slide.active .anim:nth-child(7){animation-delay:.6s}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active" id="s1">
+  <div class="logo-big anim">🧠</div>
+  <div class="badge badge-purple anim">Mental Wellness App · 2026</div>
+  <h1 class="gradient anim">Placida</h1>
+  <p class="sub anim" style="margin-top:16px">Your private AI mental wellness companion.<br>Mood tracking · Breathing · AI Chat · Stress Relief</p>
+  <div style="display:flex;gap:32px;margin-top:40px" class="anim">
+    <div style="text-align:center"><div class="stat-big" style="color:var(--purple)">4</div><div class="stat-label">Team Members</div></div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center"><div class="stat-big" style="color:var(--teal)">11</div><div class="stat-label">Pages Built</div></div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center"><div class="stat-big" style="color:var(--pink)">4</div><div class="stat-label">Weeks Dev</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 2: PROBLEM -->
+<div class="slide" id="s2">
+  <div class="badge badge-pink anim">The Problem</div>
+  <h2 class="anim">Mental health is a <span style="color:var(--pink)">crisis</span> hiding in plain sight</h2>
+  <div class="grid" style="max-width:800px;margin-top:32px">
+    <div class="problem-item anim">
+      <div class="problem-num">1 in 7</div>
+      <div class="problem-text"><h4>Indians face mental health issues</h4><p>Yet 80% never receive any professional help — NIMHANS</p></div>
+    </div>
+    <div class="problem-item anim">
+      <div class="problem-num">🚫</div>
+      <div class="problem-text"><h4>Stigma blocks access</h4><p>People fear judgment more than the condition itself</p></div>
+    </div>
+    <div class="problem-item anim">
+      <div class="problem-num">💸</div>
+      <div class="problem-text"><h4>Therapy is expensive & inaccessible</h4><p>₹1500–3000/session. No affordable daily tools exist</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: SOLUTION -->
+<div class="slide" id="s3">
+  <div class="badge badge-teal anim">Our Solution</div>
+  <h2 class="anim">Meet <span class="gradient">Placida</span></h2>
+  <p class="sub anim">A free, private, stigma-free daily mental wellness companion.<br>No therapist needed. No data shared. Works offline.</p>
+  <div class="grid grid-3 anim" style="max-width:900px;margin-top:36px">
+    <div class="card" style="text-align:center">
+      <div class="card-icon">🔒</div>
+      <h3>100% Private</h3>
+      <p>All data stays on your device. Zero tracking. Zero ads.</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="card-icon">📱</div>
+      <h3>Works Offline</h3>
+      <p>Installable PWA — works like a native app, no internet needed</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="card-icon">🆓</div>
+      <h3>Completely Free</h3>
+      <p>No subscriptions, no paywalls. Open for everyone.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: FEATURES -->
+<div class="slide" id="s4">
+  <div class="badge badge-purple anim">Features</div>
+  <h2 class="anim">Everything you need to feel better</h2>
+  <div class="grid grid-2 anim" style="max-width:900px;margin-top:28px">
+    <div class="feat"><div class="feat-icon p">😊</div><div><h4>Mood Logger</h4><p>One-tap emoji logging with personal notes</p></div></div>
+    <div class="feat"><div class="feat-icon t">🌬️</div><div><h4>Guided Breathing</h4><p>4-7-8 & box breathing with glow animations</p></div></div>
+    <div class="feat"><div class="feat-icon pk">💬</div><div><h4>AI Chatbot</h4><p>Gemini-powered empathetic support + crisis detection</p></div></div>
+    <div class="feat"><div class="feat-icon p">📊</div><div><h4>Dashboard</h4><p>7-day mood chart, streaks, weekly trends</p></div></div>
+    <div class="feat"><div class="feat-icon t">🎮</div><div><h4>Relax Games</h4><p>Bubble Pop · Zen Canvas · Sound Tiles</p></div></div>
+    <div class="feat"><div class="feat-icon pk">🆘</div><div><h4>SOS Helplines</h4><p>8 govt helplines — KIRAN, NIMHANS, iCall</p></div></div>
+  </div>
+</div>
+
+<!-- SLIDE 5: TECH STACK -->
+<div class="slide" id="s5">
+  <div class="badge badge-teal anim">Tech Stack</div>
+  <h2 class="anim">Built lean. Built fast.</h2>
+  <div class="grid grid-2 anim" style="max-width:800px;margin-top:32px">
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <h3>Frontend</h3>
+      <div class="pills" style="justify-content:flex-start;margin-top:12px">
+        <span class="pill">HTML5</span><span class="pill">CSS3</span><span class="pill">Vanilla JS</span><span class="pill">Chart.js</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>Backend & Auth</h3>
+      <div class="pills" style="justify-content:flex-start;margin-top:12px">
+        <span class="pill">Supabase</span><span class="pill">Gemini AI</span><span class="pill">Web Audio API</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Mobile & PWA</h3>
+      <div class="pills" style="justify-content:flex-start;margin-top:12px">
+        <span class="pill">Service Worker</span><span class="pill">manifest.json</span><span class="pill">Capacitor</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🚀</div>
+      <h3>DevOps</h3>
+      <div class="pills" style="justify-content:flex-start;margin-top:12px">
+        <span class="pill">GitHub Pages</span><span class="pill">GitHub Actions</span><span class="pill">Git</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: TEAM -->
+<div class="slide" id="s6">
+  <div class="badge badge-purple anim">The Team</div>
+  <h2 class="anim">Built by students, for everyone</h2>
+  <div class="grid grid-4 anim" style="max-width:960px;margin-top:32px">
+    <div class="card team-card">
+      <div class="avatar av-p">👨‍💻</div>
+      <h3>Sahil</h3>
+      <div class="role">Lead Frontend</div>
+      <p>Core UI, Dashboard, PWA, SOS, Supabase integration</p>
+    </div>
+    <div class="card team-card">
+      <div class="avatar av-pk">👩‍💻</div>
+      <h3>Ayushi</h3>
+      <div class="role" style="color:var(--pink)">Chatbot Dev</div>
+      <p>AI Chat, Crisis detection, Auth guard, Resources page</p>
+    </div>
+    <div class="card team-card">
+      <div class="avatar av-t">👩‍🎨</div>
+      <h3>Sanchari</h3>
+      <div class="role" style="color:var(--teal)">Wellness Dev</div>
+      <p>Breathing, Journal, Zen Canvas, Animations</p>
+    </div>
+    <div class="card team-card">
+      <div class="avatar av-y">👨‍📝</div>
+      <h3>Divyans</h3>
+      <div class="role" style="color:#f0c86b">QA & Docs</div>
+      <p>Testing, 10+ docs, Presentation, Feedback analysis</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: FEEDBACK -->
+<div class="slide" id="s7">
+  <div class="badge badge-pink anim">User Feedback</div>
+  <h2 class="anim">Users <span style="color:var(--pink)">love</span> it</h2>
+  <div class="grid grid-2 anim" style="max-width:900px;margin-top:28px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem;font-weight:600">🌬️ Breathing</span><span style="color:var(--teal);font-weight:700">4.5 / 5</span></div>
+        <div class="metric-bar"><div class="metric-fill" style="width:90%;background:var(--teal)"></div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem;font-weight:600">😊 Mood Logger</span><span style="color:var(--purple);font-weight:700">4.2 / 5</span></div>
+        <div class="metric-bar"><div class="metric-fill" style="width:84%;background:var(--purple)"></div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem;font-weight:600">💬 AI Chat</span><span style="color:var(--pink);font-weight:700">3.8 / 5</span></div>
+        <div class="metric-bar"><div class="metric-fill" style="width:76%;background:var(--pink)"></div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" style="text-align:center;padding:32px">
+        <div class="stat-big" style="color:var(--teal)">7.4</div>
+        <div class="stat-label">NPS Score / 10</div>
+        <p style="font-size:.78rem;color:#8888aa;margin-top:8px">"Likely to Recommend"</p>
+      </div>
+      <div class="card">
+        <p style="font-size:.85rem;font-style:italic;color:#b0b0cc;line-height:1.6">"The UI feels premium and calming — it actually made me want to use it daily."</p>
+        <p style="font-size:.72rem;color:#666;margin-top:10px">— Beta Tester</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: CTA -->
+<div class="slide" id="s8" style="text-align:center">
+  <div class="badge badge-purple anim">Try It Now</div>
+  <h2 class="gradient anim" style="font-size:clamp(2rem,5vw,4rem)">Your mind deserves care.<br>Start today — for free.</h2>
+  <div style="display:flex;align-items:center;gap:48px;margin-top:40px" class="anim">
+    <div class="qr-box">📱</div>
+    <div style="text-align:left">
+      <p style="color:#8888aa;font-size:.8rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Live App</p>
+      <p style="font-size:1rem;font-weight:700;color:var(--teal)">bugbitcoder.github.io/PLACIDA</p>
+      <p style="color:#8888aa;font-size:.8rem;margin-top:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Source Code</p>
+      <p style="font-size:1rem;font-weight:700;color:var(--purple)">github.com/BugBitCoder/PLACIDA</p>
+      <div style="margin-top:28px;display:flex;gap:12px">
+        <span class="pill" style="border-color:rgba(94,196,182,.3);color:var(--teal)">✅ Free Forever</span>
+        <span class="pill" style="border-color:rgba(124,106,247,.3);color:var(--purple)">✅ Open Source</span>
+        <span class="pill" style="border-color:rgba(240,107,139,.3);color:var(--pink)">✅ Works Offline</span>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:40px;color:#8888aa;font-size:.85rem" class="anim">Made with 💜 by Sahil · Ayushi · Sanchari · Divyans</p>
+</div>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn">‹</button>
+  <div id="dots"></div>
+  <span class="slide-num" id="slideNum">1 / 8</span>
+  <button class="nav-btn" id="nextBtn">›</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let cur = 0;
+const dotsEl = document.getElementById('dots');
+const numEl  = document.getElementById('slideNum');
+
+// Build dots
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'nav-dot' + (i===0?' active':'');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('prev');
+  setTimeout(() => slides[cur].classList.remove('prev'), 500);
+  cur = (n + slides.length) % slides.length;
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i===cur));
+  numEl.textContent = `${cur+1} / ${slides.length}`;
+}
+
+document.getElementById('nextBtn').onclick = () => goTo(cur+1);
+document.getElementById('prevBtn').onclick = () => goTo(cur-1);
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') goTo(cur-1);
+});
+
+// Touch swipe
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) dx<0?goTo(cur+1):goTo(cur-1);
+});
+</script>
+</body>
+</html>

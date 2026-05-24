@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Placida — Service Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f4f6fb;color:#1a1a2e;min-height:100vh}
+
+/* ─── HEADER ─── */
+.header{background:linear-gradient(135deg,#2563eb 0%,#1e40af 100%);color:#fff;padding:28px 40px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(37,99,235,.3)}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:1.5px solid rgba(255,255,255,.3)}
+.header h1{font-size:1.7rem;font-weight:800;letter-spacing:-.5px}
+.header .sub{font-size:.82rem;opacity:.75;margin-top:2px}
+.badge-header{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:6px 18px;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+
+/* ─── PERSONAS BAR ─── */
+.personas{display:flex;gap:12px;padding:18px 40px;background:#fff;border-bottom:2px solid #e5e7eb;overflow-x:auto}
+.persona-chip{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:100px;border:2px solid;font-size:.78rem;font-weight:600;white-space:nowrap;cursor:default;transition:transform .2s}
+.persona-chip:hover{transform:translateY(-2px)}
+.p1{border-color:#2563eb;background:#eff6ff;color:#1e40af}
+.p2{border-color:#7c3aed;background:#f5f3ff;color:#5b21b6}
+.p3{border-color:#059669;background:#ecfdf5;color:#047857}
+.persona-avatar{font-size:1.3rem}
+
+/* ─── LEGEND ─── */
+.legend{display:flex;gap:20px;padding:14px 40px;background:#fff;border-bottom:2px solid #e5e7eb;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;color:#6b7280}
+.legend-line{width:40px;height:3px;border-radius:2px}
+.legend-line.interaction{background:#2563eb}
+.legend-line.visibility{background:#f59e0b;border-top:2px dashed #f59e0b;height:0}
+.legend-line.internal{background:#e5e7eb;border-top:2px dotted #9ca3af;height:0}
+.legend-dot{width:12px;height:12px;border-radius:50%}
+
+/* ─── BLUEPRINT TABLE ─── */
+.blueprint-wrap{padding:28px 40px 60px;overflow-x:auto}
+.blueprint{border-collapse:separate;border-spacing:0;width:100%;min-width:960px;background:#fff;border-radius:20px;box-shadow:0 4px 30px rgba(0,0,0,.08);overflow:hidden}
+
+/* Column headers (phases) */
+.phase-header{padding:14px 12px;font-size:.78rem;font-weight:800;text-align:center;color:#fff;letter-spacing:.5px;text-transform:uppercase;border-right:2px solid rgba(255,255,255,.2)}
+.ph-row-label{background:#1a1a2e;color:#fff;font-size:.8rem;font-weight:700;width:130px;padding:14px 16px;text-align:center;letter-spacing:.3px}
+.ph-awareness{background:#2563eb}
+.ph-onboarding{background:#f59e0b}
+.ph-exploration{background:#10b981}
+.ph-activeuse{background:#8b5cf6}
+.ph-reflection{background:#ef4444}
+
+/* Row label column */
+.row-label{padding:16px 14px;font-size:.72rem;font-weight:700;color:#fff;text-align:center;vertical-align:middle;width:130px;letter-spacing:.3px;text-transform:uppercase;line-height:1.4}
+.rl-evidence{background:#1e3a5f}
+.rl-action{background:#1e40af}
+.rl-frontstage{background:#0369a1}
+.rl-backstage{background:#0e7490}
+.rl-support{background:#065f46}
+.rl-internal{background:#1a1a2e}
+
+/* Data cells */
+.cell{padding:14px 12px;font-size:.74rem;color:#374151;vertical-align:top;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;line-height:1.55}
+.cell:last-child{border-right:none}
+.cell ul{list-style:none;padding:0}
+.cell ul li{padding:3px 0;padding-left:14px;position:relative}
+.cell ul li::before{content:'•';position:absolute;left:2px;color:#9ca3af;font-size:.8rem}
+.cell strong{display:block;font-size:.72rem;font-weight:700;color:#1a1a2e;margin-bottom:5px}
+
+/* Divider rows (Lines) */
+.line-row td{padding:0;height:6px;position:relative}
+.line-interaction{background:linear-gradient(90deg,#bfdbfe,#93c5fd)}
+.line-visibility{background:repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 12px,transparent 12px,transparent 20px);height:4px}
+.line-internal{background:repeating-linear-gradient(90deg,#d1d5db 0,#d1d5db 8px,transparent 8px,transparent 16px);height:4px}
+
+.line-label{font-size:.6rem;font-weight:700;color:#fff;text-align:center;padding:4px 8px;text-transform:uppercase;letter-spacing:1px}
+.ll-blue{background:#2563eb}
+.ll-amber{background:#f59e0b}
+.ll-gray{background:#6b7280}
+
+/* Emotion cells */
+.emotion-cell{text-align:center;padding:10px 8px;font-size:1.5rem;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6}
+.emotion-label{font-size:.62rem;color:#6b7280;margin-top:4px;font-weight:500;line-height:1.3}
+
+/* Section bg alternation */
+.evidence-row td{background:#eff6ff}
+.action-row td{background:#fff}
+.frontstage-row td{background:#f0fdf4}
+.backstage-row td{background:#fefce8}
+.support-row td{background:#fdf4ff}
+.internal-row td{background:#f8fafc}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:.6rem;font-weight:700;margin:2px 2px 2px 0;white-space:nowrap}
+.tag-blue{background:#dbeafe;color:#1e40af}
+.tag-green{background:#d1fae5;color:#065f46}
+.tag-amber{background:#fef3c7;color:#92400e}
+.tag-purple{background:#ede9fe;color:#5b21b6}
+.tag-red{background:#fee2e2;color:#991b1b}
+
+/* FOOTER */
+.footer{background:#1a1a2e;color:rgba(255,255,255,.5);text-align:center;padding:16px;font-size:.72rem}
+
+/* Responsive */
+@media print{body{background:#fff}.header{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🧠</div>
+    <div>
+      <h1>Placida — Service Blueprint</h1>
+      <div class="sub">End-to-end service delivery map across all user touchpoints</div>
+    </div>
+  </div>
+  <div class="badge-header">UX Design · 2026</div>
+</div>
+
+<!-- PERSONAS BAR -->
+<div class="personas">
+  <span style="font-size:.75rem;font-weight:700;color:#6b7280;align-self:center;margin-right:4px">PERSONAS:</span>
+  <div class="persona-chip p1"><span class="persona-avatar">👨‍💻</span> Rahul Mehta · Software Engineer · Burnout &amp; Work-Life Balance</div>
+  <div class="persona-chip p2"><span class="persona-avatar">👩‍🎓</span> Aisha Khan · Student · Exam Stress &amp; Emotional Stability</div>
+  <div class="persona-chip p3"><span class="persona-avatar">👴</span> Ramesh Iyer · Retired · Loneliness &amp; Daily Connection</div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-line interaction"></div> Line of Interaction (Customer ↔ Frontstage)</div>
+  <div class="legend-item"><div class="legend-line visibility"></div> Line of Visibility (Frontstage ↔ Backstage)</div>
+  <div class="legend-item"><div class="legend-line internal"></div> Line of Internal Interaction (Backstage ↔ Support)</div>
+  <div class="legend-item"><span style="font-size:1rem">😊😐😟😁😮</span> Emotion States</div>
+</div>
+
+<!-- BLUEPRINT TABLE -->
+<div class="blueprint-wrap">
+<table class="blueprint">
+  <colgroup>
+    <col style="width:130px"/>
+    <col style="width:17%"/><col style="width:17%"/><col style="width:17%"/><col style="width:17%"/><col style="width:17%"/>
+  </colgroup>
+
+  <!-- PHASE HEADERS -->
+  <thead>
+    <tr>
+      <th class="ph-row-label">Layer</th>
+      <th class="phase-header ph-awareness">🔍 Awareness</th>
+      <th class="phase-header ph-onboarding">⚡ Onboarding</th>
+      <th class="phase-header ph-exploration">🌿 Exploration</th>
+      <th class="phase-header ph-activeuse">🌟 Active Use</th>
+      <th class="phase-header ph-reflection">🪞 Reflection</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- PHYSICAL EVIDENCE -->
+    <tr class="evidence-row">
+      <td class="row-label rl-evidence">📦 Physical Evidence</td>
+      <td class="cell">
+        <ul>
+          <li>College/Reddit forums</li>
+          <li>Student Discord servers</li>
+          <li>Radio / community newsletter (Ramesh)</li>
+          <li>App Store listing page</li>
+          <li>GitHub Pages preview</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>App Store description &amp; screenshots</li>
+          <li>Welcome / splash screen</li>
+          <li>First mood log entry screen</li>
+          <li>Goal-setting wizard</li>
+          <li>Profile setup UI</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Exercise menu page</li>
+          <li>Journaling module UI</li>
+          <li>Resource library dashboard</li>
+          <li>Breathing animation screen</li>
+          <li>CBT exercise prompts</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Main dashboard (mood chart)</li>
+          <li>Push notification banners</li>
+          <li>AI Chat interface</li>
+          <li>Weekly mood summary card</li>
+          <li>Conversation module (Ramesh)</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>'My Progress' summary screen</li>
+          <li>Pain Trigger analysis view</li>
+          <li>Feedback form</li>
+          <li>Long-term trend charts</li>
+          <li>Monthly report export</li>
+        </ul>
+      </td>
+    </tr>
+
+    <!-- CUSTOMER ACTIONS -->
+    <tr class="action-row">
+      <td class="row-label rl-action">👤 Customer Actions</td>
+      <td class="cell">
+        <strong>Rahul:</strong> Searches for mental health tracker after burnout episode on metro forum<br/>
+        <strong>Aisha:</strong> Reads about mental wellness tools on student forum; needs privacy assurance<br/>
+        <strong>Ramesh:</strong> Hears about app on radio/community newsletter; wonders if it's easy to use<br/>
+        <span class="tag tag-blue">Discovers Placida</span>
+        <span class="tag tag-amber">Checks reviews</span>
+      </td>
+      <td class="cell">
+        <strong>All personas:</strong><br/>
+        <ul>
+          <li>Downloads app on smartphone</li>
+          <li>Creates account (email/Google)</li>
+          <li>Logs initial mood (emoji)</li>
+          <li>Sets personal goals</li>
+          <li>Fills out profile / anxiety tags</li>
+        </ul>
+        <span class="tag tag-green">First session begins</span>
+      </td>
+      <td class="cell">
+        <strong>Rahul:</strong> Explores quick insights, data visualizations, productivity-linked wellness<br/>
+        <strong>Aisha:</strong> Tries CBT journaling prompts, receives positive feedback message<br/>
+        <strong>Ramesh:</strong> Browses general interest sections, tries basic breathing feature<br/>
+        <span class="tag tag-purple">Feature discovery</span>
+      </td>
+      <td class="cell">
+        <strong>Rahul:</strong> Daily logs + late-night reflections; uses guided break &amp; sleep modules<br/>
+        <strong>Aisha:</strong> Daily check-ins; consistent use of pre-exam breathing exercises<br/>
+        <strong>Ramesh:</strong> Uses conversational check-in daily; looks at weekly mood summary<br/>
+        <span class="tag tag-green">Habit formed</span>
+      </td>
+      <td class="cell">
+        <strong>Rahul:</strong> Reviews mood trends monthly; sets new goals for work-life balance<br/>
+        <strong>Aisha:</strong> Reviews long-term trends; identifies "comparison thoughts" as pain trigger<br/>
+        <strong>Ramesh:</strong> Looks at weekly summary; provides feedback via form<br/>
+        <span class="tag tag-red">Growth insights</span>
+      </td>
+    </tr>
+
+    <!-- LINE OF INTERACTION -->
+    <tr class="line-row">
+      <td colspan="6" class="line-interaction"><div class="line-label ll-blue">━━ LINE OF INTERACTION (Customer ↔ Frontstage) ━━</div></td>
+    </tr>
+
+    <!-- FRONTSTAGE -->
+    <tr class="frontstage-row">
+      <td class="row-label rl-frontstage">🎭 Frontstage<br/>(Visible Service)</td>
+      <td class="cell">
+        <ul>
+          <li>SEO-optimised landing page</li>
+          <li>App Store listing (screenshots, ratings)</li>
+          <li>Social media presence</li>
+          <li>Community forum posts</li>
+        </ul>
+        <span class="tag tag-blue">Marketing Outreach</span>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Auth UI (email + Google OAuth)</li>
+          <li>Mood input flow (emoji picker)</li>
+          <li>Animated welcome screen</li>
+          <li>Goal-setting wizard UI</li>
+          <li>Privacy assurance message</li>
+        </ul>
+        <span class="tag tag-green">Frontend Team</span>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Exercise menu navigation</li>
+          <li>Journaling interface</li>
+          <li>Guided breathing animations</li>
+          <li>Resource library (articles, guides)</li>
+          <li>CBT prompt display</li>
+        </ul>
+        <span class="tag tag-purple">AI + Content Team</span>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Dashboard UI (7-day chart)</li>
+          <li>AI Chatbot (Gemini-powered)</li>
+          <li>Push notification reminders</li>
+          <li>Conversational check-in UI</li>
+          <li>Streak &amp; progress display</li>
+        </ul>
+        <span class="tag tag-amber">Product Team</span>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>'My Progress' summary screen</li>
+          <li>Pain Trigger analysis view</li>
+          <li>Goal progress visualisation</li>
+          <li>In-app feedback form</li>
+        </ul>
+        <span class="tag tag-red">Data Analytics Team</span>
+      </td>
+    </tr>
+
+    <!-- LINE OF VISIBILITY -->
+    <tr class="line-row">
+      <td colspan="6" class="line-visibility"><div class="line-label ll-amber">- - - LINE OF VISIBILITY (Frontstage ↔ Backstage) - - -</div></td>
+    </tr>
+
+    <!-- BACKSTAGE -->
+    <tr class="backstage-row">
+      <td class="row-label rl-backstage">🔧 Backstage<br/>(Invisible Actions)</td>
+      <td class="cell">
+        <ul>
+          <li>SEO keyword research &amp; targeting</li>
+          <li>App Store optimisation (ASO)</li>
+          <li>Content creation for forums</li>
+          <li>UX Research (student mental health)</li>
+          <li>User persona development</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Supabase Auth (JWT tokens)</li>
+          <li>Data collection &amp; schema setup</li>
+          <li>Student/user profile DB population</li>
+          <li>Local storage initialisation</li>
+          <li>Service Worker cache registration</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>AI model training on CBT techniques</li>
+          <li>RAG-based context building</li>
+          <li>Meditation guide curation</li>
+          <li>Content moderation pipeline</li>
+          <li>Feature A/B test configuration</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Mood trend analysis algorithms</li>
+          <li>AI coverage scoring (Gemini API)</li>
+          <li>Push notification scheduling</li>
+          <li>Weekly reflection logic</li>
+          <li>Crisis detection flag system</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <ul>
+          <li>Long-term trend data aggregation</li>
+          <li>Pain trigger pattern detection</li>
+          <li>Feedback analysis pipeline</li>
+          <li>QA reliability checks</li>
+          <li>Report generation logic</li>
+        </ul>
+      </td>
+    </tr>
+
+    <!-- LINE OF INTERNAL INTERACTION -->
+    <tr class="line-row">
+      <td colspan="6" class="line-internal"><div class="line-label ll-gray">· · · LINE OF INTERNAL INTERACTION (Backstage ↔ Support) · · ·</div></td>
+    </tr>
+
+    <!-- SUPPORT PROCESSES -->
+    <tr class="support-row">
+      <td class="row-label rl-support">⚙️ Support Processes</td>
+      <td class="cell">
+        <span class="tag tag-blue">Supabase BaaS</span>
+        <span class="tag tag-green">GitHub Pages CDN</span>
+        <span class="tag tag-amber">Google Analytics</span>
+        <br/>
+        <ul>
+          <li>Hosting infrastructure</li>
+          <li>Domain &amp; SSL management</li>
+          <li>Analytics tracking setup</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-purple">Supabase Auth</span>
+        <span class="tag tag-blue">PostgreSQL DB</span>
+        <span class="tag tag-green">PWA Manifest</span>
+        <br/>
+        <ul>
+          <li>Auth token management</li>
+          <li>DB schema migrations</li>
+          <li>PWA install prompt logic</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-amber">Gemini AI API</span>
+        <span class="tag tag-purple">RAG Pipeline</span>
+        <span class="tag tag-blue">Chart.js</span>
+        <br/>
+        <ul>
+          <li>AI API rate limiting</li>
+          <li>Content delivery network</li>
+          <li>Chart rendering engine</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-green">Push API</span>
+        <span class="tag tag-red">Crisis Detection</span>
+        <span class="tag tag-blue">Web Audio API</span>
+        <br/>
+        <ul>
+          <li>Notification scheduling service</li>
+          <li>AI response monitoring</li>
+          <li>Offline data sync (SW)</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-purple">Data Analytics</span>
+        <span class="tag tag-amber">QA Pipeline</span>
+        <span class="tag tag-green">Export Engine</span>
+        <br/>
+        <ul>
+          <li>Long-term storage queries</li>
+          <li>Trend report generation</li>
+          <li>Automated QA checks</li>
+        </ul>
+      </td>
+    </tr>
+
+    <!-- INTERNAL OWNERSHIP -->
+    <tr class="internal-row">
+      <td class="row-label rl-internal">🏢 Internal Ownership</td>
+      <td class="cell">
+        <span class="tag tag-blue">Marketing Outreach Team</span>
+        <span class="tag tag-purple">UX Research Team</span>
+        <br/><br/>
+        <ul>
+          <li>Student mental health focus</li>
+          <li>Forum &amp; community engagement</li>
+          <li>Persona validation</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-green">Frontend Team</span>
+        <span class="tag tag-blue">Backend Team</span>
+        <br/><br/>
+        <ul>
+          <li><strong>Frontend:</strong> Auth UI, mood input flow</li>
+          <li><strong>Backend:</strong> Data collection, user DB</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-amber">AI Team</span>
+        <span class="tag tag-purple">Content Team</span>
+        <br/><br/>
+        <ul>
+          <li><strong>AI:</strong> CBT training, RAG context</li>
+          <li><strong>Content:</strong> Meditation guides</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-green">Product Team</span>
+        <span class="tag tag-amber">AI Team</span>
+        <span class="tag tag-blue">Frontend Team</span>
+        <br/><br/>
+        <ul>
+          <li><strong>Product:</strong> Weekly reflection design</li>
+          <li><strong>AI:</strong> Mood-trend analysis, scoring</li>
+          <li><strong>Frontend:</strong> Weekly design iterations</li>
+        </ul>
+      </td>
+      <td class="cell">
+        <span class="tag tag-red">Data Analytics Team</span>
+        <span class="tag tag-purple">AI Team</span>
+        <span class="tag tag-blue">QA Team</span>
+        <br/><br/>
+        <ul>
+          <li><strong>Analytics:</strong> Long-term trend reports</li>
+          <li><strong>AI + QA:</strong> Reliability of trend data</li>
+        </ul>
+      </td>
+    </tr>
+
+    <!-- EMOTION STATES -->
+    <tr>
+      <td class="row-label" style="background:#374151;font-size:.7rem">🎭 Emotion States (All Personas)</td>
+      <td class="emotion-cell" style="background:#eff6ff">
+        <div>😟🤔😰</div>
+        <div class="emotion-label"><strong>Rahul:</strong> Exhausted but hopeful<br/><strong>Aisha:</strong> Intrigued, hesitant (privacy?)<br/><strong>Ramesh:</strong> Skeptical but curious</div>
+      </td>
+      <td class="emotion-cell" style="background:#fefce8">
+        <div>😤😟😰</div>
+        <div class="emotion-label"><strong>Rahul:</strong> Frustrated — repetitive<br/><strong>Aisha:</strong> Cautiously hopeful<br/><strong>Ramesh:</strong> Slight learning curve</div>
+      </td>
+      <td class="emotion-cell" style="background:#f0fdf4">
+        <div>🧐😊😌</div>
+        <div class="emotion-label"><strong>Rahul:</strong> Curious &amp; analytical<br/><strong>Aisha:</strong> Pleasantly surprised<br/><strong>Ramesh:</strong> Still slightly complex</div>
+      </td>
+      <td class="emotion-cell" style="background:#fdf4ff">
+        <div>😊😊😊</div>
+        <div class="emotion-label"><strong>Rahul:</strong> Relieved — actionable insights<br/><strong>Aisha:</strong> Focused, can manage stress<br/><strong>Ramesh:</strong> Connected &amp; comforted</div>
+      </td>
+      <td class="emotion-cell" style="background:#fef2f2">
+        <div>😮😄😊</div>
+        <div class="emotion-label"><strong>Rahul:</strong> Overwhelmed — needs better reminders<br/><strong>Aisha:</strong> Confident, better equipped<br/><strong>Ramesh:</strong> Feeling more aware &amp; connected</div>
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Placida Mental Wellness App · Service Blueprint · Designed by Team Placida (Sahil · Ayushi · Sanchari · Divyans) · 2026
+</div>
+
+</body>
+</html>

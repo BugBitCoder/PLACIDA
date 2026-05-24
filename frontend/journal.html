@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Placida Journal — Guided journaling with mood-adaptive prompts, free writing, and AI-powered reflections."/>
+  <title>Journal — Placida</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-512.png"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <style>
+    .jnl-hero{text-align:center;padding:52px 24px 28px;animation:fadeInUp .7s ease both}
+    .jnl-hero h1{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:800;letter-spacing:-1.2px;margin-bottom:12px;background:linear-gradient(135deg,#f0f0ff 0%,var(--accent-pink) 50%,var(--accent-purple) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 6s ease infinite}
+    .jnl-hero p{color:var(--text-muted);font-size:.95rem;max-width:440px;margin:0 auto;line-height:1.7}
+    .jnl-layout{max-width:860px;margin:0 auto;padding:0 24px 100px;display:flex;flex-direction:column;gap:22px;animation:fadeInUp .8s ease .1s both}
+
+    /* Mode Tabs */
+    .jnl-mode-tabs{display:flex;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border-glass);border-radius:14px;padding:5px}
+    .jnl-tab{flex:1;padding:9px 16px;border-radius:10px;border:none;font-family:Inter,sans-serif;font-size:.82rem;font-weight:600;color:var(--text-muted);cursor:pointer;background:none;transition:all .25s ease;text-align:center}
+    .jnl-tab.active{background:linear-gradient(135deg,rgba(240,107,139,.2),rgba(124,106,247,.2));color:var(--text-primary);border:1px solid rgba(240,107,139,.3)}
+
+    /* Prompt card */
+    .prompt-card{background:linear-gradient(135deg,rgba(240,107,139,.1),rgba(124,106,247,.08));border:1px solid rgba(240,107,139,.25);border-radius:18px;padding:20px 24px;display:flex;align-items:flex-start;gap:14px}
+    .prompt-emoji{font-size:1.8rem;flex-shrink:0}
+    .prompt-text{flex:1}
+    .prompt-label{font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-pink);margin-bottom:4px}
+    .prompt-q{font-size:.95rem;color:var(--text-primary);line-height:1.6;font-style:italic}
+    .prompt-refresh{padding:6px 14px;border-radius:8px;border:1px solid rgba(240,107,139,.3);background:rgba(240,107,139,.08);font-family:Inter,sans-serif;font-size:.75rem;font-weight:600;color:var(--accent-pink);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+    .prompt-refresh:hover{background:rgba(240,107,139,.18)}
+
+    /* Write area */
+    .jnl-textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border-glass);border-radius:14px;padding:18px 20px;font-family:Inter,sans-serif;font-size:.95rem;line-height:1.8;color:var(--text-primary);resize:none;outline:none;min-height:220px;transition:border-color .3s,box-shadow .3s}
+    .jnl-textarea::placeholder{color:var(--text-muted)}
+    .jnl-textarea:focus{border-color:rgba(240,107,139,.4);box-shadow:0 0 0 3px rgba(240,107,139,.1)}
+    .jnl-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .jnl-wordcount{font-size:.75rem;color:var(--text-muted);margin-right:auto}
+
+    /* Mood tag */
+    .mood-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+    .mood-tag{padding:5px 12px;border-radius:100px;border:1px solid var(--border-glass);background:rgba(255,255,255,.04);font-size:.72rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s}
+    .mood-tag.active{background:rgba(124,106,247,.2);border-color:rgba(124,106,247,.4);color:#a89df9}
+
+    /* Entry list */
+    .jnl-entries-wrap{}
+    .jnl-search{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .jnl-search input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border-glass);border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:.88rem;color:var(--text-primary);outline:none;transition:border-color .25s}
+    .jnl-search input:focus{border-color:rgba(124,106,247,.4)}
+    .jnl-search input::placeholder{color:var(--text-muted)}
+    .jnl-entry-list{display:flex;flex-direction:column;gap:12px}
+    .jnl-entry{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px 20px;cursor:pointer;transition:all var(--transition)}
+    .jnl-entry:hover{background:var(--bg-card-hover);transform:translateY(-2px);box-shadow:var(--shadow-card)}
+    .jnl-entry-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .jnl-entry-mode{font-size:.7rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:3px 9px;border-radius:100px;background:rgba(124,106,247,.15);color:#a89df9}
+    .jnl-entry-mode.free{background:rgba(94,196,182,.15);color:var(--accent-teal)}
+    .jnl-entry-date{font-size:.75rem;color:var(--text-muted);margin-left:auto}
+    .jnl-entry-prompt{font-size:.75rem;color:var(--accent-pink);margin-bottom:5px;font-style:italic}
+    .jnl-entry-preview{font-size:.85rem;color:var(--text-soft);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .jnl-entry-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+    .jnl-tag-pill{font-size:.65rem;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.06);color:var(--text-muted);border:1px solid var(--border-glass)}
+    .jnl-delete-btn{margin-left:auto;padding:4px 10px;background:rgba(240,107,139,.12);border:1px solid rgba(240,107,139,.25);border-radius:8px;cursor:pointer;font-size:.72rem;color:var(--accent-pink);font-family:Inter,sans-serif;transition:all .2s;white-space:nowrap}
+    .jnl-delete-btn:hover{background:rgba(240,107,139,.25)}
+    .jnl-empty{text-align:center;padding:40px 20px;color:var(--text-muted)}
+    .jnl-empty-emoji{font-size:3rem;margin-bottom:12px}
+
+    /* AI Reflection */
+    .ai-reflection{background:linear-gradient(135deg,rgba(124,106,247,.1),rgba(94,196,182,.07));border:1px solid rgba(124,106,247,.25);border-radius:16px;padding:18px 20px;font-size:.88rem;color:var(--text-soft);line-height:1.7;min-height:60px;position:relative}
+    .ai-reflection .ai-label{font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-purple);margin-bottom:8px}
+    .ai-reflection .ai-loading{color:var(--text-muted);font-style:italic}
+    .ai-cursor{display:inline-block;width:2px;height:1em;background:var(--accent-purple);margin-left:2px;animation:blink 1s step-start infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* Detail view */
+    .jnl-detail-overlay{position:fixed;inset:0;background:rgba(6,7,16,.9);backdrop-filter:blur(16px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .jnl-detail-overlay.show{display:flex}
+    .jnl-detail-dialog{background:rgba(14,16,30,.98);border:1px solid rgba(240,107,139,.25);border-radius:24px;padding:32px;max-width:600px;width:100%;max-height:calc(100vh - 48px);overflow-y:auto;animation:fadeInUp .3s ease both}
+    .jnl-detail-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--text-muted);display:flex;align-items:center;justify-content:center}
+    .jnl-detail-dialog{position:relative}
+
+    @media(max-width:600px){.jnl-toolbar{gap:6px}.jnl-tab{padding:8px 10px;font-size:.75rem}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+      <li><a href="relax.html">Relax</a></li>
+      <li><a href="journal.html" class="active" aria-current="page">Journal</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+    <button class="btn-logout" onclick="signOut()" aria-label="Logout">⏻ Logout</button>
+  </nav>
+
+  <main class="page-wrapper">
+    <section class="jnl-hero" aria-labelledby="jnl-title">
+      <div class="hero-badge">📓 Mindful Writing</div>
+      <h1 id="jnl-title">Your Personal<br>Wellness Journal</h1>
+      <p>Write freely, reflect deeply, and track your emotional journey — one entry at a time.</p>
+    </section>
+
+    <div class="jnl-layout">
+
+      <!-- ── Write Panel ── -->
+      <div class="glass-card" aria-label="Journal write panel">
+        <div class="card-header">
+          <div class="card-icon pink" aria-hidden="true">✍️</div>
+          <div style="flex:1">
+            <div class="card-title">New Entry</div>
+            <div class="card-subtitle" id="jnlDate"></div>
+          </div>
+          <div id="jnlEntryCount" style="font-size:.75rem;color:var(--text-muted)"></div>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="jnl-mode-tabs" role="tablist" aria-label="Journal mode" style="margin-bottom:16px">
+          <button class="jnl-tab active" id="tabGuided" role="tab" aria-selected="true" onclick="switchMode('guided')">📌 Guided Prompt</button>
+          <button class="jnl-tab" id="tabFree" role="tab" aria-selected="false" onclick="switchMode('free')">🖊️ Free Write</button>
+          <button class="jnl-tab" id="tabReflect" role="tab" aria-selected="false" onclick="switchMode('reflect')">🤖 AI Reflect</button>
+        </div>
+
+        <!-- Guided prompt -->
+        <div id="guidedPanel">
+          <div class="prompt-card" style="margin-bottom:14px">
+            <div class="prompt-emoji" id="promptEmoji">💭</div>
+            <div class="prompt-text">
+              <div class="prompt-label">Today's Prompt</div>
+              <div class="prompt-q" id="promptQuestion">Loading your prompt…</div>
+            </div>
+            <button class="prompt-refresh" onclick="refreshPrompt()" aria-label="Get new prompt">🔀 New</button>
+          </div>
+        </div>
+
+        <!-- Free write hint -->
+        <div id="freePanel" style="display:none">
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:12px">Write whatever's on your mind — no rules, no prompts. This is your space.</p>
+        </div>
+
+        <!-- AI Reflect panel -->
+        <div id="reflectPanel" style="display:none">
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:12px">Write about your day or how you feel, then let AI generate a thoughtful reflection for you.</p>
+        </div>
+
+        <!-- Mood tags -->
+        <div class="mood-tags" id="moodTagsRow" aria-label="Tag your emotional state" style="margin-bottom:10px">
+          <span style="font-size:.72rem;color:var(--text-muted);padding:5px 0;flex-shrink:0">Tag:</span>
+        </div>
+
+        <!-- Textarea -->
+        <textarea class="jnl-textarea" id="jnlTextarea" placeholder="Start writing…" aria-label="Journal entry text" rows="8"></textarea>
+
+        <!-- Toolbar -->
+        <div class="jnl-toolbar" style="margin-top:12px">
+          <span class="jnl-wordcount" id="jnlWordCount">0 words</span>
+          <button class="btn-secondary" onclick="exportJournal()" style="padding:9px 16px;font-size:.8rem;width:auto">📤 Export</button>
+          <button id="aiReflectBtn" onclick="generateAIReflection()" style="padding:9px 16px;font-size:.8rem;display:none;background:linear-gradient(135deg,rgba(124,106,247,.25),rgba(94,196,182,.15));border:1px solid rgba(124,106,247,.35);border-radius:10px;color:var(--text-primary);font-family:Inter,sans-serif;font-weight:600;cursor:pointer;transition:all .2s">✨ Get Reflection</button>
+          <button class="btn-primary" onclick="saveEntry()" style="width:auto;padding:9px 24px" id="jnlSaveBtn">💾 Save Entry</button>
+        </div>
+
+        <!-- AI Reflection output -->
+        <div id="aiReflectionWrap" style="margin-top:14px;display:none">
+          <div class="ai-reflection">
+            <div class="ai-label">🤖 AI Reflection</div>
+            <div id="aiReflectionText" class="ai-loading">Generating your reflection…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Past Entries ── -->
+      <div class="glass-card" aria-label="Past journal entries">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">📚</div>
+          <div style="flex:1">
+            <div class="card-title">Your Entries</div>
+            <div class="card-subtitle">Click an entry to read it in full</div>
+          </div>
+          <button onclick="clearAllJournal()" style="padding:6px 12px;background:rgba(240,107,139,.1);border:1px solid rgba(240,107,139,.25);border-radius:8px;cursor:pointer;font-size:.72rem;color:var(--accent-pink);font-family:Inter,sans-serif;white-space:nowrap">🗑️ Clear All</button>
+        </div>
+        <div class="jnl-search">
+          <input type="search" id="jnlSearch" placeholder="🔍 Search entries…" aria-label="Search entries" oninput="renderEntries()"/>
+        </div>
+        <div class="jnl-entry-list" id="jnlEntryList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Entry Detail Overlay -->
+  <div class="jnl-detail-overlay" id="jnlDetailOverlay" role="dialog" aria-modal="true" aria-label="Journal entry detail">
+    <div class="jnl-detail-dialog">
+      <button class="jnl-detail-close" onclick="closeDetail()" aria-label="Close">✕</button>
+      <div id="jnlDetailContent"></div>
+    </div>
+  </div>
+
+  <button class="sos-float-btn" onclick="openSOS()" aria-label="Open helplines" id="sosFloatBtn">
+    <span class="sos-icon">🆘</span> Need Help?
+  </button>
+  <div class="sos-modal" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosModalTitle">
+    <div class="sos-dialog">
+      <button class="sos-close-btn" onclick="closeSOS()" aria-label="Close">✕</button>
+      <div class="sos-dialog-header"><div class="sos-dialog-icon">🆘</div><div><div class="sos-dialog-title" id="sosModalTitle">You are not alone.</div><div class="sos-dialog-subtitle">Free, confidential support — right now.</div></div></div>
+      <div class="sos-section-label">🏛️ Government Helplines</div>
+      <a href="tel:18005990019" class="sos-helpline priority"><div class="sos-helpline-emoji">📞</div><div class="sos-helpline-info"><div class="sos-helpline-name">KIRAN <span class="sos-priority-badge">Govt. of India</span></div><div class="sos-helpline-org">Toll-Free · 24/7 · 13 Languages</div></div><div class="sos-helpline-number">1800-599-0019</div></a>
+      <a href="tel:9152987821" class="sos-helpline"><div class="sos-helpline-emoji">📱</div><div class="sos-helpline-info"><div class="sos-helpline-name">iCall — TISS</div><div class="sos-helpline-org">Mon–Sat 8am–10pm</div></div><div class="sos-helpline-number">9152987821</div></a>
+      <p class="sos-modal-note">In immediate danger, call <strong>112</strong>.</p>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
+  <script>
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+  function openSOS(){document.getElementById('sosModal').classList.add('show');document.body.style.overflow='hidden';}
+  function closeSOS(){document.getElementById('sosModal').classList.remove('show');document.body.style.overflow='';}
+  document.getElementById('sosModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSOS();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSOS();closeDetail();}});
+
+  // ════════════════ JOURNAL STATE ════════════════
+  const JOURNAL_KEY = 'placida_journal';
+  let currentMode = 'guided';
+  let selectedTags = [];
+  let currentPromptIdx = 0;
+
+  const MOOD_TAGS = ['😊 Happy','😔 Sad','😰 Anxious','😤 Frustrated','🥱 Tired','😌 Calm','💪 Motivated','🤔 Confused','🥲 Overwhelmed','🌟 Grateful'];
+
+  const PROMPTS = [
+    { emoji:'💭', q:'What is one thing that happened today that you want to remember? How did it make you feel?' },
+    { emoji:'🌱', q:'What is one small thing you did today that you are proud of, even if no one else noticed?' },
+    { emoji:'😤', q:'Is there something that has been frustrating you lately? What would it feel like to let it go?' },
+    { emoji:'🤝', q:'Who made you feel supported recently? What did they do that meant something to you?' },
+    { emoji:'🌊', q:'Describe your current mental state like weather. What kind of day is it inside your mind right now?' },
+    { emoji:'🔦', q:'What is one fear or worry you have been carrying? Write it out completely — getting it out of your head is the first step.' },
+    { emoji:'🎯', q:'If you could change one thing about how your day went, what would it be and why?' },
+    { emoji:'💡', q:'What did you learn about yourself today — even something small or surprising?' },
+    { emoji:'🌟', q:'List three things, however small, that you are grateful for right now. How do they make you feel?' },
+    { emoji:'🛏️', q:'As you prepare to rest, what is one thing you want to release from today and not carry into tomorrow?' },
+    { emoji:'🧩', q:'Is there a problem or situation in your life right now that feels unsolvable? Write about it without trying to fix it — just describe it.' },
+    { emoji:'💌', q:'Write a short, compassionate message to yourself — as if you were writing to your best friend going through what you are going through.' },
+    { emoji:'🌅', q:'What does a perfect, peaceful day look like to you? Describe it in as much detail as you want.' },
+    { emoji:'🔄', q:'What patterns do you notice in your moods? Are there certain times, places, or people that consistently affect how you feel?' },
+    { emoji:'🏆', q:'What is one challenge you have overcome recently? What did it teach you about your own strength?' },
+  ];
+
+  // ════════════════ INIT ════════════════
+  document.addEventListener('DOMContentLoaded', () => {
+    // Date display
+    const dateEl = document.getElementById('jnlDate');
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    // Mood tags
+    renderMoodTags();
+    // Prompt
+    refreshPrompt(false);
+    // Entries
+    renderEntries();
+    updateEntryCount();
+    // Word count
+    document.getElementById('jnlTextarea').addEventListener('input', updateWordCount);
+  });
+
+  function renderMoodTags() {
+    const row = document.getElementById('moodTagsRow');
+    if (!row) return;
+    const span = row.querySelector('span');
+    row.innerHTML = '';
+    if (span) row.appendChild(span);
+    MOOD_TAGS.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.className = 'mood-tag' + (selectedTags.includes(tag) ? ' active' : '');
+      btn.textContent = tag;
+      btn.onclick = () => {
+        if (selectedTags.includes(tag)) selectedTags = selectedTags.filter(t => t !== tag);
+        else if (selectedTags.length < 3) selectedTags.push(tag);
+        else { showToast('Max 3 tags per entry'); return; }
+        renderMoodTags();
+      };
+      row.appendChild(btn);
+    });
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    ['guided','free','reflect'].forEach(m => {
+      document.getElementById(`tab${m.charAt(0).toUpperCase()+m.slice(1)}`).classList.toggle('active', m===mode);
+      document.getElementById(`tab${m.charAt(0).toUpperCase()+m.slice(1)}`).setAttribute('aria-selected', m===mode);
+      document.getElementById(m+'Panel').style.display = m===mode ? 'block' : 'none';
+    });
+    const aiBtn = document.getElementById('aiReflectBtn');
+    if (aiBtn) aiBtn.style.display = mode === 'reflect' ? 'inline-block' : 'none';
+    if (mode !== 'reflect') {
+      document.getElementById('aiReflectionWrap').style.display = 'none';
+    }
+    const ta = document.getElementById('jnlTextarea');
+    if (ta) ta.placeholder = mode === 'free' ? 'Write whatever comes to mind…' : mode === 'reflect' ? 'Describe your day or how you\'re feeling…' : 'Write your response to the prompt above…';
+  }
+
+  function refreshPrompt(animate=true) {
+    const prompts = getMoodAdaptedPrompts();
+    currentPromptIdx = Math.floor(Math.random() * prompts.length);
+    const p = prompts[currentPromptIdx];
+    const emoji = document.getElementById('promptEmoji');
+    const q = document.getElementById('promptQuestion');
+    if (animate && q) { q.style.opacity='0'; setTimeout(() => { emoji.textContent=p.emoji; q.textContent=p.q; q.style.opacity='1'; q.style.transition='opacity .4s'; }, 200); }
+    else { if(emoji) emoji.textContent=p.emoji; if(q) q.textContent=p.q; }
+  }
+
+  function getMoodAdaptedPrompts() {
+    // Check last logged mood to adapt prompts
+    try {
+      const moods = JSON.parse(localStorage.getItem('placida_moods') || '[]');
+      const last = moods[0];
+      if (last && last.score <= 2) {
+        // Low mood — more compassionate, gentle prompts
+        return PROMPTS.filter((_, i) => [5, 11, 3, 8, 9].includes(i)).concat(PROMPTS);
+      }
+      if (last && last.score >= 4) {
+        // High mood — growth/gratitude prompts first
+        return PROMPTS.filter((_, i) => [2, 8, 14, 1, 12].includes(i)).concat(PROMPTS);
+      }
+    } catch {}
+    return PROMPTS;
+  }
+
+  function updateWordCount() {
+    const ta = document.getElementById('jnlTextarea');
+    const wc = document.getElementById('jnlWordCount');
+    if (!ta || !wc) return;
+    const words = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+    wc.textContent = words + ' word' + (words !== 1 ? 's' : '');
+  }
+
+  // ════════════════ SAVE ════════════════
+  function saveEntry() {
+    const ta = document.getElementById('jnlTextarea');
+    if (!ta || !ta.value.trim()) { showToast('✍️ Write something first!'); return; }
+    if (ta.value.trim().length < 10) { showToast('Write a bit more before saving 📝'); return; }
+
+    const prompt = currentMode === 'guided' ? document.getElementById('promptQuestion').textContent : null;
+    const entry = {
+      id: Date.now(),
+      mode: currentMode,
+      text: ta.value.trim(),
+      prompt: prompt,
+      tags: [...selectedTags],
+      timestamp: new Date().toISOString(),
+      wordCount: ta.value.trim().split(/\s+/).length,
+    };
+
+    const entries = getEntries();
+    entries.unshift(entry);
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+
+    ta.value = '';
+    selectedTags = [];
+    renderMoodTags();
+    updateWordCount();
+    renderEntries();
+    updateEntryCount();
+    document.getElementById('aiReflectionWrap').style.display = 'none';
+    showToast('📓 Entry saved to your journal!');
+    if (currentMode === 'guided') refreshPrompt();
+  }
+
+  function getEntries() {
+    try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]'); } catch { return []; }
+  }
+
+  function updateEntryCount() {
+    const el = document.getElementById('jnlEntryCount');
+    const entries = getEntries();
+    if (el) el.textContent = entries.length + ' entr' + (entries.length !== 1 ? 'ies' : 'y');
+  }
+
+  // ════════════════ RENDER ENTRIES ════════════════
+  function renderEntries() {
+    const list = document.getElementById('jnlEntryList');
+    if (!list) return;
+    let entries = getEntries();
+    const q = (document.getElementById('jnlSearch')?.value || '').toLowerCase().trim();
+    if (q) entries = entries.filter(e => e.text.toLowerCase().includes(q) || (e.prompt||'').toLowerCase().includes(q) || (e.tags||[]).some(t => t.toLowerCase().includes(q)));
+
+    if (!entries.length) {
+      list.innerHTML = `<div class="jnl-empty"><div class="jnl-empty-emoji">${q ? '🔍' : '📓'}</div><p style="font-size:.88rem;line-height:1.6">${q ? 'No entries match your search.' : 'No entries yet.<br>Write your first one above!'}</p></div>`;
+      return;
+    }
+
+    list.innerHTML = entries.map(e => {
+      const date = new Date(e.timestamp).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+      const time = new Date(e.timestamp).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+      const preview = e.text.slice(0, 200);
+      return `
+        <div class="jnl-entry" onclick="openDetail(${e.id})" aria-label="Journal entry from ${date}">
+          <div class="jnl-entry-header">
+            <span class="jnl-entry-mode ${e.mode}">${e.mode === 'guided' ? '📌 Guided' : e.mode === 'free' ? '🖊️ Free Write' : '🤖 Reflect'}</span>
+            <span style="font-size:.72rem;color:var(--text-muted)">${e.wordCount} words</span>
+            <span class="jnl-entry-date">${date} · ${time}</span>
+          </div>
+          ${e.prompt ? `<div class="jnl-entry-prompt">"${e.prompt.slice(0,80)}${e.prompt.length>80?'…':''}"</div>` : ''}
+          <div class="jnl-entry-preview">${escapeHtml(preview)}${e.text.length>200?'…':''}</div>
+          ${e.tags && e.tags.length ? `<div class="jnl-entry-tags">${e.tags.map(t=>`<span class="jnl-tag-pill">${t}</span>`).join('')}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(text));
+    return d.innerHTML;
+  }
+
+  // ════════════════ DETAIL VIEW ════════════════
+  function openDetail(id) {
+    const entries = getEntries();
+    const e = entries.find(e => e.id === id);
+    if (!e) return;
+    const date = new Date(e.timestamp).toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const content = document.getElementById('jnlDetailContent');
+    if (content) content.innerHTML = `
+      <div style="margin-bottom:20px">
+        <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:8px">${date}</div>
+        ${e.prompt ? `<div style="font-size:.85rem;color:var(--accent-pink);font-style:italic;margin-bottom:16px;padding:10px 14px;background:rgba(240,107,139,.08);border-radius:10px;border-left:2px solid var(--accent-pink)">"${e.prompt}"</div>` : ''}
+        <div style="font-size:.95rem;color:var(--text-primary);line-height:1.9;white-space:pre-wrap">${escapeHtml(e.text)}</div>
+        ${e.tags && e.tags.length ? `<div class="jnl-entry-tags" style="margin-top:14px">${e.tags.map(t=>`<span class="jnl-tag-pill">${t}</span>`).join('')}</div>` : ''}
+      </div>
+      <button onclick="deleteEntry(${e.id})" class="jnl-delete-btn" style="margin-top:4px">🗑️ Delete Entry</button>`;
+    document.getElementById('jnlDetailOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetail() {
+    document.getElementById('jnlDetailOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('jnlDetailOverlay').addEventListener('click', e => { if(e.target === e.currentTarget) closeDetail(); });
+
+  function deleteEntry(id) {
+    if (!confirm('Delete this entry? This cannot be undone.')) return;
+    const entries = getEntries().filter(e => e.id !== id);
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+    closeDetail();
+    renderEntries();
+    updateEntryCount();
+    showToast('🗑️ Entry deleted');
+  }
+
+  function clearAllJournal() {
+    if (!confirm('Clear ALL journal entries? This cannot be undone.')) return;
+    localStorage.removeItem(JOURNAL_KEY);
+    renderEntries();
+    updateEntryCount();
+    showToast('🗑️ All entries cleared');
+  }
+
+  // ════════════════ EXPORT ════════════════
+  function exportJournal() {
+    const entries = getEntries();
+    if (!entries.length) { showToast('No entries to export yet!'); return; }
+    const text = entries.map(e => {
+      const date = new Date(e.timestamp).toLocaleString('en-IN');
+      return `📓 ${date}\n${e.prompt ? `Prompt: "${e.prompt}"\n` : ''}${e.tags?.length ? `Tags: ${e.tags.join(', ')}\n` : ''}\n${e.text}\n\n${'─'.repeat(50)}\n`;
+    }).join('\n');
+    const blob = new Blob([`PLACIDA — My Wellness Journal\nExported: ${new Date().toLocaleString('en-IN')}\n${'═'.repeat(50)}\n\n` + text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `placida-journal-${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    showToast('📤 Journal exported!');
+  }
+
+  // ════════════════ AI REFLECTION ════════════════
+  async function generateAIReflection() {
+    const ta = document.getElementById('jnlTextarea');
+    if (!ta || !ta.value.trim()) { showToast('✍️ Write something first so I can reflect on it!'); return; }
+    if (ta.value.trim().length < 30) { showToast('Write a bit more for a meaningful reflection.'); return; }
+
+    const wrap = document.getElementById('aiReflectionWrap');
+    const output = document.getElementById('aiReflectionText');
+    wrap.style.display = 'block';
+    output.innerHTML = '<span class="ai-loading">Generating your reflection…<span class="ai-cursor"></span></span>';
+
+    const GEMINI_KEY = 'AIzaSyB4oRRi1gNFEQz6LRJ2lIOFMkCEFCQ6y_4';
+    const prompt = `You are a compassionate wellness journaling coach. The user wrote this journal entry:\n\n"${ta.value.trim()}"\n\nWrite a warm, thoughtful, 3-4 sentence reflection that:\n1. Validates what they shared without being dismissive\n2. Points out a strength or insight you notice in their writing\n3. Offers one gentle, actionable thought to carry forward\n4. Ends with an encouraging question to prompt further reflection\n\nKeep it personal, warm, and avoid generic advice. Write as if speaking directly to them.`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (text) {
+        output.innerHTML = '';
+        // Typewriter effect
+        let i = 0;
+        const interval = setInterval(() => {
+          output.textContent = text.slice(0, i);
+          i += 3;
+          if (i > text.length) { output.textContent = text; clearInterval(interval); }
+        }, 20);
+      } else {
+        output.textContent = 'Thank you for sharing. Your willingness to write shows self-awareness and courage. Take a moment to notice how you feel after putting these thoughts on paper.';
+      }
+    } catch {
+      output.textContent = 'Thank you for sharing. Putting your thoughts into words is already a powerful act of self-care. Notice how it feels to have expressed this.';
+    }
+  }
+  </script>
+</body>
+</html>

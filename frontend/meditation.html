@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Placida Meditate — Guided meditation sessions, ASMR ambient sounds, and mindfulness exercises for students."/>
+  <meta property="og:title" content="Meditate — Placida"/>
+  <meta property="og:description" content="Guided meditation, ASMR ambient sounds, and mindfulness exercises."/>
+  <meta property="og:type" content="website"/>
+  <title>Meditate — Placida</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-512.png"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <style>
+    /* ── Meditation Page ── */
+    .med-hero{text-align:center;padding:52px 24px 28px;animation:fadeInUp .7s ease both}
+    .med-hero h1{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:800;letter-spacing:-1.2px;margin-bottom:12px;background:linear-gradient(135deg,#f0f0ff 0%,var(--accent-teal) 55%,var(--accent-purple) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 6s ease infinite}
+    .med-hero p{color:var(--text-muted);font-size:.95rem;max-width:440px;margin:0 auto;line-height:1.7}
+    .med-layout{max-width:960px;margin:0 auto;padding:0 24px 80px;display:flex;flex-direction:column;gap:22px;animation:fadeInUp .8s ease .1s both}
+
+    /* ── Session Picker ── */
+    .session-tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:4px}
+    .session-tab{padding:9px 20px;border-radius:100px;border:1px solid var(--border-glass);background:rgba(255,255,255,.04);font-family:Inter,sans-serif;font-size:.82rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all var(--transition)}
+    .session-tab:hover,.session-tab.active{background:linear-gradient(135deg,rgba(124,106,247,.2),rgba(94,196,182,.15));border-color:rgba(124,106,247,.4);color:var(--text-primary)}
+
+    /* ── Meditation Timer ── */
+    .med-timer-wrap{display:flex;flex-direction:column;align-items:center;gap:20px;padding:32px 20px}
+    .med-orb{width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 38% 35%,rgba(124,106,247,.85),rgba(94,196,182,.5));box-shadow:0 0 60px rgba(124,106,247,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:transform 1s ease,box-shadow 1s ease;position:relative}
+    .med-orb.pulsing{animation:medPulse 4s ease-in-out infinite}
+    @keyframes medPulse{0%,100%{transform:scale(1);box-shadow:0 0 60px rgba(124,106,247,.45)}50%{transform:scale(1.1);box-shadow:0 0 90px rgba(94,196,182,.6)}}
+    .med-timer-display{font-size:2rem;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:2px}
+    .med-phase-label{font-size:.78rem;color:rgba(255,255,255,.75);letter-spacing:1px;font-weight:600;text-transform:uppercase}
+    .med-session-name{font-size:.9rem;color:var(--text-muted);font-weight:500}
+    .med-guide-text{font-size:1.05rem;color:var(--text-soft);text-align:center;min-height:30px;transition:all .5s ease;font-style:italic;max-width:400px}
+    .med-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .med-btn{padding:12px 28px;border-radius:12px;border:none;font-family:Inter,sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .25s ease}
+    .med-btn-primary{background:linear-gradient(135deg,var(--accent-purple),#9b6af7);color:#fff}
+    .med-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,106,247,.4)}
+    .med-btn-secondary{background:rgba(255,255,255,.07);border:1px solid var(--border-glass);color:var(--text-soft)}
+    .med-btn-secondary:hover{background:rgba(255,255,255,.12);color:var(--text-primary)}
+    .med-progress{width:100%;max-width:320px;height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+    .med-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-teal));border-radius:100px;transition:width .5s linear}
+    .med-completed-msg{display:none;flex-direction:column;align-items:center;gap:8px;text-align:center}
+    .med-completed-msg.show{display:flex}
+    .med-completed-emoji{font-size:3rem;animation:fadeInUp .5s ease both}
+    .med-completed-msg h3{font-size:1.2rem;font-weight:700;color:var(--text-primary)}
+    .med-completed-msg p{font-size:.88rem;color:var(--text-muted)}
+
+    /* ── Session Cards ── */
+    .sessions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .session-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:18px;padding:22px;cursor:pointer;transition:all var(--transition);display:flex;align-items:flex-start;gap:14px}
+    .session-card:hover{transform:translateY(-3px);background:var(--bg-card-hover);box-shadow:var(--shadow-card)}
+    .session-card.selected{border-color:rgba(124,106,247,.5);background:rgba(124,106,247,.08)}
+    .sc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .sc-icon.purple{background:rgba(124,106,247,.2)}
+    .sc-icon.teal{background:rgba(94,196,182,.2)}
+    .sc-icon.pink{background:rgba(240,107,139,.2)}
+    .sc-info{}
+    .sc-title{font-size:.92rem;font-weight:700;color:var(--text-primary);margin-bottom:3px}
+    .sc-desc{font-size:.75rem;color:var(--text-muted);line-height:1.5}
+    .sc-dur{font-size:.68rem;font-weight:700;color:var(--accent-purple);margin-top:6px;letter-spacing:.5px}
+
+    /* ── ASMR Sound Board ── */
+    .asmr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+    .asmr-tile{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;transition:all var(--transition);display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;overflow:hidden}
+    .asmr-tile::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-purple),var(--accent-teal));opacity:0;transition:opacity .3s ease}
+    .asmr-tile.playing::before{opacity:.12}
+    .asmr-tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-card)}
+    .asmr-tile.playing{border-color:rgba(94,196,182,.5);box-shadow:0 0 20px rgba(94,196,182,.2)}
+    .asmr-icon{font-size:2rem;position:relative;z-index:1}
+    .asmr-name{font-size:.75rem;font-weight:700;color:var(--text-primary);position:relative;z-index:1}
+    .asmr-vol{width:80%;height:3px;background:rgba(255,255,255,.12);border-radius:100px;position:relative;z-index:1;cursor:pointer;appearance:none;-webkit-appearance:none;margin-top:4px;display:none}
+    .asmr-tile.playing .asmr-vol{display:block}
+    .asmr-playing-dot{width:8px;height:8px;background:var(--accent-teal);border-radius:50%;position:absolute;top:10px;right:10px;animation:pulse 1.5s ease infinite;display:none}
+    .asmr-tile.playing .asmr-playing-dot{display:block}
+    .asmr-mix-info{font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:4px}
+
+    /* ── Body Scan ── */
+    .bodyscan-wrap{display:flex;flex-direction:column;gap:14px}
+    .bs-step{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid var(--border-glass);transition:all .4s ease}
+    .bs-step.active{background:rgba(94,196,182,.1);border-color:rgba(94,196,182,.3);box-shadow:0 0 20px rgba(94,196,182,.08)}
+    .bs-step.done{background:rgba(124,106,247,.08);border-color:rgba(124,106,247,.2)}
+    .bs-body{font-size:1.5rem;flex-shrink:0}
+    .bs-text{flex:1}
+    .bs-part{font-size:.88rem;font-weight:700;color:var(--text-primary)}
+    .bs-instruction{font-size:.75rem;color:var(--text-muted);line-height:1.5;margin-top:2px}
+    .bs-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-glass);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;transition:all .3s}
+    .bs-step.done .bs-check{background:rgba(124,106,247,.3);border-color:var(--accent-purple);color:var(--text-primary)}
+
+    @media(max-width:600px){.sessions-grid{grid-template-columns:1fr}.asmr-grid{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html" class="active" aria-current="page">Meditate</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+      <li><a href="relax.html">Relax</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+    <button class="btn-logout" onclick="signOut()" aria-label="Logout">⏻ Logout</button>
+  </nav>
+
+  <main class="page-wrapper">
+    <section class="med-hero" aria-labelledby="med-title">
+      <div class="hero-badge">🧘 Mindfulness Studio</div>
+      <h1 id="med-title">Find Your<br>Inner Calm</h1>
+      <p>Guided meditations, ASMR soundscapes, and body scan exercises — all designed for students under pressure.</p>
+    </section>
+
+    <div class="med-layout">
+
+      <!-- ── Guided Meditation Timer ── -->
+      <div class="glass-card" aria-label="Guided meditation timer">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">🧘</div>
+          <div>
+            <div class="card-title">Guided Meditation</div>
+            <div class="card-subtitle">Choose a session and follow the visual guide</div>
+          </div>
+        </div>
+
+        <!-- Session chooser -->
+        <div class="sessions-grid" id="sessionsGrid" style="margin-bottom:24px">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Timer interface -->
+        <div class="med-timer-wrap" id="meditationTimerWrap">
+          <div class="med-orb" id="medOrb" onclick="toggleMeditation()" aria-label="Meditation orb — tap to start">
+            <div class="med-timer-display" id="medTimerDisplay">5:00</div>
+            <div class="med-phase-label" id="medPhaseLabel">TAP TO BEGIN</div>
+          </div>
+          <div class="med-session-name" id="medSessionName">5-Minute Calm</div>
+          <div class="med-guide-text" id="medGuideText">Press the orb to begin your meditation session.</div>
+          <div class="med-progress" aria-label="Session progress">
+            <div class="med-progress-bar" id="medProgressBar" style="width:0%"></div>
+          </div>
+          <div class="med-actions">
+            <button class="med-btn med-btn-primary" id="medStartBtn" onclick="toggleMeditation()">▶ Start Session</button>
+            <button class="med-btn med-btn-secondary" onclick="resetMeditation()">↺ Reset</button>
+          </div>
+
+          <!-- Completion message -->
+          <div class="med-completed-msg" id="medCompletedMsg" aria-live="polite">
+            <div class="med-completed-emoji">🌟</div>
+            <h3>Session Complete!</h3>
+            <p>Well done. Take a moment to notice how you feel.</p>
+            <button class="med-btn med-btn-primary" onclick="resetMeditation()" style="margin-top:8px">Start Another</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ASMR Soundscape ── -->
+      <div class="glass-card" aria-label="ASMR ambient sounds">
+        <div class="card-header">
+          <div class="card-icon teal" aria-hidden="true">🎧</div>
+          <div>
+            <div class="card-title">ASMR Soundscapes</div>
+            <div class="card-subtitle">Mix ambient sounds to create your perfect calm environment</div>
+          </div>
+        </div>
+        <div class="asmr-grid" id="asmrGrid" role="group" aria-label="Ambient sound tiles">
+          <!-- Rendered by JS -->
+        </div>
+        <div class="asmr-mix-info" id="asmrInfo">🔇 All sounds off — tap any tile to play</div>
+      </div>
+
+      <!-- ── Body Scan ── -->
+      <div class="glass-card" aria-label="Body scan exercise">
+        <div class="card-header">
+          <div class="card-icon pink" aria-hidden="true">✨</div>
+          <div>
+            <div class="card-title">5-Minute Body Scan</div>
+            <div class="card-subtitle">Bring awareness to each part of your body to release tension</div>
+          </div>
+        </div>
+        <div class="bodyscan-wrap" id="bodyScanWrap">
+          <!-- Rendered by JS -->
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="med-btn med-btn-primary" onclick="startBodyScan()" id="bsStartBtn">▶ Start Body Scan</button>
+          <button class="med-btn med-btn-secondary" onclick="resetBodyScan()">↺ Reset</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="relax.html">Relax</a></li>
+    </ul>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <button class="sos-float-btn" onclick="openSOS()" aria-label="Open helplines" id="sosFloatBtn">
+    <span class="sos-icon">🆘</span> Need Help?
+  </button>
+  <div class="sos-modal" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosModalTitle">
+    <div class="sos-dialog">
+      <button class="sos-close-btn" onclick="closeSOS()" aria-label="Close">✕</button>
+      <div class="sos-dialog-header"><div class="sos-dialog-icon">🆘</div><div><div class="sos-dialog-title" id="sosModalTitle">You are not alone.</div><div class="sos-dialog-subtitle">Free, confidential support — right now.</div></div></div>
+      <div class="sos-section-label">🏛️ Government Helplines</div>
+      <a href="tel:18005990019" class="sos-helpline priority"><div class="sos-helpline-emoji">📞</div><div class="sos-helpline-info"><div class="sos-helpline-name">KIRAN <span class="sos-priority-badge">Govt. of India</span></div><div class="sos-helpline-org">Toll-Free · 24/7 · 13 Languages</div></div><div class="sos-helpline-number">1800-599-0019</div></a>
+      <a href="tel:9152987821" class="sos-helpline"><div class="sos-helpline-emoji">📱</div><div class="sos-helpline-info"><div class="sos-helpline-name">iCall — TISS</div><div class="sos-helpline-org">Mon–Sat 8am–10pm</div></div><div class="sos-helpline-number">9152987821</div></a>
+      <a href="tel:18602662345" class="sos-helpline"><div class="sos-helpline-emoji">💙</div><div class="sos-helpline-info"><div class="sos-helpline-name">Vandrevala Foundation</div><div class="sos-helpline-org">24/7 · Confidential</div></div><div class="sos-helpline-number">1860-2662-345</div></a>
+      <p class="sos-modal-note">In immediate danger, call <strong>112</strong>.</p>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
+  <script>
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+  function openSOS(){document.getElementById('sosModal').classList.add('show');document.body.style.overflow='hidden';}
+  function closeSOS(){document.getElementById('sosModal').classList.remove('show');document.body.style.overflow='';}
+  document.getElementById('sosModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSOS();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSOS();});
+
+  // ════════════════════════════════════════
+  // GUIDED MEDITATION SESSIONS
+  // ════════════════════════════════════════
+  const SESSIONS = [
+    {
+      id: 'stress', icon: '🌿', color: 'teal', title: '3-Min Stress Relief', duration: 180,
+      desc: 'Quick reset for anxious moments',
+      phases: [
+        {dur:30, label:'SETTLE IN', guide:'Sit comfortably. Close your eyes. Feel where your body touches the seat.'},
+        {dur:60, label:'BREATHE',   guide:'Breathe in for 4… hold for 4… out for 4. Let each exhale soften your shoulders.'},
+        {dur:60, label:'RELEASE',   guide:'With each exhale, imagine tension leaving your body like smoke dissolving into air.'},
+        {dur:30, label:'RETURN',    guide:'Slowly bring your awareness back. Wiggle your fingers. Open your eyes when ready.'},
+      ]
+    },
+    {
+      id: 'calm', icon: '🧘', color: 'purple', title: '5-Min Calm', duration: 300,
+      desc: 'Daily mindfulness practice',
+      phases: [
+        {dur:30, label:'ARRIVE',    guide:'Take three deep breaths. With each exhale, let go of wherever you just were.'},
+        {dur:90, label:'ANCHOR',    guide:'Focus on the sensation of breathing. Notice the rise of your chest, the fall. When your mind wanders, gently return.'},
+        {dur:90, label:'OBSERVE',   guide:'Notice any thoughts without chasing them. Let them pass like clouds across a clear sky.'},
+        {dur:60, label:'GRATITUDE', guide:'Bring to mind one thing you\'re grateful for. Let that feeling expand in your chest.'},
+        {dur:30, label:'CLOSE',     guide:'Gently return. Notice the sounds around you. Carry this calm into your next moment.'},
+      ]
+    },
+    {
+      id: 'sleep', icon: '🌙', color: 'purple', title: '10-Min Deep Rest', duration: 600,
+      desc: 'Unwind before sleep',
+      phases: [
+        {dur:60,  label:'LET GO',   guide:'Lie down or sit comfortably. Permission to do nothing. You have nowhere to be right now.'},
+        {dur:120, label:'BODY',     guide:'Scan from head to toe. Anywhere you feel tightness — breathe into it, and on the exhale, let it soften.'},
+        {dur:180, label:'STILLNESS',guide:'Rest in the stillness. Your breath is a gentle anchor. Thoughts will arise — let them drift away without following them.'},
+        {dur:120, label:'DEEPEN',   guide:'Imagine a warm, heavy calm spreading from your head… down through your neck… shoulders… arms… torso… legs.'},
+        {dur:120, label:'REST',     guide:'You are safe. You are calm. Your only task is to rest. Stay here as long as you need.'},
+      ]
+    },
+    {
+      id: 'focus', icon: '🎯', color: 'pink', title: '5-Min Focus', duration: 300,
+      desc: 'Prime your mind for study',
+      phases: [
+        {dur:30,  label:'CLEAR',    guide:'Take 3 sharp breaths. Exhale fully each time. Clear the mental clutter.'},
+        {dur:120, label:'CENTER',   guide:'Set a clear intention: what is the ONE thing you want to accomplish? Hold it in mind.'},
+        {dur:120, label:'SHARPEN',  guide:'Breathe steadily. Imagine your mind as a clear, still lake — perfectly reflective, ready.'},
+        {dur:30,  label:'ACTIVATE', guide:'Take one powerful breath in. Hold. Release slowly. You are ready. Open your eyes.'},
+      ]
+    },
+  ];
+
+  let activeSession = SESSIONS[1]; // default 5-min calm
+  let medRunning = false;
+  let medInterval = null;
+  let medSeconds = 0;
+  let medTotalSeconds = 0;
+  let medPhaseTimer = 0;
+  let medCurrentPhase = 0;
+
+  function renderSessions() {
+    const grid = document.getElementById('sessionsGrid');
+    if (!grid) return;
+    grid.innerHTML = SESSIONS.map(s => `
+      <div class="session-card ${s.id === activeSession.id ? 'selected' : ''}" onclick="selectSession('${s.id}')" aria-label="${s.title}">
+        <div class="sc-icon ${s.color}">${s.icon}</div>
+        <div class="sc-info">
+          <div class="sc-title">${s.title}</div>
+          <div class="sc-desc">${s.desc}</div>
+          <div class="sc-dur">${Math.floor(s.duration/60)} MIN</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function selectSession(id) {
+    if (medRunning) { showToast('⏸ Stop current session first'); return; }
+    activeSession = SESSIONS.find(s => s.id === id);
+    renderSessions();
+    resetMeditation();
+    document.getElementById('medSessionName').textContent = activeSession.title;
+  }
+
+  function fmtTime(s) {
+    const m = Math.floor(s / 60);
+    return `${m}:${String(s % 60).padStart(2,'0')}`;
+  }
+
+  function toggleMeditation() {
+    if (medRunning) {
+      pauseMeditation();
+    } else {
+      startMeditation();
+    }
+  }
+
+  function startMeditation() {
+    if (medSeconds === 0) {
+      medSeconds = activeSession.duration;
+      medTotalSeconds = activeSession.duration;
+      medCurrentPhase = 0;
+      medPhaseTimer = activeSession.phases[0].dur;
+    }
+    medRunning = true;
+    document.getElementById('medOrb').classList.add('pulsing');
+    document.getElementById('medStartBtn').textContent = '⏸ Pause';
+    updateMedUI();
+    medInterval = setInterval(() => {
+      medSeconds--;
+      medPhaseTimer--;
+      if (medPhaseTimer <= 0 && medCurrentPhase < activeSession.phases.length - 1) {
+        medCurrentPhase++;
+        medPhaseTimer = activeSession.phases[medCurrentPhase].dur;
+      }
+      updateMedUI();
+      if (medSeconds <= 0) completeMeditation();
+    }, 1000);
+  }
+
+  function pauseMeditation() {
+    clearInterval(medInterval);
+    medRunning = false;
+    document.getElementById('medOrb').classList.remove('pulsing');
+    document.getElementById('medStartBtn').textContent = '▶ Resume';
+  }
+
+  function updateMedUI() {
+    const phase = activeSession.phases[medCurrentPhase];
+    document.getElementById('medTimerDisplay').textContent = fmtTime(medSeconds);
+    document.getElementById('medPhaseLabel').textContent = phase.label;
+    document.getElementById('medGuideText').textContent = phase.guide;
+    const pct = ((medTotalSeconds - medSeconds) / medTotalSeconds) * 100;
+    document.getElementById('medProgressBar').style.width = pct + '%';
+  }
+
+  function completeMeditation() {
+    clearInterval(medInterval);
+    medRunning = false;
+    medSeconds = 0;
+    document.getElementById('medOrb').classList.remove('pulsing');
+    document.getElementById('medOrb').style.background = 'radial-gradient(circle at 38% 35%,rgba(94,196,182,.9),rgba(124,106,247,.6))';
+    document.getElementById('medTimerDisplay').textContent = '✓';
+    document.getElementById('medPhaseLabel').textContent = 'COMPLETE';
+    document.getElementById('medProgressBar').style.width = '100%';
+    document.getElementById('medGuideText').textContent = '';
+    document.getElementById('medStartBtn').textContent = '▶ Start Session';
+    document.getElementById('medCompletedMsg').classList.add('show');
+    // Save to localStorage
+    const stats = JSON.parse(localStorage.getItem('placida_meditation') || '[]');
+    stats.push({ session: activeSession.id, duration: activeSession.duration, timestamp: new Date().toISOString() });
+    localStorage.setItem('placida_meditation', JSON.stringify(stats));
+    showToast('🧘 Session complete! Great job.');
+  }
+
+  function resetMeditation() {
+    clearInterval(medInterval);
+    medRunning = false;
+    medSeconds = 0;
+    medCurrentPhase = 0;
+    const orb = document.getElementById('medOrb');
+    if (orb) {
+      orb.classList.remove('pulsing');
+      orb.style.background = '';
+    }
+    document.getElementById('medTimerDisplay').textContent = fmtTime(activeSession.duration);
+    document.getElementById('medPhaseLabel').textContent = 'TAP TO BEGIN';
+    document.getElementById('medGuideText').textContent = 'Press the orb to begin your meditation session.';
+    document.getElementById('medProgressBar').style.width = '0%';
+    document.getElementById('medStartBtn').textContent = '▶ Start Session';
+    document.getElementById('medCompletedMsg').classList.remove('show');
+  }
+
+  renderSessions();
+  document.getElementById('medSessionName').textContent = activeSession.title;
+
+  // ════════════════════════════════════════
+  // ASMR SOUNDSCAPE (Web Audio API)
+  // ════════════════════════════════════════
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  const activeSounds = {};
+
+  const SOUNDS = [
+    { id:'rain',    emoji:'🌧️', name:'Rain',       color:'rgba(94,196,182,.25)' },
+    { id:'ocean',   emoji:'🌊', name:'Ocean',      color:'rgba(94,196,182,.18)' },
+    { id:'forest',  emoji:'🌲', name:'Forest',     color:'rgba(90,210,120,.2)'  },
+    { id:'fire',    emoji:'🔥', name:'Campfire',   color:'rgba(240,140,80,.2)'  },
+    { id:'wind',    emoji:'💨', name:'Wind',       color:'rgba(180,180,220,.18)'},
+    { id:'thunder', emoji:'⛈️', name:'Thunder',    color:'rgba(124,106,247,.2)' },
+    { id:'birds',   emoji:'🐦', name:'Birds',      color:'rgba(180,230,100,.18)'},
+    { id:'stream',  emoji:'💧', name:'Stream',     color:'rgba(94,196,182,.22)' },
+    { id:'white',   emoji:'〰️', name:'White Noise',color:'rgba(200,200,220,.15)'},
+  ];
+
+  function createNoiseNode(type, ctx) {
+    const bufferSize = ctx.sampleRate * 4;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i = 0; i < bufferSize; i++) {
+      const w = Math.random() * 2 - 1;
+      if (type === 'rain' || type === 'stream') {
+        // Filtered noise for rain
+        b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759;
+        b2=.96900*b2+w*.1538520; b3=.86650*b3+w*.3104856;
+        b4=.55000*b4+w*.5329522; b5=-.7616*b5-w*.0168980;
+        data[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*0.11;
+        b6=w*.115926;
+      } else if (type === 'white') {
+        data[i] = w * 0.3;
+      } else if (type === 'ocean') {
+        b0=.95*b0+w*.05; b1=.90*b1+w*.07; b2=.85*b2+w*.08;
+        data[i] = (b0+b1+b2) * 0.15;
+      } else if (type === 'wind') {
+        b0=.98*b0+w*.025; b1=.96*b1+w*.03;
+        data[i] = (b0+b1) * 0.3 * (0.8 + 0.2*Math.sin(i/3000));
+      } else if (type === 'fire') {
+        b0=.97*b0+w*.04; b1=.93*b1+w*.06;
+        data[i] = (b0+b1) * 0.18 * (0.7 + 0.3*Math.random());
+      } else {
+        b0=.99*b0+w*.03; b1=.95*b1+w*.05;
+        data[i] = (b0+b1+w*.02)*0.25;
+      }
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    return src;
+  }
+
+  function toggleSound(id) {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const tile = document.getElementById('asmr-' + id);
+    if (activeSounds[id]) {
+      activeSounds[id].gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+      setTimeout(() => { try { activeSounds[id].src.stop(); } catch {} delete activeSounds[id]; }, 600);
+      if (tile) tile.classList.remove('playing');
+    } else {
+      const src = createNoiseNode(id, audioCtx);
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = id === 'white' ? 'highshelf' : 'lowpass';
+      filter.frequency.value = id === 'birds' ? 4000 : id === 'thunder' ? 200 : 1800;
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.setTargetAtTime(0.35, audioCtx.currentTime, 0.8);
+      src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+      src.start();
+      activeSounds[id] = { src, gain, filter };
+      if (tile) tile.classList.add('playing');
+    }
+    updateASMRInfo();
+  }
+
+  function updateASMRInfo() {
+    const playing = SOUNDS.filter(s => activeSounds[s.id]).map(s => s.name);
+    const info = document.getElementById('asmrInfo');
+    if (info) {
+      info.textContent = playing.length
+        ? '🎵 Playing: ' + playing.join(' + ')
+        : '🔇 All sounds off — tap any tile to play';
+    }
+  }
+
+  function renderASMR() {
+    const grid = document.getElementById('asmrGrid');
+    if (!grid) return;
+    grid.innerHTML = SOUNDS.map(s => `
+      <div class="asmr-tile" id="asmr-${s.id}" onclick="toggleSound('${s.id}')" role="button" aria-label="Toggle ${s.name}" style="background:${s.color}">
+        <div class="asmr-playing-dot"></div>
+        <div class="asmr-icon">${s.emoji}</div>
+        <div class="asmr-name">${s.name}</div>
+      </div>`).join('');
+  }
+  renderASMR();
+
+  // ════════════════════════════════════════
+  // BODY SCAN
+  // ════════════════════════════════════════
+  const BODY_STEPS = [
+    { body:'👆', part:'Head & Scalp', instruction:'Bring your awareness to the top of your head. Notice any tension. Breathe into it, and let it soften on the exhale.' },
+    { body:'😌', part:'Face & Jaw',   instruction:'Relax your forehead. Unclench your jaw. Let your tongue rest on the floor of your mouth. Notice the space this creates.' },
+    { body:'🧣', part:'Neck & Shoulders', instruction:'Gently drop your shoulders away from your ears. Breathe into any tightness in your neck.' },
+    { body:'🤲', part:'Arms & Hands', instruction:'Feel the weight of your arms. Soften your hands. Notice the temperature of the air touching your skin.' },
+    { body:'🫁', part:'Chest & Lungs', instruction:'With each breath, feel your chest rise and fall. Notice the rhythm of your breathing without changing it.' },
+    { body:'🔄', part:'Belly & Core',  instruction:'Let your belly be soft. With each inhale, feel it gently expand. With each exhale, let go completely.' },
+    { body:'🦴', part:'Lower Back',    instruction:'If you carry tension in your lower back, breathe into that space. Imagine it opening and releasing with each exhale.' },
+    { body:'🦵', part:'Legs & Feet',   instruction:'Feel the weight of your legs. Relax your thighs, your calves. Feel the ground beneath your feet.' },
+    { body:'🌟', part:'Whole Body',    instruction:'Now bring awareness to your whole body as one. Notice the sense of calm that has settled over you. Sit with this feeling.' },
+  ];
+
+  let bsCurrentStep = -1;
+  let bsInterval = null;
+  let bsCompletedSteps = new Set();
+
+  function renderBodyScan() {
+    const wrap = document.getElementById('bodyScanWrap');
+    if (!wrap) return;
+    wrap.innerHTML = BODY_STEPS.map((s, i) => `
+      <div class="bs-step ${i < bsCurrentStep ? 'done' : i === bsCurrentStep ? 'active' : ''}" id="bs-step-${i}">
+        <div class="bs-body">${s.body}</div>
+        <div class="bs-text">
+          <div class="bs-part">${s.part}</div>
+          <div class="bs-instruction" style="${i === bsCurrentStep ? '' : 'display:none'}">${s.instruction}</div>
+        </div>
+        <div class="bs-check" id="bs-check-${i}">${i < bsCurrentStep ? '✓' : ''}</div>
+      </div>`).join('');
+  }
+
+  function startBodyScan() {
+    if (bsCurrentStep >= 0 && bsCurrentStep < BODY_STEPS.length) return; // already running
+    bsCurrentStep = 0;
+    renderBodyScan();
+    document.getElementById('bsStartBtn').textContent = '⏸ Running…';
+    bsInterval = setInterval(() => {
+      bsCurrentStep++;
+      if (bsCurrentStep >= BODY_STEPS.length) {
+        clearInterval(bsInterval);
+        bsCurrentStep = BODY_STEPS.length;
+        renderBodyScan();
+        document.getElementById('bsStartBtn').textContent = '✓ Complete!';
+        showToast('✨ Body scan complete! Notice how you feel.');
+        return;
+      }
+      renderBodyScan();
+      const nextStep = document.getElementById('bs-step-' + bsCurrentStep);
+      if (nextStep) nextStep.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }, 30000); // 30 seconds per step (~4.5 min total)
+    const currentStep = document.getElementById('bs-step-0');
+    if (currentStep) currentStep.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function resetBodyScan() {
+    clearInterval(bsInterval);
+    bsCurrentStep = -1;
+    renderBodyScan();
+    document.getElementById('bsStartBtn').textContent = '▶ Start Body Scan';
+  }
+
+  renderBodyScan();
+  </script>
+</body>
+</html>

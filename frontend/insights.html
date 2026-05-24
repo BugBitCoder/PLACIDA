@@ -276,8 +276,11 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
       <li><a href="chatbot.html">Chat</a></li>
       <li><a href="insights.html" class="active" aria-current="page">Insights</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html">Community</a></li>
       <li><a href="relax.html">Relax</a></li>
       <li><a href="feedback.html">Feedback</a></li>
     </ul>
@@ -393,6 +396,21 @@
       </div>
 
     </div><!-- /insights-layout -->
+
+      <!-- ── AI Pattern Analysis ── -->
+      <div style="max-width:900px;margin:0 auto;padding:0 24px 80px">
+        <div class="glass-card" aria-label="AI mood pattern analysis">
+          <div class="card-header">
+            <div class="card-icon purple" aria-hidden="true">🤖</div>
+            <div style="flex:1">
+              <div class="card-title">AI Pattern Analysis</div>
+              <div class="card-subtitle">Gemini AI interprets your 30-day mood journey</div>
+            </div>
+            <button onclick="generateAIInsight()" style="padding:8px 16px;background:linear-gradient(135deg,rgba(124,106,247,.25),rgba(94,196,182,.15));border:1px solid rgba(124,106,247,.35);border-radius:10px;color:var(--text-primary);font-family:Inter,sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap">✨ Refresh</button>
+          </div>
+          <div id="aiInsightCard" style="font-size:.85rem;color:var(--text-muted);font-style:italic">Generating your analysis…</div>
+        </div>
+      </div>
 
 
 

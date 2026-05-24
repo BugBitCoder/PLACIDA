@@ -32,8 +32,11 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
       <li><a href="chatbot.html">Chat</a></li>
       <li><a href="insights.html">Insights</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html">Community</a></li>
       <li><a href="relax.html">Relax</a></li>
       <li><a href="feedback.html" class="active" aria-current="page">Feedback</a></li>
     </ul>
@@ -238,7 +241,7 @@
     <!-- ── Thank You Card (shown after submit) ── -->
     <div id="thankYouCard" class="thank-you-card" style="display:none;" aria-live="polite">
       <div class="ty-emoji">🎉</div>
-      <h2>Thank you, Sahil!</h2>
+      <h2 id="thankYouHeading">Thank you!</h2>
       <p>Your feedback has been saved and will help us improve Placida for everyone. The team appreciates you taking the time.</p>
       <button class="btn-primary" onclick="resetForm()" style="max-width:240px;margin:0 auto;" aria-label="Submit another response">
         Submit Another
@@ -333,6 +336,24 @@
       }
     })();
 
+    // ── Get display name from session ──
+    function getUserDisplayName() {
+      // 1) Try cached name from localStorage
+      const cached = localStorage.getItem('placida_user_name');
+      if (cached && cached.trim()) return cached.trim().split(' ')[0];
+      // 2) Try Supabase session user metadata
+      try {
+        const session = JSON.parse(localStorage.getItem('sb-snmfdktkjggsszziexsz-auth-token') || '{}');
+        const meta = session?.user?.user_metadata;
+        if (meta?.full_name) return meta.full_name.split(' ')[0];
+        if (meta?.name) return meta.name.split(' ')[0];
+        if (meta?.display_name) return meta.display_name.split(' ')[0];
+        const email = session?.user?.email;
+        if (email) return email.split('@')[0];
+      } catch {}
+      return 'Friend';
+    }
+
     // ── Submit ──
     function submitFeedback() {
       // Validate at least 1 feature rated
@@ -357,14 +378,18 @@
       all.push(entry);
       localStorage.setItem('placida_feedback', JSON.stringify(all));
 
-      // Show thank you
+      // Show thank you with personalized name
+      const displayName = getUserDisplayName();
+      const heading = document.getElementById('thankYouHeading');
+      if (heading) heading.textContent = `Thank you, ${displayName}! 🌿`;
+
       document.getElementById('feedbackFormWrapper').style.display = 'none';
       const ty = document.getElementById('thankYouCard');
       ty.style.display = 'flex';
       setTimeout(() => ty.classList.add('ty-visible'), 10);
 
       loadPastFeedback();
-      showToast('✅ Feedback saved! Thank you 🌿');
+      showToast(`✅ Thank you, ${displayName}! Feedback saved 🌿`);
     }
 
     // ── Export as JSON ──

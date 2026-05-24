@@ -34,8 +34,11 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html" class="active" aria-current="page">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
       <li><a href="chatbot.html">Chat</a></li>
       <li><a href="insights.html">Insights</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html">Community</a></li>
       <li><a href="relax.html">Relax</a></li>
       <li><a href="feedback.html">Feedback</a></li>
     </ul>
@@ -145,16 +148,76 @@
             <div class="action-title">Chat</div>
             <div class="action-desc">AI companion</div>
           </a>
-          <a href="summary.html" id="journalQuickBtn" class="action-card" aria-label="Journaling prompts">
+          <a href="journal.html" id="journalQuickBtn" class="action-card" aria-label="Journaling prompts">
             <div class="action-icon">📓</div>
             <div class="action-title">Journal</div>
-            <div class="action-desc">Weekly summary</div>
+            <div class="action-desc">Guided prompts & free write</div>
+          </a>
+          <a href="meditation.html" class="action-card" aria-label="Meditation and ASMR">
+            <div class="action-icon">🧘</div>
+            <div class="action-title">Meditate</div>
+            <div class="action-desc">ASMR + guided sessions</div>
+          </a>
+          <a href="community.html" class="action-card" aria-label="Community">
+            <div class="action-icon">🌍</div>
+            <div class="action-title">Community</div>
+            <div class="action-desc">Affirmations & challenges</div>
+          </a>
+          <a href="relax.html" class="action-card" aria-label="Relax games">
+            <div class="action-icon">🎮</div>
+            <div class="action-title">Relax</div>
+            <div class="action-desc">Wellness games</div>
           </a>
         </div>
       </div>
 
-      <!-- Crisis Banner — full width -->
-      <div class="col-span-2" style="margin-top:-8px;"></div>
+      <!-- ── Wellness Recommendations ── -->
+      <div class="glass-card col-span-2" aria-label="Personalized wellness recommendations">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">🎯</div>
+          <div>
+            <div class="card-title">Recommended For You</div>
+            <div class="card-subtitle">Personalized based on your latest mood</div>
+          </div>
+        </div>
+        <div id="wellnessRecommendations">Loading…</div>
+      </div>
+
+      <!-- ── Streak Milestone ── -->
+      <div class="glass-card" aria-label="Streak milestones">
+        <div class="card-header">
+          <div class="card-icon pink" aria-hidden="true">🔥</div>
+          <div>
+            <div class="card-title">Streak & Milestones</div>
+            <div class="card-subtitle">Your consistency badges</div>
+          </div>
+        </div>
+        <div id="streakMilestone">Loading…</div>
+      </div>
+
+      <!-- ── Daily Quote ── -->
+      <div class="glass-card" aria-label="Daily motivational quote">
+        <div class="card-header">
+          <div class="card-icon teal" aria-hidden="true">💬</div>
+          <div>
+            <div class="card-title">Today's Thought</div>
+            <div class="card-subtitle">Refreshes daily</div>
+          </div>
+        </div>
+        <div id="dailyQuote">Loading…</div>
+      </div>
+
+      <!-- ── Reminder Panel ── -->
+      <div class="glass-card col-span-2" aria-label="Daily reminder settings">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">🔔</div>
+          <div>
+            <div class="card-title">Daily Reminder</div>
+            <div class="card-subtitle">Never miss a check-in</div>
+          </div>
+        </div>
+        <div id="reminderPanel">Loading…</div>
+      </div>
 
     </section>
   </main>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="Placida Community — Anonymous wellness wall, daily challenges, and peer support for students."/>
+  <title>Community — Placida</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-512.png"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <style>
+    .comm-hero{text-align:center;padding:52px 24px 28px;animation:fadeInUp .7s ease both}
+    .comm-hero h1{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:800;letter-spacing:-1.2px;margin-bottom:12px;background:linear-gradient(135deg,#f0f0ff 0%,var(--accent-teal) 50%,var(--accent-purple) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 6s ease infinite}
+    .comm-hero p{color:var(--text-muted);font-size:.95rem;max-width:440px;margin:0 auto;line-height:1.7}
+    .comm-layout{max-width:900px;margin:0 auto;padding:0 24px 100px;display:grid;grid-template-columns:1fr 1fr;gap:22px;animation:fadeInUp .8s ease .1s both}
+    .comm-full{grid-column:1/-1}
+    @media(max-width:680px){.comm-layout{grid-template-columns:1fr}.comm-full{grid-column:1}}
+
+    /* Anonymous Mood Poll */
+    .mood-poll-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .poll-option{flex:1;min-width:70px;padding:12px 6px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04);cursor:pointer;text-align:center;transition:all .2s;font-family:Inter,sans-serif}
+    .poll-option:hover{background:rgba(124,106,247,.12);border-color:rgba(124,106,247,.3)}
+    .poll-option.voted{background:rgba(124,106,247,.18);border-color:var(--accent-purple)}
+    .poll-emoji{font-size:1.8rem;display:block;margin-bottom:4px}
+    .poll-label{font-size:.62rem;font-weight:700;color:var(--text-muted);letter-spacing:.3px}
+    .poll-bar-wrap{margin-top:6px;height:4px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+    .poll-bar{height:100%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-teal));border-radius:100px;transition:width .8s cubic-bezier(.34,1.28,.64,1)}
+    .poll-pct{font-size:.6rem;color:var(--text-muted);margin-top:3px}
+    .poll-total{font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:10px}
+
+    /* Affirmation Wall */
+    .wall-compose{display:flex;gap:8px;margin-bottom:14px}
+    .wall-compose input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border-glass);border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:.85rem;color:var(--text-primary);outline:none;transition:border-color .25s}
+    .wall-compose input:focus{border-color:rgba(94,196,182,.4)}
+    .wall-compose input::placeholder{color:var(--text-muted)}
+    .wall-compose button{padding:10px 14px;background:linear-gradient(135deg,var(--accent-teal),#4adbc8);border:none;border-radius:10px;cursor:pointer;font-size:.9rem;color:#0d0f1a;font-weight:700;transition:all .2s;white-space:nowrap}
+    .wall-compose button:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(94,196,182,.35)}
+    .wall-messages{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+    .wall-msg{background:rgba(255,255,255,.04);border:1px solid var(--border-glass);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;animation:fadeInUp .3s ease both}
+    .wall-msg-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent-purple),var(--accent-teal));display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+    .wall-msg-body{flex:1}
+    .wall-msg-text{font-size:.85rem;color:var(--text-primary);line-height:1.5}
+    .wall-msg-meta{font-size:.68rem;color:var(--text-muted);margin-top:4px;display:flex;gap:8px;align-items:center}
+    .wall-msg-like{background:none;border:none;cursor:pointer;font-size:.78rem;color:var(--text-muted);padding:2px 6px;border-radius:6px;transition:all .2s;font-family:Inter,sans-serif}
+    .wall-msg-like:hover,.wall-msg-like.liked{color:var(--accent-pink);background:rgba(240,107,139,.1)}
+
+    /* Daily Challenge */
+    .challenge-card{background:linear-gradient(135deg,rgba(94,196,182,.12),rgba(124,106,247,.08));border:1px solid rgba(94,196,182,.25);border-radius:18px;padding:22px;text-align:center}
+    .challenge-icon{font-size:2.5rem;margin-bottom:10px}
+    .challenge-tag{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-teal);margin-bottom:8px}
+    .challenge-title{font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:8px}
+    .challenge-desc{font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:16px}
+    .challenge-done-btn{padding:10px 22px;border-radius:10px;border:none;font-family:Inter,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s}
+    .challenge-done-btn:not(.done){background:linear-gradient(135deg,var(--accent-teal),#4adbc8);color:#0d0f1a}
+    .challenge-done-btn.done{background:rgba(255,255,255,.06);border:1px solid var(--border-glass);color:var(--text-muted);cursor:default}
+    .challenge-progress{margin-top:14px}
+    .challenge-prog-bar-wrap{height:5px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin-top:6px}
+    .challenge-prog-bar{height:100%;background:linear-gradient(90deg,var(--accent-teal),var(--accent-purple));border-radius:100px;transition:width .8s cubic-bezier(.34,1.28,.64,1)}
+
+    /* Peer Quotes */
+    .quote-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:22px;text-align:center}
+    .quote-marks{font-size:2rem;color:rgba(124,106,247,.4);line-height:1;margin-bottom:8px}
+    .quote-text{font-size:.92rem;color:var(--text-primary);line-height:1.7;font-style:italic;margin-bottom:12px}
+    .quote-author{font-size:.72rem;color:var(--text-muted);font-weight:600}
+    .quote-nav{display:flex;gap:10px;justify-content:center;margin-top:14px}
+    .quote-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:all .2s;border:none;padding:0}
+    .quote-dot.active{background:var(--accent-purple);transform:scale(1.3)}
+
+    /* Wellness Tip */
+    .tip-card{background:linear-gradient(135deg,rgba(240,107,139,.1),rgba(124,106,247,.07));border:1px solid rgba(240,107,139,.22);border-radius:16px;padding:20px}
+    .tip-label{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-pink);margin-bottom:8px}
+    .tip-text{font-size:.88rem;color:var(--text-primary);line-height:1.6}
+    .tip-source{font-size:.7rem;color:var(--text-muted);margin-top:6px}
+  </style>
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
+      <li><a href="chatbot.html">Chat</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html" class="active" aria-current="page">Community</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+    <button class="btn-logout" onclick="signOut()" aria-label="Logout">⏻ Logout</button>
+  </nav>
+
+  <main class="page-wrapper">
+    <section class="comm-hero" aria-labelledby="comm-title">
+      <div class="hero-badge">🌍 Anonymous & Safe</div>
+      <h1 id="comm-title">You Are<br>Not Alone</h1>
+      <p>A judgment-free space to share positivity, complete wellness challenges, and feel the warmth of community — anonymously.</p>
+    </section>
+
+    <div class="comm-layout">
+
+      <!-- ── Anonymous Mood Poll (Full width) ── -->
+      <div class="glass-card comm-full" aria-label="Anonymous community mood poll">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">🗳️</div>
+          <div>
+            <div class="card-title">How Is Everyone Feeling Today?</div>
+            <div class="card-subtitle">Anonymous · Your vote helps the community understand each other</div>
+          </div>
+        </div>
+        <div class="mood-poll-grid" id="moodPollGrid" role="group" aria-label="Mood poll options">
+          <!-- Rendered by JS -->
+        </div>
+        <div class="poll-total" id="pollTotal"></div>
+      </div>
+
+      <!-- ── Today's Challenge ── -->
+      <div class="glass-card" aria-label="Daily wellness challenge">
+        <div class="card-header">
+          <div class="card-icon teal" aria-hidden="true">🎯</div>
+          <div>
+            <div class="card-title">Today's Challenge</div>
+            <div class="card-subtitle">A small act with a big impact</div>
+          </div>
+        </div>
+        <div class="challenge-card" id="challengeCard">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- ── Wellness Tip ── -->
+      <div class="glass-card" aria-label="Daily wellness tip">
+        <div class="card-header">
+          <div class="card-icon pink" aria-hidden="true">💡</div>
+          <div>
+            <div class="card-title">Science-Backed Tip</div>
+            <div class="card-subtitle">Refreshes daily</div>
+          </div>
+        </div>
+        <div class="tip-card" id="wellnessTip">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- ── Affirmation Wall (Full width) ── -->
+      <div class="glass-card comm-full" aria-label="Anonymous affirmation wall">
+        <div class="card-header">
+          <div class="card-icon teal" aria-hidden="true">💚</div>
+          <div>
+            <div class="card-title">Affirmation Wall</div>
+            <div class="card-subtitle">Share a kind thought anonymously — it might be exactly what someone needs</div>
+          </div>
+        </div>
+        <div class="wall-compose">
+          <input type="text" id="wallInput" placeholder="Send a positive message to the community… (max 120 chars)" maxlength="120" aria-label="Write an affirmation" onkeydown="if(event.key==='Enter')postAffirmation()"/>
+          <button onclick="postAffirmation()" aria-label="Post affirmation">💚 Share</button>
+        </div>
+        <div class="wall-messages" id="wallMessages" aria-live="polite">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- ── Peer Quotes Carousel (Full width) ── -->
+      <div class="glass-card comm-full" aria-label="Peer wellness quotes">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">💬</div>
+          <div>
+            <div class="card-title">Words That Help</div>
+            <div class="card-subtitle">From students, for students</div>
+          </div>
+        </div>
+        <div class="quote-card" id="quoteCard">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-brand">Made with 💜 by <strong>Sahil</strong> &amp; Team · © 2026 Placida</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <button class="sos-float-btn" onclick="openSOS()" aria-label="Open helplines" id="sosFloatBtn">
+    <span class="sos-icon">🆘</span> Need Help?
+  </button>
+  <div class="sos-modal" id="sosModal" role="dialog" aria-modal="true">
+    <div class="sos-dialog">
+      <button class="sos-close-btn" onclick="closeSOS()" aria-label="Close">✕</button>
+      <div class="sos-dialog-header"><div class="sos-dialog-icon">🆘</div><div><div class="sos-dialog-title">You are not alone.</div><div class="sos-dialog-subtitle">Free, confidential support — right now.</div></div></div>
+      <div class="sos-section-label">🏛️ Government Helplines</div>
+      <a href="tel:18005990019" class="sos-helpline priority"><div class="sos-helpline-emoji">📞</div><div class="sos-helpline-info"><div class="sos-helpline-name">KIRAN <span class="sos-priority-badge">Govt. of India</span></div><div class="sos-helpline-org">Toll-Free · 24/7 · 13 Languages</div></div><div class="sos-helpline-number">1800-599-0019</div></a>
+      <p class="sos-modal-note">In immediate danger, call <strong>112</strong>.</p>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
+  <script>
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+  function openSOS(){document.getElementById('sosModal').classList.add('show');document.body.style.overflow='hidden';}
+  function closeSOS(){document.getElementById('sosModal').classList.remove('show');document.body.style.overflow='';}
+  document.getElementById('sosModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSOS();});
+
+  // ════════════════ MOOD POLL ════════════════
+  const POLL_OPTS = [
+    {id:'great',  emoji:'😊', label:'Great',   color:'rgba(94,196,182,.3)'},
+    {id:'good',   emoji:'🙂', label:'Good',    color:'rgba(94,196,182,.2)'},
+    {id:'okay',   emoji:'😐', label:'Okay',    color:'rgba(124,106,247,.2)'},
+    {id:'low',    emoji:'😟', label:'Low',     color:'rgba(240,107,139,.2)'},
+    {id:'rough',  emoji:'😔', label:'Rough',   color:'rgba(240,107,139,.3)'},
+  ];
+
+  // Seeded with some starter votes so it looks active
+  const DEFAULT_VOTES = {great:42, good:61, okay:38, low:24, rough:15};
+
+  function getPollData() {
+    try {
+      const d = JSON.parse(localStorage.getItem('placida_community_poll') || 'null');
+      const today = new Date().toDateString();
+      if (d && d.date === today) return d;
+    } catch {}
+    return { date: new Date().toDateString(), votes: { ...DEFAULT_VOTES }, myVote: null };
+  }
+
+  function savePollData(d) { localStorage.setItem('placida_community_poll', JSON.stringify(d)); }
+
+  function renderPoll() {
+    const data = getPollData();
+    const total = Object.values(data.votes).reduce((a,b) => a+b, 0);
+    const grid = document.getElementById('moodPollGrid');
+    if (!grid) return;
+    grid.innerHTML = POLL_OPTS.map(o => {
+      const pct = total ? Math.round((data.votes[o.id]||0) / total * 100) : 0;
+      const voted = data.myVote === o.id;
+      return `
+        <div class="poll-option ${voted?'voted':''}" onclick="vote('${o.id}')" role="button" aria-label="Vote ${o.label}" style="${voted?`border-color:var(--accent-purple);background:rgba(124,106,247,.15)`:''}">
+          <span class="poll-emoji">${o.emoji}</span>
+          <div class="poll-label">${o.label}</div>
+          ${data.myVote ? `<div class="poll-bar-wrap"><div class="poll-bar" style="width:${pct}%"></div></div><div class="poll-pct">${pct}%</div>` : ''}
+        </div>`;
+    }).join('');
+    const totalEl = document.getElementById('pollTotal');
+    if (totalEl) totalEl.textContent = data.myVote ? `${total.toLocaleString()} responses today` : 'Tap to share how you feel today';
+  }
+
+  function vote(id) {
+    const data = getPollData();
+    if (data.myVote) { showToast('You already voted today 🗳️'); return; }
+    data.votes[id] = (data.votes[id]||0) + 1;
+    data.myVote = id;
+    savePollData(data);
+    renderPoll();
+    showToast('🗳️ Vote cast! Thanks for sharing.');
+  }
+
+  renderPoll();
+
+  // ════════════════ DAILY CHALLENGE ════════════════
+  const CHALLENGES = [
+    { icon:'📵', tag:'Digital Wellness', title:'30-Minute Screen Break', desc:'Put your phone away for 30 minutes. Go for a walk, make tea, or simply sit quietly. Notice how your mind feels without stimulation.', benefit:'Reduces cortisol by up to 15%' },
+    { icon:'💌', tag:'Connection', title:'Send One Kind Message', desc:'Text or tell someone specific thing you appreciate about them. It takes 30 seconds and the ripple effect lasts all day.', benefit:'Activates your own happiness circuits' },
+    { icon:'🥗', tag:'Physical Wellness', title:'Hydrate & Move', desc:'Drink 2 extra glasses of water today and take a 10-minute walk. Simple, but powerful for brain function and mood.', benefit:'Improves focus by up to 20%' },
+    { icon:'🌿', tag:'Mindfulness', title:'One-Minute Gratitude', desc:'Before your next meal, pause for 60 seconds and name 3 things — however small — that went okay today.', benefit:'Rewires brain for positivity over 21 days' },
+    { icon:'📖', tag:'Self-Care', title:'Read Something Joyful', desc:'Spend 15 minutes reading something you actually enjoy — not studying. A chapter, a blog, a comic. Your brain deserves rest.', benefit:'Reduces stress by up to 68%' },
+    { icon:'🎨', tag:'Creativity', title:'Draw or Doodle Freely', desc:'Spend 10 minutes drawing anything — no skill required. Doodling activates the parts of your brain that handle calm problem-solving.', benefit:'Boosts creative thinking by 29%' },
+    { icon:'🌙', tag:'Sleep Hygiene', title:'10-Minute Wind-Down', desc:'Tonight, spend 10 minutes before bed away from screens. Dim the lights, breathe slowly, or journal briefly. Watch your sleep quality improve.', benefit:'Improves sleep onset by 37%' },
+  ];
+
+  const TIPS = [
+    { tip:'Cold water on your face activates the dive reflex — slowing your heart rate and reducing anxiety almost instantly. Try it the next time you feel overwhelmed.', source:'Polyvagal Theory — Stephen Porges' },
+    { tip:'The 5-4-3-2-1 grounding technique (name 5 things you see, 4 you hear, 3 you can touch, 2 you smell, 1 you taste) brings you back to the present moment during anxiety attacks.', source:'Cognitive Behavioral Therapy' },
+    { tip:'Writing about a stressful event for 20 minutes, 3 days in a row, significantly reduces its emotional impact. The act of narrating creates distance from the experience.', source:'James Pennebaker, UT Austin' },
+    { tip:'Physical exercise produces BDNF — "Miracle-Gro for the brain" — which helps new neurons form and old ones survive stress. Even a 10-minute walk counts.', source:'Harvard Medical School' },
+    { tip:'Texting a friend during stress is nearly as effective as talking to them in person. Social connection — in any form — activates the parasympathetic nervous system.', source:'UCLA Social Cognitive Neuroscience Lab' },
+    { tip:'Your brain cannot distinguish between imagined and real gratitude. Mentally walking through a positive memory for 12 seconds shifts your neurochemistry.', source:'Rick Hanson, Hardwiring Happiness' },
+    { tip:'Humming activates the vagus nerve — the same nerve that controls your calm-down response. Hum a song for 2 minutes when anxious.', source:'Polyvagal Theory' },
+  ];
+
+  function getTodayChallenge() {
+    const dayIdx = Math.floor(Date.now() / 86400000) % CHALLENGES.length;
+    return CHALLENGES[dayIdx];
+  }
+
+  function getTodayTip() {
+    const dayIdx = Math.floor(Date.now() / 86400000) % TIPS.length;
+    return TIPS[dayIdx];
+  }
+
+  function renderChallenge() {
+    const c = getTodayChallenge();
+    const done = localStorage.getItem('placida_challenge_' + new Date().toDateString()) === 'done';
+    const card = document.getElementById('challengeCard');
+    if (!card) return;
+    // Progress — how many days completed
+    let streak = 0;
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(); d.setDate(d.getDate()-i);
+      if (localStorage.getItem('placida_challenge_' + d.toDateString()) === 'done') streak++;
+      else if (i > 0) break;
+    }
+    card.innerHTML = `
+      <div class="challenge-icon">${c.icon}</div>
+      <div class="challenge-tag">🎯 ${c.tag}</div>
+      <div class="challenge-title">${c.title}</div>
+      <div class="challenge-desc">${c.desc}</div>
+      <div style="font-size:.72rem;color:var(--accent-teal);margin-bottom:14px">💡 ${c.benefit}</div>
+      <button class="challenge-done-btn ${done?'done':''}" onclick="markChallengeDone()" id="challengeBtn" ${done?'disabled':''}>
+        ${done ? '✓ Completed Today!' : '✅ Mark Complete'}
+      </button>
+      <div class="challenge-progress">
+        <div style="font-size:.72rem;color:var(--text-muted)">Your completion streak: <strong style="color:var(--accent-teal)">${streak} day${streak!==1?'s':''}</strong></div>
+        <div class="challenge-prog-bar-wrap">
+          <div class="challenge-prog-bar" style="width:${Math.min(streak/30*100, 100)}%"></div>
+        </div>
+      </div>`;
+  }
+
+  function markChallengeDone() {
+    const key = 'placida_challenge_' + new Date().toDateString();
+    if (localStorage.getItem(key) === 'done') return;
+    localStorage.setItem(key, 'done');
+    renderChallenge();
+    showToast('🎯 Challenge completed! Keep going.');
+  }
+
+  function renderTip() {
+    const t = getTodayTip();
+    const card = document.getElementById('wellnessTip');
+    if (!card) return;
+    card.innerHTML = `
+      <div class="tip-label">📚 Science-Backed Insight</div>
+      <div class="tip-text">${t.tip}</div>
+      <div class="tip-source">— ${t.source}</div>`;
+  }
+
+  renderChallenge();
+  renderTip();
+
+  // ════════════════ AFFIRMATION WALL ════════════════
+  const STARTER_MESSAGES = [
+    { text:"You don't have to have it all figured out. Just take one step forward.", time: Date.now()-3600000*2, likes:7, liked:false },
+    { text:"Studying is hard but you chose to show up today. That matters.", time: Date.now()-3600000*5, likes:12, liked:false },
+    { text:"Rest is not laziness. It is part of the process.", time: Date.now()-3600000*8, likes:19, liked:false },
+    { text:"You got through 100% of your bad days so far. You're doing better than you think.", time: Date.now()-86400000, likes:34, liked:false },
+    { text:"It's okay to ask for help. Strength is knowing when you need support.", time: Date.now()-86400000*2, likes:21, liked:false },
+  ];
+
+  const ANON_NAMES = ['A Stargazer','A Quiet Mind','A Fellow Student','A Kind Soul','A Night Owl','A Dreamer','A Wanderer','A Believer'];
+
+  function getWallData() {
+    try {
+      const d = JSON.parse(localStorage.getItem('placida_affirmation_wall') || 'null');
+      if (d) return d;
+    } catch {}
+    return { messages: STARTER_MESSAGES };
+  }
+
+  function saveWallData(d) { localStorage.setItem('placida_affirmation_wall', JSON.stringify(d)); }
+
+  function postAffirmation() {
+    const input = document.getElementById('wallInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) { showToast('✍️ Write something first!'); return; }
+    if (text.length < 10) { showToast('Write a bit more — make it meaningful 💚'); return; }
+    const data = getWallData();
+    data.messages.unshift({ text, time: Date.now(), likes: 0, liked: false });
+    saveWallData(data);
+    input.value = '';
+    renderWall();
+    showToast('💚 Your message is on the wall!');
+  }
+
+  function likeMessage(idx) {
+    const data = getWallData();
+    if (data.messages[idx].liked) { showToast('You already liked this one 💚'); return; }
+    data.messages[idx].liked = true;
+    data.messages[idx].likes++;
+    saveWallData(data);
+    renderWall();
+  }
+
+  function formatWallTime(ts) {
+    const diff = (Date.now() - ts) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+  }
+
+  function renderWall() {
+    const data = getWallData();
+    const container = document.getElementById('wallMessages');
+    if (!container) return;
+    container.innerHTML = data.messages.slice(0, 20).map((m, i) => {
+      const avatarEmoji = ['🌿','💜','🌊','⭐','🌙','🌸','🔮','🦋'][i % 8];
+      const anonName = ANON_NAMES[i % ANON_NAMES.length];
+      return `
+        <div class="wall-msg">
+          <div class="wall-msg-avatar">${avatarEmoji}</div>
+          <div class="wall-msg-body">
+            <div class="wall-msg-text">${m.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+            <div class="wall-msg-meta">
+              <span>${anonName}</span>
+              <span>·</span>
+              <span>${formatWallTime(m.time)}</span>
+              <button class="wall-msg-like ${m.liked?'liked':''}" onclick="likeMessage(${i})" aria-label="Like message">
+                ${m.liked ? '💚' : '🤍'} ${m.likes}
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  renderWall();
+
+  // ════════════════ PEER QUOTES ════════════════
+  const PEER_QUOTES = [
+    { text:"I used to think asking for help meant I was weak. Now I know it's the bravest thing I ever did.", author:"Anonymous student, 3rd year" },
+    { text:"Breathing exercises saved me during my finals week. I felt stupid doing them at first. Now I do them every day.", author:"Engineering student" },
+    { text:"Writing in my journal didn't fix my problems, but it helped me see them clearly enough to start solving them.", author:"First-year student" },
+    { text:"The chatbot said something simple: 'What you're feeling makes sense.' I had been waiting weeks to hear that.", author:"Student, Placida user" },
+    { text:"Some days, logging my mood is the only productive thing I do. And I've learned to call that enough.", author:"Anonymous" },
+    { text:"I stopped comparing my mental health journey to others. We all have different battles. That realization was freeing.", author:"Psychology student" },
+    { text:"Rest is not a reward for finishing your work. Rest is what makes doing the work possible.", author:"Placida community member" },
+  ];
+
+  let activeQuote = 0;
+
+  function renderQuote() {
+    const q = PEER_QUOTES[activeQuote];
+    const card = document.getElementById('quoteCard');
+    if (!card) return;
+    card.innerHTML = `
+      <div class="quote-marks">"</div>
+      <div class="quote-text">${q.text}</div>
+      <div class="quote-author">— ${q.author}</div>
+      <div class="quote-nav" role="tablist" aria-label="Quote navigation">
+        ${PEER_QUOTES.map((_, i) => `<button class="quote-dot ${i===activeQuote?'active':''}" onclick="goQuote(${i})" aria-label="Quote ${i+1}" role="tab" aria-selected="${i===activeQuote}"></button>`).join('')}
+      </div>`;
+  }
+
+  function goQuote(idx) {
+    activeQuote = idx;
+    renderQuote();
+  }
+
+  renderQuote();
+  // Auto-advance quote every 8 seconds
+  setInterval(() => { activeQuote = (activeQuote + 1) % PEER_QUOTES.length; renderQuote(); }, 8000);
+  </script>
+</body>
+</html>

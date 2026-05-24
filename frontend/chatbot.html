@@ -254,14 +254,22 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
       <li><a href="chatbot.html" class="active" aria-current="page">Chat</a></li>
+      <li><a href="insights.html">Insights</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="relax.html">Relax</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
     </ul>
   </nav>
 
   <main class="page-wrapper" style="padding-bottom: 40px;">
-    <div class="chat-page">
-
-      <!-- Chat Header -->
+    <div style="display:flex; gap:20px; max-width:1000px; margin:0 auto; padding:0 16px; flex-wrap:wrap; justify-content:center;">
+      
+      <!-- Left: Chat UI -->
+      <div class="chat-page" style="flex:1; min-width:320px; max-width:640px; margin:0;">
+        <!-- Chat Header -->
       <div class="chat-header">
         <div class="chat-avatar" aria-hidden="true">🧠</div>
         <div class="chat-header-info">
@@ -279,31 +287,63 @@
 
       <!-- Input Area -->
       <div class="chat-input-area">
+        <button id="voiceMicBtn" onclick="toggleVoiceInput()" aria-label="Voice input" title="Speak your message" style="background:rgba(255,255,255,.06);border:1px solid var(--border-glass);border-radius:12px;width:40px;height:40px;flex-shrink:0;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .25s;color:var(--text-muted)" onmouseover="this.style.background='rgba(124,106,247,.2)'" onmouseout="if(!window._isRecording)this.style.background='rgba(255,255,255,.06)'">🎤</button>
         <textarea
           id="chatInput"
-          placeholder="How are you feeling today…"
+          placeholder="How are you feeling today… or tap 🎤 to speak"
           rows="1"
           aria-label="Type your message"
         ></textarea>
         <button id="chatSendBtn" aria-label="Send message">➤</button>
       </div>
 
-      <!-- Quick Prompts -->
-      <div class="quick-prompts" aria-label="Quick message suggestions">
-        <button class="qp-btn" onclick="quickPrompt('I feel anxious')">😟 I feel anxious</button>
-        <button class="qp-btn" onclick="quickPrompt('I am really stressed')">😓 I\'m stressed</button>
-        <button class="qp-btn" onclick="quickPrompt('I feel happy today')">😊 I\'m happy</button>
-        <button class="qp-btn" onclick="quickPrompt('I feel lonely')">💙 I feel lonely</button>
-        <button class="qp-btn" onclick="quickPrompt('I need help')">🆘 I need help</button>
+        <!-- Quick Prompts -->
+        <div class="quick-prompts" aria-label="Quick message suggestions">
+          <button class="qp-btn" onclick="quickPrompt('I feel anxious')">😟 I feel anxious</button>
+          <button class="qp-btn" onclick="quickPrompt('I am really stressed')">😓 I'm stressed</button>
+          <button class="qp-btn" onclick="quickPrompt('I feel happy today')">😊 I'm happy</button>
+          <button class="qp-btn" onclick="quickPrompt('I feel lonely')">💙 I feel lonely</button>
+          <button class="qp-btn" onclick="quickPrompt('I need help')">🆘 I need help</button>
+        </div>
+
+        <!-- Disclaimer -->
+        <p class="chat-disclaimer" style="padding-bottom:0">
+          💜 Placida AI is not a substitute for professional care.<br>
+          If in crisis, please click the 🆘 button.
+        </p>
+      </div> <!-- End chat-page -->
+
+      <!-- Right: Adaptive Sidebar -->
+      <div class="chat-sidebar" style="width:300px; display:flex; flex-direction:column; gap:16px;">
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-icon pink" aria-hidden="true">🧠</div>
+            <div>
+              <div class="card-title">Mood Analysis</div>
+              <div class="card-subtitle">Detected emotion</div>
+            </div>
+          </div>
+          <div id="chatMoodIndicator" style="font-size:1.1rem; text-align:center; padding:10px 0; color:var(--text-primary); font-weight:600;">
+            Start chatting...
+          </div>
+        </div>
+        <div class="glass-card" style="flex:1;">
+          <div class="card-header">
+            <div class="card-icon teal" aria-hidden="true">💡</div>
+            <div>
+              <div class="card-title">Suggestions</div>
+              <div class="card-subtitle">Adaptive tools</div>
+            </div>
+          </div>
+          <div id="chatAdaptiveSuggestions" style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+            <div style="font-size:.85rem; color:var(--text-muted); text-align:center;">
+              Personalized wellness activities will appear here based on our conversation.
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Disclaimer -->
-      <p class="chat-disclaimer">
-        💜 Placida is an AI companion, not a substitute for professional mental health care.<br>
-        If you're in crisis, please call <strong>iCall: 9152987821</strong> or <strong>Vandrevala: 1860-2662-345</strong>
-      </p>
-
-    </div>
+    </div> <!-- End flex container -->
   </main>
 
   <!-- Footer -->

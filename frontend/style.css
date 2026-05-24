@@ -1626,6 +1626,9 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;                 /* allow scroll if dialog is taller than viewport */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;    /* prevent page behind from scrolling */
 }
 .onboard-dialog {
   background: rgba(14,16,30,0.98);
@@ -1634,8 +1637,12 @@ footer {
   padding: 36px 32px 28px;
   max-width: 460px;
   width: 100%;
+  max-height: calc(100vh - 48px);   /* never taller than viewport */
+  overflow-y: auto;                  /* scroll internally if content overflows */
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(124,106,247,0.12);
   animation: fadeInUp 0.4s cubic-bezier(0.34,1.28,0.64,1) both;
+  margin: auto;                      /* vertically center even when shorter than viewport */
 }
 .ob-header { text-align: center; margin-bottom: 24px; }
 .ob-logo { font-size: 3rem; margin-bottom: 12px; animation: floatOrb 6s ease-in-out infinite alternate; }
@@ -1654,6 +1661,6 @@ footer {
 .ob-feat strong { font-size: 0.88rem; color: var(--text-primary); display: block; margin-bottom: 2px; }
 .ob-feat small  { font-size: 0.74rem; color: var(--text-muted); line-height: 1.4; }
 .ob-note { font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
-@media (max-width: 500px) { .onboard-dialog { padding: 28px 20px 22px; border-radius: 22px; } }
+@media (max-width: 500px) { .onboard-dialog { padding: 28px 20px 22px; border-radius: 22px; max-height: calc(100dvh - 32px); } }
 
 

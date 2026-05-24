@@ -50,6 +50,8 @@
     .ext-name{font-size:.82rem;font-weight:700;color:var(--text-primary)}
     .ext-tag{font-size:.68rem;color:var(--text-muted)}
     .section-label{text-align:center;font-size:.68rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);margin:28px 0 14px;padding:0 24px}
+    .game-purpose{font-size:.75rem;color:var(--accent-teal);line-height:1.5;padding:8px 12px;background:rgba(94,196,182,.07);border-left:2px solid rgba(94,196,182,.4);border-radius:0 8px 8px 0;margin:-4px 0 2px}
+    .game-purpose em{font-style:normal;font-weight:700}
     @media(max-width:600px){.relax-grid{grid-template-columns:1fr}#bubbleGrid{grid-template-columns:repeat(6,1fr)}#soundGrid{grid-template-columns:repeat(4,1fr)}}
   </style>
 </head>
@@ -63,8 +65,11 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="breathe.html">Breathe</a></li>
+      <li><a href="meditation.html">Meditate</a></li>
       <li><a href="chatbot.html">Chat</a></li>
       <li><a href="insights.html">Insights</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="community.html">Community</a></li>
       <li><a href="relax.html" class="active" aria-current="page">Relax</a></li>
       <li><a href="feedback.html">Feedback</a></li>
     </ul>
@@ -86,9 +91,10 @@
           <div class="card-icon purple" aria-hidden="true">🫧</div>
           <div>
             <div class="game-title">Bubble Pop</div>
-            <span class="game-badge">Sahil</span>
+            <span class="game-badge">Stress Release</span>
           </div>
         </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Repetitive popping activates your sense of completion and releases physical tension — like squeezing a stress ball, digitally.</p>
         <p class="game-desc">Click every bubble to pop it. Satisfying, simple, effective.</p>
         <div class="game-area">
           <div id="bubbleGrid" role="group" aria-label="Bubble wrap grid"></div>
@@ -103,9 +109,10 @@
           <div class="card-icon teal" aria-hidden="true">🎨</div>
           <div>
             <div class="game-title">Zen Canvas</div>
-            <span class="game-badge teal">Sanchari</span>
+            <span class="game-badge teal">Creative Flow</span>
           </div>
         </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Free-form drawing activates your creative mind and quiets the analytical brain — shifting you from stress mode to calm, present-moment awareness.</p>
         <p class="game-desc">Draw freely with glowing colors. No right or wrong — just flow.</p>
         <div class="game-area">
           <canvas id="zenCanvas" aria-label="Drawing canvas"></canvas>
@@ -125,14 +132,88 @@
           <div class="card-icon pink" aria-hidden="true">🎵</div>
           <div>
             <div class="game-title">Sound Tiles</div>
-            <span class="game-badge pink">Ayushi</span>
+            <span class="game-badge pink">Sound Healing</span>
           </div>
         </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Tapping gentle tones engages your auditory cortex and grounds you in the present moment — a simple, effective form of sound therapy.</p>
         <p class="game-desc">Tap tiles to play soft calming tones. Create your own gentle melody.</p>
         <div class="game-area">
           <div id="soundGrid" role="group" aria-label="Sound tile grid"></div>
         </div>
         <div id="soundHint">Tap any tile ✨</div>
+      </div>
+
+      <!-- GRATITUDE JAR — New -->
+      <div class="game-card" aria-label="Gratitude Jar game">
+        <div class="game-card-header">
+          <div class="card-icon teal" aria-hidden="true">🫙</div>
+          <div>
+            <div class="game-title">Gratitude Jar</div>
+            <span class="game-badge teal">Positivity Boost</span>
+          </div>
+        </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Research shows writing 3 good things daily for 1 week significantly reduces anxiety and boosts mood for months. Your gratitude notes are saved locally.</p>
+        <p class="game-desc">Write one thing you're grateful for and drop it in the jar. Watch your collection grow.</p>
+        <div class="game-area" style="padding:16px">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="text" id="gratitudeInput" placeholder="I'm grateful for…" maxlength="100"
+              style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:0.85rem;color:var(--text-primary);outline:none;"
+              aria-label="Gratitude entry" onkeydown="if(event.key==='Enter')addGratitude()"/>
+            <button onclick="addGratitude()" id="gratitudeAddBtn"
+              style="padding:10px 14px;background:linear-gradient(135deg,var(--accent-teal),#4adbc8);border:none;border-radius:10px;cursor:pointer;font-size:1rem;color:#0d0f1a;font-weight:700;transition:all 0.2s ease;"
+              aria-label="Add gratitude">+ Add</button>
+          </div>
+          <div id="gratitudeList" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;"></div>
+          <div id="gratitudeCount" style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:8px;">0 notes in your jar 🫙</div>
+        </div>
+        <button class="btn-secondary" onclick="clearGratitude()" style="padding:8px;font-size:0.8rem;margin-top:4px">🗑️ Clear Jar</button>
+      </div>
+
+      <!-- WORRY CRUSHER — New -->
+      <div class="game-card" aria-label="Worry Crusher game">
+        <div class="game-card-header">
+          <div class="card-icon pink" aria-hidden="true">💥</div>
+          <div>
+            <div class="game-title">Worry Crusher</div>
+            <span class="game-badge pink">Anxiety Relief</span>
+          </div>
+        </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Writing a worry externalizes it (takes it out of your head). Then symbolically destroying it gives your brain a "done" signal — reducing the worry's emotional grip.</p>
+        <p class="game-desc">Type a worry, then crush it. Watch it shatter and disappear.</p>
+        <div class="game-area" style="padding:16px">
+          <textarea id="worryInput" rows="3" placeholder="Write your worry here… (e.g. 'I'm scared of failing my exam')"
+            style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;font-family:Inter,sans-serif;font-size:0.85rem;color:var(--text-primary);outline:none;resize:none;line-height:1.5;"
+            aria-label="Write your worry"></textarea>
+          <button onclick="crushWorry()" id="crushBtn"
+            style="width:100%;margin-top:10px;padding:11px;background:linear-gradient(135deg,#f06b8b,#e0446e);border:none;border-radius:10px;cursor:pointer;font-family:Inter,sans-serif;font-size:0.9rem;font-weight:700;color:#fff;transition:all 0.2s ease;letter-spacing:0.3px;"
+            aria-label="Crush worry">💥 Crush This Worry</button>
+          <div id="worryMsg" style="font-size:0.82rem;color:var(--accent-teal);text-align:center;margin-top:10px;min-height:20px;transition:all 0.3s;"></div>
+        </div>
+      </div>
+
+      <!-- COLOR BREATH — New -->
+      <div class="game-card" aria-label="Color Breath game">
+        <div class="game-card-header">
+          <div class="card-icon purple" aria-hidden="true">🌈</div>
+          <div>
+            <div class="game-title">Color Breath</div>
+            <span class="game-badge">Nervous System Reset</span>
+          </div>
+        </div>
+        <p class="game-purpose">🎯 <em>Purpose:</em> Visual breathing guides engage both sight and breathing centers simultaneously — activating the parasympathetic nervous system faster than breathing alone.</p>
+        <p class="game-desc">Watch the orb expand and contract. Breathe with it — inhale as it grows, exhale as it shrinks.</p>
+        <div class="game-area" style="display:flex;flex-direction:column;align-items:center;padding:20px;gap:14px">
+          <div id="colorBreathOrb" style="
+            width:120px;height:120px;border-radius:50%;
+            background:radial-gradient(circle at 40% 35%,rgba(124,106,247,0.8),rgba(94,196,182,0.5));
+            box-shadow:0 0 40px rgba(124,106,247,0.4);
+            transition:transform 4s ease-in-out, box-shadow 4s ease-in-out, background 4s ease-in-out;
+            cursor:pointer;
+          " role="img" aria-label="Breathing orb"></div>
+          <div id="colorBreathLabel" style="font-size:0.95rem;font-weight:600;color:var(--text-primary);letter-spacing:0.5px;">Tap to start</div>
+          <div id="colorBreathPhase" style="font-size:0.78rem;color:var(--text-muted);">Follow the orb's rhythm</div>
+        </div>
+        <button class="btn-secondary" onclick="toggleColorBreath()" id="colorBreathBtn" style="padding:10px">▶ Start Color Breath</button>
       </div>
 
     </div><!-- /relax-grid -->
@@ -355,6 +436,134 @@
       });
       grid.appendChild(btn);
     });
+  })();
+
+  // ════════════════════════════════════════
+  // GRATITUDE JAR
+  // ════════════════════════════════════════
+  (function() {
+    function renderGratitude() {
+      const items = JSON.parse(localStorage.getItem('placida_gratitude') || '[]');
+      const list = document.getElementById('gratitudeList');
+      const count = document.getElementById('gratitudeCount');
+      if (!list) return;
+      list.innerHTML = items.slice().reverse().map((t, i) => `
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(94,196,182,.1);border-radius:8px;padding:8px 12px;font-size:0.82rem;color:var(--text-primary);">
+          <span style="font-size:1rem">🌿</span>
+          <span style="flex:1">${t.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+          <button onclick="deleteGratitude(${items.length-1-i})" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.8rem;padding:2px 4px;border-radius:4px;" aria-label="Delete">✕</button>
+        </div>`).join('');
+      if (count) count.textContent = items.length + ' note' + (items.length !== 1 ? 's' : '') + ' in your jar 🫙';
+    }
+    window.addGratitude = function() {
+      const input = document.getElementById('gratitudeInput');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) { showToast('✍️ Write something first!'); return; }
+      const items = JSON.parse(localStorage.getItem('placida_gratitude') || '[]');
+      items.push(val);
+      localStorage.setItem('placida_gratitude', JSON.stringify(items));
+      input.value = '';
+      renderGratitude();
+      showToast('🫙 Added to your gratitude jar!');
+    };
+    window.deleteGratitude = function(idx) {
+      const items = JSON.parse(localStorage.getItem('placida_gratitude') || '[]');
+      items.splice(idx, 1);
+      localStorage.setItem('placida_gratitude', JSON.stringify(items));
+      renderGratitude();
+    };
+    window.clearGratitude = function() {
+      if (!confirm('Clear all gratitude notes?')) return;
+      localStorage.removeItem('placida_gratitude');
+      renderGratitude();
+      showToast('🗑️ Jar cleared');
+    };
+    renderGratitude();
+  })();
+
+  // ════════════════════════════════════════
+  // WORRY CRUSHER
+  // ════════════════════════════════════════
+  window.crushWorry = function() {
+    const input = document.getElementById('worryInput');
+    const btn = document.getElementById('crushBtn');
+    const msg = document.getElementById('worryMsg');
+    if (!input || !input.value.trim()) { showToast('✍️ Write your worry first!'); return; }
+    // Animate text shattering
+    if (btn) { btn.style.transform = 'scale(0.95)'; btn.disabled = true; btn.textContent = '💥 Crushing…'; }
+    const affirmations = [
+      "💥 Crushed! That worry no longer owns your headspace.",
+      "✨ Destroyed! You are bigger than your worries.",
+      "💪 Gone! You just took back your power.",
+      "🌿 Shattered! Your mind is clearer now.",
+      "🔥 Obliterated! You faced it — that takes strength."
+    ];
+    setTimeout(() => {
+      input.value = '';
+      if (msg) {
+        msg.textContent = affirmations[Math.floor(Math.random() * affirmations.length)];
+        msg.style.opacity = '1';
+      }
+      if (btn) { btn.style.transform = ''; btn.disabled = false; btn.textContent = '💥 Crush This Worry'; }
+      setTimeout(() => { if (msg) { msg.style.opacity = '0'; setTimeout(() => msg.textContent = '', 300); } }, 4000);
+    }, 900);
+  };
+
+  // ════════════════════════════════════════
+  // COLOR BREATH
+  // ════════════════════════════════════════
+  (function() {
+    let cbRunning = false;
+    let cbTimeout = null;
+    const phases = [
+      { label: 'Inhale…', sub: 'Breathe in slowly', duration: 4000,
+        bg: 'radial-gradient(circle at 40% 35%,rgba(124,106,247,0.9),rgba(94,196,182,0.6))',
+        shadow: '0 0 70px rgba(124,106,247,0.7)', scale: 'scale(1.6)' },
+      { label: 'Hold…', sub: 'Hold your breath', duration: 4000,
+        bg: 'radial-gradient(circle at 40% 35%,rgba(94,196,182,0.9),rgba(240,180,80,0.5))',
+        shadow: '0 0 60px rgba(94,196,182,0.7)', scale: 'scale(1.6)' },
+      { label: 'Exhale…', sub: 'Let it all out slowly', duration: 6000,
+        bg: 'radial-gradient(circle at 40% 35%,rgba(240,107,139,0.7),rgba(124,106,247,0.4))',
+        shadow: '0 0 30px rgba(240,107,139,0.4)', scale: 'scale(1.0)' },
+    ];
+    let phaseIdx = 0;
+
+    function runPhase() {
+      if (!cbRunning) return;
+      const p = phases[phaseIdx];
+      const orb = document.getElementById('colorBreathOrb');
+      const lbl = document.getElementById('colorBreathLabel');
+      const sub = document.getElementById('colorBreathPhase');
+      if (orb) { orb.style.transform = p.scale; orb.style.boxShadow = p.shadow; orb.style.background = p.bg; }
+      if (lbl) lbl.textContent = p.label;
+      if (sub) sub.textContent = p.sub;
+      phaseIdx = (phaseIdx + 1) % phases.length;
+      cbTimeout = setTimeout(runPhase, p.duration);
+    }
+
+    window.toggleColorBreath = function() {
+      const btn = document.getElementById('colorBreathBtn');
+      const lbl = document.getElementById('colorBreathLabel');
+      const sub = document.getElementById('colorBreathPhase');
+      const orb = document.getElementById('colorBreathOrb');
+      if (cbRunning) {
+        cbRunning = false;
+        clearTimeout(cbTimeout);
+        if (btn) btn.textContent = '▶ Start Color Breath';
+        if (lbl) lbl.textContent = 'Tap to start';
+        if (sub) sub.textContent = "Follow the orb's rhythm";
+        if (orb) { orb.style.transform = 'scale(1)'; orb.style.boxShadow = '0 0 40px rgba(124,106,247,0.4)'; orb.style.background = 'radial-gradient(circle at 40% 35%,rgba(124,106,247,0.8),rgba(94,196,182,0.5))'; }
+      } else {
+        cbRunning = true;
+        phaseIdx = 0;
+        if (btn) btn.textContent = '⏹ Stop';
+        runPhase();
+      }
+    };
+    // Clicking the orb also toggles
+    const orb = document.getElementById('colorBreathOrb');
+    if (orb) orb.addEventListener('click', window.toggleColorBreath);
   })();
   </script>
 </body>
