@@ -290,8 +290,8 @@
 
   <script>
   // ── SOS ──
-  function openSOS(){document.getElementById('sosModal').classList.add('show');document.body.style.overflow='hidden';}
-  function closeSOS(){document.getElementById('sosModal').classList.remove('show');document.body.style.overflow='';}
+  function openSOS(){document.getElementById('sosModal').classList.add('show');document.documentElement.classList.add('sos-open');}
+  function closeSOS(){document.getElementById('sosModal').classList.remove('show');document.documentElement.classList.remove('sos-open');}
   document.getElementById('sosModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSOS();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSOS();});
 

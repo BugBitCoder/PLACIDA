@@ -210,16 +210,152 @@
           </div>
         </div>
 
+      </div><!-- /open-ended card -->
+
+      <!-- ── Extended Survey Card ── -->
+      <div class="glass-card col-span-2" aria-label="Extended survey" id="extendedSurveyCard" style="animation-delay:0.15s">
+        <div class="card-header">
+          <div class="card-icon purple" aria-hidden="true">📊</div>
+          <div>
+            <div class="card-title">Quick Survey</div>
+            <div class="card-subtitle">Helps us understand who uses Placida and how</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;">
+
+          <!-- Academic Year -->
+          <div class="input-group">
+            <label for="academicYear">🎓 Academic Year</label>
+            <select id="academicYear" aria-label="Academic Year">
+              <option value="">Select year…</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="Postgraduate">Postgraduate</option>
+              <option value="Working Professional">Working Professional</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Stress Frequency -->
+          <div class="input-group">
+            <label for="stressFrequency">😰 How often do you feel stressed?</label>
+            <select id="stressFrequency" aria-label="Stress frequency">
+              <option value="">Select…</option>
+              <option value="Rarely">Rarely (once a month)</option>
+              <option value="Sometimes">Sometimes (once a week)</option>
+              <option value="Often">Often (several times a week)</option>
+              <option value="Almost daily">Almost daily</option>
+              <option value="Constantly">Constantly</option>
+            </select>
+          </div>
+
+          <!-- Breathing Preference -->
+          <div class="input-group">
+            <label for="breathingPref">🌬️ Preferred Breathing Technique</label>
+            <select id="breathingPref" aria-label="Breathing preference">
+              <option value="">Select…</option>
+              <option value="4-7-8">4-7-8 Method</option>
+              <option value="Box Breathing">Box Breathing</option>
+              <option value="Both">I use both</option>
+              <option value="None">Haven't tried</option>
+            </select>
+          </div>
+
+          <!-- Session Duration -->
+          <div class="input-group">
+            <label for="sessionDuration">⏱️ Typical Session Duration</label>
+            <select id="sessionDuration" aria-label="Session duration">
+              <option value="">Select…</option>
+              <option value="Under 2 min">Under 2 min</option>
+              <option value="2-5 min">2–5 min</option>
+              <option value="5-15 min">5–15 min</option>
+              <option value="15-30 min">15–30 min</option>
+              <option value="30+ min">30+ min</option>
+            </select>
+          </div>
+
+          <!-- Preferred Time -->
+          <div class="input-group">
+            <label for="preferredTime">🕐 When do you use Placida most?</label>
+            <select id="preferredTime" aria-label="Preferred time">
+              <option value="">Select…</option>
+              <option value="Morning">Morning (6am–12pm)</option>
+              <option value="Afternoon">Afternoon (12pm–6pm)</option>
+              <option value="Evening">Evening (6pm–10pm)</option>
+              <option value="Late Night">Late Night (10pm–2am)</option>
+              <option value="Varies">Varies</option>
+            </select>
+          </div>
+
+          <!-- Platform Preference -->
+          <div class="input-group">
+            <label for="preferredPlatform">📱 Primary Device</label>
+            <select id="preferredPlatform" aria-label="Platform preference">
+              <option value="">Select…</option>
+              <option value="Mobile">Mobile Phone</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Desktop">Desktop / Laptop</option>
+              <option value="Mixed">Multiple devices</option>
+            </select>
+          </div>
+
+          <!-- SOS Preference -->
+          <div class="input-group">
+            <label for="sosPreference">🆘 SOS Feature — Have you used it?</label>
+            <select id="sosPreference" aria-label="SOS preference">
+              <option value="">Select…</option>
+              <option value="Yes, it helped">Yes, it helped</option>
+              <option value="Saw it, didn't need">Saw it, didn't need it</option>
+              <option value="Didn't notice">Didn't notice it</option>
+              <option value="Need it more prominent">Would like it more visible</option>
+            </select>
+          </div>
+
+          <!-- Most Used Features -->
+          <div class="input-group" style="grid-column: 1 / -1;">
+            <label>✅ Most Used Features <span style="opacity:.6;font-weight:400">(select all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Mood Logger"> 🌙 Mood Logger</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Dashboard"> 📊 Dashboard</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Breathing"> 🌬️ Breathing</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="AI Chat"> 💬 AI Chat</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Journal"> 📓 Journal</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Meditation"> 🧘 Meditation</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Relax Games"> 🎮 Relax Games</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Community"> 🌍 Community</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Insights"> 📈 Insights</label>
+            </div>
+          </div>
+
+          <!-- Open Comment -->
+          <div class="input-group" style="grid-column: 1 / -1;">
+            <label for="openComment">💬 Any other thoughts or feedback?</label>
+            <textarea id="openComment" rows="3"
+              placeholder="Anything else you'd like us to know — suggestions, complaints, praise…"
+              aria-label="Open comment"></textarea>
+          </div>
+
+        </div>
+
         <!-- Submit Actions -->
         <div class="feedback-actions">
           <button id="submitFeedbackBtn" class="btn-primary" onclick="submitFeedback()" aria-label="Submit feedback">
             Submit Feedback 🌿
           </button>
           <button id="exportFeedbackBtn" class="btn-secondary" onclick="exportFeedback()" aria-label="Export as JSON">
-            Export as JSON ↓
+            Export JSON ↓
           </button>
+          <a href="admin.html" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;text-align:center;padding:13px 20px;font-size:0.88rem;font-weight:600;" aria-label="View analytics dashboard">
+            📊 Analytics
+          </a>
         </div>
-      </div><!-- /open-ended card -->
+
+      </div><!-- /extended survey card -->
+
+
 
       <!-- ── Past Submissions Card ── -->
       <div class="glass-card col-span-2" id="pastFeedbackCard" aria-label="Previous submissions" style="display:none;">
@@ -337,25 +473,33 @@
     })();
 
     // ── Get display name from session ──
-    function getUserDisplayName() {
-      // 1) Try cached name from localStorage
+    async function getUserDisplayName() {
+      // 1) Try live Supabase session (most accurate — never stale)
+      if (window.supabase) {
+        try {
+          const { data } = await window.supabase.auth.getUser();
+          const user = data?.user;
+          if (user) {
+            const meta = user.user_metadata;
+            const name = meta?.full_name || meta?.name || meta?.display_name;
+            if (name) {
+              const firstName = name.trim().split(' ')[0];
+              localStorage.setItem('placida_user_name', name); // keep cache fresh
+              return firstName;
+            }
+            if (user.email) return user.email.split('@')[0];
+          }
+        } catch {}
+      }
+      // 2) Try cached name from localStorage (offline fallback)
       const cached = localStorage.getItem('placida_user_name');
       if (cached && cached.trim()) return cached.trim().split(' ')[0];
-      // 2) Try Supabase session user metadata
-      try {
-        const session = JSON.parse(localStorage.getItem('sb-snmfdktkjggsszziexsz-auth-token') || '{}');
-        const meta = session?.user?.user_metadata;
-        if (meta?.full_name) return meta.full_name.split(' ')[0];
-        if (meta?.name) return meta.name.split(' ')[0];
-        if (meta?.display_name) return meta.display_name.split(' ')[0];
-        const email = session?.user?.email;
-        if (email) return email.split('@')[0];
-      } catch {}
+      // 3) Generic fallback
       return 'Friend';
     }
 
     // ── Submit ──
-    function submitFeedback() {
+    async function submitFeedback() {
       // Validate at least 1 feature rated
       const hasRating = Object.values(ratings).some(r => r > 0);
       if (!hasRating) {
@@ -363,23 +507,71 @@
         return;
       }
 
+      const displayName = await getUserDisplayName();
+
       const entry = {
         id:          Date.now(),
         timestamp:   new Date().toISOString(),
+        userName:    displayName,
         ratings:     { ...ratings },
         nps:         npsScore,
         liked:       document.getElementById('feedbackLike').value.trim(),
         improve:     document.getElementById('feedbackImprove').value.trim(),
-        featureReq:  document.getElementById('feedbackFeature').value.trim()
+        featureReq:  document.getElementById('feedbackFeature').value.trim(),
+        // Extended fields
+        academicYear:      (document.getElementById('academicYear')?.value || '').trim(),
+        stressFrequency:   (document.getElementById('stressFrequency')?.value || '').trim(),
+        breathingPref:     (document.getElementById('breathingPref')?.value || '').trim(),
+        sessionDuration:   (document.getElementById('sessionDuration')?.value || '').trim(),
+        preferredTime:     (document.getElementById('preferredTime')?.value || '').trim(),
+        preferredPlatform: (document.getElementById('preferredPlatform')?.value || '').trim(),
+        sosPreference:     (document.getElementById('sosPreference')?.value || '').trim(),
+        mostUsed:          [...document.querySelectorAll('.most-used-cb:checked')].map(c => c.value),
+        openComment:       (document.getElementById('openComment')?.value || '').trim()
       };
 
-      // Save to localStorage
+      // Duplicate prevention: warn if same session already submitted within 1 hour
       const all = JSON.parse(localStorage.getItem('placida_feedback') || '[]');
+      const oneHourAgo = Date.now() - 3600000;
+      const recentSub = all.find(e => new Date(e.timestamp).getTime() > oneHourAgo);
+      if (recentSub && !confirm('You already submitted feedback recently. Submit again?')) return;
+
       all.push(entry);
       localStorage.setItem('placida_feedback', JSON.stringify(all));
 
+      // Optional Supabase write
+      if (window.supabase) {
+        try {
+          const { data: authData } = await window.supabase.auth.getUser().catch(() => ({ data: {} }));
+          const user = authData?.user;
+          await window.supabase.from('feedback_responses').insert({
+            user_id:            user?.id || null,
+            user_name:          displayName,
+            user_email:         user?.email || null,
+            academic_year:      entry.academicYear,
+            stress_frequency:   entry.stressFrequency,
+            rating_moodlogger:  entry.ratings.moodlogger || null,
+            rating_dashboard:   entry.ratings.dashboard || null,
+            rating_breathing:   entry.ratings.breathing || null,
+            rating_chat:        entry.ratings.chat || null,
+            rating_journal:     entry.ratings.journal || null,
+            nps_score:          entry.nps || null,
+            breathing_preference: entry.breathingPref,
+            session_duration:   entry.sessionDuration,
+            most_used_features: entry.mostUsed,
+            requested_improvements: entry.improve,
+            preferred_time:     entry.preferredTime,
+            preferred_platform: entry.preferredPlatform,
+            sos_preference:     entry.sosPreference,
+            liked_most:         entry.liked,
+            improve:            entry.improve,
+            open_comment:       entry.openComment,
+            submitted_at:       entry.timestamp
+          }).catch(() => {}); // silent fail if table doesn't exist yet
+        } catch {}
+      }
+
       // Show thank you with personalized name
-      const displayName = getUserDisplayName();
       const heading = document.getElementById('thankYouHeading');
       if (heading) heading.textContent = `Thank you, ${displayName}! 🌿`;
 
@@ -520,8 +712,8 @@
     </div>
   </div>
   <script>
-    function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.body.style.overflow='hidden'; }
-    function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.body.style.overflow=''; }
+    function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.documentElement.classList.add('sos-open'); }
+    function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.documentElement.classList.remove('sos-open'); }
     document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });
     document.addEventListener('keydown', e => { if(e.key==='Escape') closeSOS(); });
   </script>

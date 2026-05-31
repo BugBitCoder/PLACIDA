@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Placida Admin — Feedback Analytics Dashboard for reviewing user responses, charts, and exporting data." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin Analytics — Placida</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ── Admin-specific styles ── */
+    :root {
+      --col-promoter: #5ec4b6;
+      --col-passive: #a89df9;
+      --col-detractor: #f06b8b;
+    }
+
+    .admin-header {
+      padding: 52px 32px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .admin-header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #f0f0ff 0%, #7c6af7 55%, #5ec4b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .admin-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 6px; }
+
+    .admin-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .admin-grid { grid-template-columns: 1fr 1fr; padding: 0 20px 60px; } }
+    @media (max-width: 540px) { .admin-grid { grid-template-columns: 1fr; padding: 0 16px 60px; } }
+
+    .span-2 { grid-column: span 2; }
+    .span-4 { grid-column: span 4; }
+    @media (max-width: 900px) { .span-4 { grid-column: span 2; } }
+    @media (max-width: 540px) { .span-2, .span-4 { grid-column: span 1; } }
+
+    /* Metric summary cards */
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeInUp 0.4s ease both;
+    }
+    .metric-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .metric-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c6af7, #5ec4b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .metric-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .metric-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Chart cards */
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px;
+      animation: fadeInUp 0.4s ease both;
+    }
+    .chart-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+    .chart-card-sub { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 18px; }
+    .chart-wrap-admin { height: 200px; position: relative; }
+    .chart-wrap-admin-lg { height: 260px; position: relative; }
+
+    /* Toolbar */
+    .admin-toolbar {
+      max-width: 1200px;
+      margin: 0 auto 16px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 540px) { .admin-toolbar { padding: 0 16px; } }
+
+    .toolbar-input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .toolbar-input:focus { border-color: var(--accent-purple); }
+    .toolbar-input::placeholder { color: var(--text-muted); }
+
+    .toolbar-select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .toolbar-select option { background: #141626; }
+
+    /* Table */
+    .response-table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    .response-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .response-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+    .response-table td {
+      padding: 10px 12px;
+      color: var(--text-soft);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .response-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .response-table tr:hover { cursor: pointer; }
+
+    .nps-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .nps-pill.promoter  { background: rgba(94,196,182,0.18); color: #5ec4b6; }
+    .nps-pill.passive   { background: rgba(168,157,249,0.18); color: #a89df9; }
+    .nps-pill.detractor { background: rgba(240,107,139,0.18); color: #f06b8b; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pg-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-glass);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pg-btn:hover, .pg-btn.active { background: rgba(124,106,247,0.15); border-color: rgba(124,106,247,0.4); color: var(--text-primary); }
+    .pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .pg-info { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Detail Modal */
+    .detail-modal {
+      position: fixed; inset: 0;
+      background: rgba(6,7,16,0.82);
+      backdrop-filter: blur(14px);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      overscroll-behavior: contain;
+    }
+    .detail-modal.show { opacity: 1; pointer-events: all; }
+    .detail-dialog {
+      background: rgba(14,16,30,0.98);
+      border: 1px solid rgba(124,106,247,0.25);
+      border-radius: 24px;
+      padding: 32px 28px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+      animation: fadeInUp 0.3s ease both;
+      position: relative;
+    }
+    .detail-close {
+      position: absolute; top: 14px; right: 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%; width: 32px; height: 32px;
+      font-size: 1rem; color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .detail-close:hover { background: rgba(240,107,139,0.2); color: #f06b8b; }
+
+    .detail-field { margin-bottom: 14px; }
+    .detail-field-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .detail-field-value { font-size: 0.88rem; color: var(--text-primary); line-height: 1.5; word-break: break-word; }
+
+    .detail-ratings { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .detail-rating-chip {
+      background: rgba(124,106,247,0.12); border: 1px solid rgba(124,106,247,0.2);
+      border-radius: 100px; padding: 3px 12px;
+      font-size: 0.75rem; color: var(--text-soft);
+    }
+
+    /* Audit card */
+    .audit-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.85rem; color: var(--text-soft);
+    }
+    .audit-item:last-child { border-bottom: none; }
+    .audit-badge {
+      font-size: 0.7rem; font-weight: 700;
+      padding: 2px 10px; border-radius: 100px;
+      flex-shrink: 0;
+    }
+    .audit-badge.ok     { background: rgba(94,196,182,0.15); color: #5ec4b6; }
+    .audit-badge.warn   { background: rgba(240,200,0,0.12); color: #e8c443; }
+    .audit-badge.error  { background: rgba(240,107,139,0.15); color: #f06b8b; }
+
+    /* Export bar */
+    .export-bar {
+      max-width: 1200px;
+      margin: 0 auto 8px;
+      padding: 0 32px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    @media (max-width: 540px) { .export-bar { padding: 0 16px; } }
+
+    .badge-promoter  { color: var(--col-promoter); }
+    .badge-passive   { color: var(--col-passive); }
+    .badge-detractor { color: var(--col-detractor); }
+
+    html.detail-open body { overflow: hidden; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar" role="navigation" aria-label="Admin navigation">
+    <a href="index.html" class="nav-logo" aria-label="Placida home">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <span class="logo-text">Placida</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+      <li><a href="admin.html" class="active" aria-current="page">Admin</a></li>
+    </ul>
+    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;border:1px solid rgba(240,107,139,0.3);padding:4px 12px;border-radius:8px;background:rgba(240,107,139,0.07);">🔐 Admin Panel</span>
+  </nav>
+
+  <main class="page-wrapper" style="padding-top:0">
+
+    <!-- ── Admin Header ── -->
+    <div class="admin-header">
+      <h1>📊 Feedback Analytics</h1>
+      <p>Live dashboard — data from localStorage (+ Supabase when available). Last updated: <span id="lastUpdated">—</span></p>
+    </div>
+
+    <!-- ── Export Bar ── -->
+    <div class="export-bar">
+      <button class="btn-primary" onclick="exportExcel()" id="exportExcelBtn" style="padding:10px 20px;font-size:0.85rem;">
+        📥 Export Excel (XLSX)
+      </button>
+      <button class="btn-secondary" onclick="exportJson()" style="padding:10px 18px;font-size:0.85rem;">
+        Export JSON
+      </button>
+      <button class="btn-secondary" onclick="loadData()" style="padding:10px 18px;font-size:0.85rem;">
+        🔄 Refresh
+      </button>
+      <span id="exportStatus" style="font-size:0.78rem;color:var(--text-muted);"></span>
+    </div>
+
+    <!-- ── Key Metrics ── -->
+    <div class="admin-grid">
+
+      <div class="metric-card" style="animation-delay:0s">
+        <div class="metric-value" id="metricTotal">0</div>
+        <div class="metric-label">Total Responses</div>
+        <div class="metric-sub" id="metricTotalSub">—</div>
+      </div>
+      <div class="metric-card" style="animation-delay:0.05s">
+        <div class="metric-value" id="metricAvgRating">—</div>
+        <div class="metric-label">Avg Feature Rating</div>
+        <div class="metric-sub">out of 5.0</div>
+      </div>
+      <div class="metric-card" style="animation-delay:0.1s">
+        <div class="metric-value" id="metricNPS">—</div>
+        <div class="metric-label">NPS Score</div>
+        <div class="metric-sub" id="metricNPSSub">Promoters – Detractors</div>
+      </div>
+      <div class="metric-card" style="animation-delay:0.15s">
+        <div class="metric-value" id="metricCompletion">—</div>
+        <div class="metric-label">Form Completion</div>
+        <div class="metric-sub">rated all 5 features</div>
+      </div>
+
+      <!-- Feature Ratings Chart -->
+      <div class="chart-card span-2" style="animation-delay:0.1s">
+        <div class="chart-card-title">⭐ Feature Ratings</div>
+        <div class="chart-card-sub">Average score per feature (out of 5)</div>
+        <div class="chart-wrap-admin">
+          <canvas id="featureRatingChart"></canvas>
+        </div>
+      </div>
+
+      <!-- NPS Distribution -->
+      <div class="chart-card span-2" style="animation-delay:0.12s">
+        <div class="chart-card-title">📣 NPS Distribution</div>
+        <div class="chart-card-sub">Promoters (9-10) · Passives (7-8) · Detractors (1-6)</div>
+        <div style="height:200px;display:flex;align-items:center;justify-content:center;">
+          <canvas id="npsChart" style="max-width:240px;max-height:200px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Academic Year Chart -->
+      <div class="chart-card" style="animation-delay:0.14s">
+        <div class="chart-card-title">🎓 Academic Year</div>
+        <div class="chart-card-sub">User segments</div>
+        <div class="chart-wrap-admin">
+          <canvas id="academicChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Stress Frequency Chart -->
+      <div class="chart-card" style="animation-delay:0.16s">
+        <div class="chart-card-title">😰 Stress Frequency</div>
+        <div class="chart-card-sub">Self-reported stress levels</div>
+        <div class="chart-wrap-admin">
+          <canvas id="stressChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Platform Preference -->
+      <div class="chart-card" style="animation-delay:0.18s">
+        <div class="chart-card-title">📱 Device Usage</div>
+        <div class="chart-card-sub">Primary device preference</div>
+        <div class="chart-wrap-admin">
+          <canvas id="platformChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Session Duration -->
+      <div class="chart-card" style="animation-delay:0.2s">
+        <div class="chart-card-title">⏱️ Session Duration</div>
+        <div class="chart-card-sub">Typical usage time per session</div>
+        <div class="chart-wrap-admin">
+          <canvas id="durationChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Most Used Features (ranked) -->
+      <div class="chart-card span-2" style="animation-delay:0.22s">
+        <div class="chart-card-title">✅ Most Used Features</div>
+        <div class="chart-card-sub">Ranked by how many users selected each</div>
+        <div class="chart-wrap-admin-lg">
+          <canvas id="featuresChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Preferred Time -->
+      <div class="chart-card span-2" style="animation-delay:0.24s">
+        <div class="chart-card-title">🕐 Usage Time of Day</div>
+        <div class="chart-card-sub">When users access Placida most</div>
+        <div class="chart-wrap-admin-lg">
+          <canvas id="timeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- DB Quality Audit -->
+      <div class="chart-card span-2" style="animation-delay:0.26s" id="auditCard">
+        <div class="chart-card-title">🔍 Data Quality Audit</div>
+        <div class="chart-card-sub">Automatic scan of localStorage feedback data</div>
+        <div id="auditResults"></div>
+      </div>
+
+      <!-- Top Improvement Requests -->
+      <div class="chart-card span-2" style="animation-delay:0.26s">
+        <div class="chart-card-title">🔧 Improvement Requests</div>
+        <div class="chart-card-sub">What users want to see improved</div>
+        <div id="improvementList" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+      </div>
+
+      <!-- Responses Table: Toolbar -->
+      <div class="span-4" style="padding:0;margin:0;">
+        <div class="chart-card" style="animation-delay:0.28s">
+          <div class="chart-card-title" style="margin-bottom:12px;">📋 All Responses <span id="responseCount" style="font-size:0.78rem;font-weight:400;color:var(--text-muted)"></span></div>
+
+          <!-- Filters -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <input type="text" id="searchInput" class="toolbar-input" placeholder="🔍 Search name, comment, feature request…" oninput="applyFilters()" />
+            <select id="filterYear" class="toolbar-select" onchange="applyFilters()">
+              <option value="">All Years</option>
+              <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
+              <option>4th Year</option><option>Postgraduate</option><option>Working Professional</option>
+            </select>
+            <select id="filterNPS" class="toolbar-select" onchange="applyFilters()">
+              <option value="">All NPS</option>
+              <option value="promoter">Promoters (9-10)</option>
+              <option value="passive">Passives (7-8)</option>
+              <option value="detractor">Detractors (1-6)</option>
+            </select>
+            <select id="filterRating" class="toolbar-select" onchange="applyFilters()">
+              <option value="">All Ratings</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 star avg</option>
+              <option value="4">⭐⭐⭐⭐ 4+ avg</option>
+              <option value="3">⭐⭐⭐ 3+ avg</option>
+            </select>
+          </div>
+
+          <!-- Table -->
+          <div class="response-table-wrap">
+            <table class="response-table" id="responseTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Date</th>
+                  <th>Year</th>
+                  <th>Avg Rating</th>
+                  <th>NPS</th>
+                  <th>Stress</th>
+                  <th>Liked</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="responseTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+
+    </div><!-- /admin-grid -->
+  </main>
+
+  <!-- Detail Modal -->
+  <div class="detail-modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="detail-dialog">
+      <button class="detail-close" onclick="closeDetail()" aria-label="Close">✕</button>
+      <h2 id="detailTitle" style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-bottom:20px;letter-spacing:-0.3px;">Response Detail</h2>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="supabase.js"></script>
+
+  <script>
+  /* =============================================
+     PLACIDA — admin.js (inline)
+     Feedback Analytics + Excel Export + Admin Panel
+     Phases 4, 5, 6, 7
+  ============================================= */
+
+  // ── State ──
+  let allData = [];
+  let filteredData = [];
+  let currentPage = 1;
+  const PAGE_SIZE = 20;
+
+  // Chart instances — tracked for destroy-on-refresh
+  const charts = {};
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(s || '')));
+    return d.innerHTML;
+  }
+
+  // ── Load Data ──
+  function loadData() {
+    // From localStorage
+    let data = [];
+    try { data = JSON.parse(localStorage.getItem('placida_feedback') || '[]'); } catch {}
+    
+    // Also try Supabase if available (async, updates after initial render)
+    if (window.supabase) {
+      window.supabase.from('feedback_responses').select('*').order('submitted_at', { ascending: false })
+        .then(({ data: sbData, error }) => {
+          if (!error && sbData && sbData.length > 0) {
+            // Merge: convert Supabase rows to local format
+            const merged = sbData.map(r => ({
+              id: r.id,
+              timestamp: r.submitted_at,
+              userName: r.user_name || 'Anonymous',
+              ratings: {
+                moodlogger: r.rating_moodlogger,
+                dashboard:  r.rating_dashboard,
+                breathing:  r.rating_breathing,
+                chat:       r.rating_chat,
+                journal:    r.rating_journal,
+              },
+              nps:               r.nps_score,
+              liked:             r.liked_most,
+              improve:           r.improve,
+              featureReq:        r.open_comment,
+              academicYear:      r.academic_year,
+              stressFrequency:   r.stress_frequency,
+              breathingPref:     r.breathing_preference,
+              sessionDuration:   r.session_duration,
+              preferredTime:     r.preferred_time,
+              preferredPlatform: r.preferred_platform,
+              sosPreference:     r.sos_preference,
+              mostUsed:          r.most_used_features || [],
+              openComment:       r.open_comment,
+            }));
+            // Use Supabase data if it has more records
+            if (merged.length > allData.length) {
+              processData(merged);
+            }
+          }
+        }).catch(() => {});
+    }
+
+    processData(data);
+  }
+
+  function processData(data) {
+    allData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('en-IN');
+    applyFilters();
+    renderMetrics();
+    renderCharts();
+    renderAudit();
+    renderImprovements();
+  }
+
+  // ── Compute Metrics ──
+  function computeAvgRating(entry) {
+    const r = entry.ratings || {};
+    const vals = Object.values(r).filter(v => v && v > 0);
+    if (!vals.length) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+
+  function getNPSCategory(score) {
+    if (!score) return 'none';
+    if (score >= 9) return 'promoter';
+    if (score >= 7) return 'passive';
+    return 'detractor';
+  }
+
+  function renderMetrics() {
+    const total = allData.length;
+    document.getElementById('metricTotal').textContent = total;
+    document.getElementById('metricTotalSub').textContent = total === 0 ? 'No data yet' : `Latest: ${new Date(allData[0]?.timestamp).toLocaleDateString('en-IN')}`;
+
+    if (total === 0) { return; }
+
+    // Avg rating
+    const avgs = allData.map(computeAvgRating).filter(v => v !== null);
+    const overallAvg = avgs.length ? (avgs.reduce((a,b) => a+b, 0) / avgs.length).toFixed(2) : '—';
+    document.getElementById('metricAvgRating').textContent = avgs.length ? `${overallAvg} ⭐` : '—';
+
+    // NPS
+    const npsList = allData.map(e => e.nps).filter(v => v && v > 0);
+    if (npsList.length) {
+      const promoters  = npsList.filter(n => n >= 9).length;
+      const detractors = npsList.filter(n => n <= 6).length;
+      const nps = Math.round(((promoters - detractors) / npsList.length) * 100);
+      document.getElementById('metricNPS').textContent = nps > 0 ? `+${nps}` : `${nps}`;
+      document.getElementById('metricNPS').style.color = nps >= 50 ? '#5ec4b6' : nps >= 0 ? '#a89df9' : '#f06b8b';
+      document.getElementById('metricNPS').style.webkitTextFillColor = nps >= 50 ? '#5ec4b6' : nps >= 0 ? '#a89df9' : '#f06b8b';
+      document.getElementById('metricNPSSub').textContent = `${promoters} Promoters · ${detractors} Detractors`;
+    }
+
+    // Completion rate (all 5 features rated)
+    const full = allData.filter(e => {
+      const r = e.ratings || {};
+      return ['moodlogger','dashboard','breathing','chat','journal'].every(k => r[k] > 0);
+    }).length;
+    document.getElementById('metricCompletion').textContent = total ? `${Math.round((full/total)*100)}%` : '—';
+  }
+
+  // ── Charts ──
+  const CHART_DEFAULTS = {
+    color: '#f0f0ff',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8888aa', font: { family: 'Inter', size: 11 } }, border: { color: 'transparent' } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8888aa', font: { family: 'Inter', size: 11 } }, border: { color: 'transparent' } }
+    }
+  };
+
+  function mkChart(id, config) {
+    if (charts[id]) { charts[id].destroy(); }
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    charts[id] = new Chart(canvas, config);
+  }
+
+  function countBy(arr, key) {
+    const map = {};
+    arr.forEach(item => {
+      const v = (typeof key === 'function' ? key(item) : item[key]) || 'Unknown';
+      map[v] = (map[v] || 0) + 1;
+    });
+    return map;
+  }
+
+  function renderCharts() {
+    if (!allData.length) return;
+
+    const PURPLE = 'rgba(124,106,247,0.8)';
+    const TEAL   = 'rgba(94,196,182,0.8)';
+    const PINK   = 'rgba(240,107,139,0.8)';
+
+    // 1) Feature ratings bar
+    const featureKeys = ['moodlogger','dashboard','breathing','chat','journal'];
+    const featureLabels = ['Mood Logger','Dashboard','Breathing','AI Chat','Journal'];
+    const featureAvgs = featureKeys.map(k => {
+      const vals = allData.map(e => e.ratings?.[k]).filter(v => v && v > 0);
+      return vals.length ? +(vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2) : 0;
+    });
+    mkChart('featureRatingChart', {
+      type: 'bar',
+      data: { labels: featureLabels, datasets: [{ data: featureAvgs, backgroundColor: [PURPLE,TEAL,PINK,'rgba(168,157,249,0.8)','rgba(94,196,182,0.6)'], borderRadius: 8, borderSkipped: false }] },
+      options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `  ${ctx.raw} / 5.0` } } },
+        scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 5 } }
+      }
+    });
+
+    // 2) NPS Doughnut
+    const npsVals = allData.map(e => e.nps).filter(v => v && v > 0);
+    const promoters  = npsVals.filter(n => n >= 9).length;
+    const passives   = npsVals.filter(n => n >= 7 && n <= 8).length;
+    const detractors = npsVals.filter(n => n <= 6).length;
+    mkChart('npsChart', {
+      type: 'doughnut',
+      data: {
+        labels: ['Promoters (9-10)', 'Passives (7-8)', 'Detractors (1-6)'],
+        datasets: [{ data: [promoters, passives, detractors], backgroundColor: ['rgba(94,196,182,0.8)', 'rgba(168,157,249,0.7)', 'rgba(240,107,139,0.8)'], borderWidth: 0, hoverOffset: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '68%',
+        plugins: { legend: { display: true, position: 'bottom', labels: { color: '#8888aa', font: { family: 'Inter', size: 10 }, boxWidth: 12, padding: 10 } },
+          tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.raw}` } }
+        }
+      }
+    });
+
+    // Helper: chart from countBy
+    function barFromCount(id, countMap, colors) {
+      const entries = Object.entries(countMap).sort((a,b) => b[1]-a[1]);
+      mkChart(id, {
+        type: 'bar',
+        data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: colors || PURPLE, borderRadius: 6, borderSkipped: false }] },
+        options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
+          indexAxis: entries.length > 4 ? 'y' : 'x',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    barFromCount('academicChart', countBy(allData.filter(e => e.academicYear), 'academicYear'), PURPLE);
+    barFromCount('stressChart', countBy(allData.filter(e => e.stressFrequency), 'stressFrequency'), PINK);
+    barFromCount('platformChart', countBy(allData.filter(e => e.preferredPlatform), 'preferredPlatform'), TEAL);
+    barFromCount('durationChart', countBy(allData.filter(e => e.sessionDuration), 'sessionDuration'), 'rgba(168,157,249,0.8)');
+    barFromCount('timeChart', countBy(allData.filter(e => e.preferredTime), 'preferredTime'), 'rgba(240,200,80,0.8)');
+
+    // Features used (flatten array values)
+    const featureUsage = {};
+    allData.forEach(e => {
+      (e.mostUsed || []).forEach(f => { featureUsage[f] = (featureUsage[f] || 0) + 1; });
+    });
+    if (Object.keys(featureUsage).length) barFromCount('featuresChart', featureUsage, PURPLE);
+  }
+
+  // ── Data Quality Audit ──
+  function renderAudit() {
+    const container = document.getElementById('auditResults');
+    if (!container) return;
+
+    const issues = [];
+    const total = allData.length;
+
+    // 1) Empty responses (no ratings at all)
+    const empty = allData.filter(e => !Object.values(e.ratings || {}).some(v => v > 0));
+    issues.push({ label: 'Empty responses (no ratings)', count: empty.length, level: empty.length > 0 ? 'warn' : 'ok' });
+
+    // 2) Duplicates (same userName, within 5 minutes of each other)
+    const dups = new Set();
+    allData.forEach((e, i) => {
+      allData.forEach((f, j) => {
+        if (i >= j) return;
+        const timeDiff = Math.abs(new Date(e.timestamp) - new Date(f.timestamp));
+        if (e.userName && e.userName === f.userName && timeDiff < 300000) dups.add(i);
+      });
+    });
+    issues.push({ label: 'Likely duplicates (same user, <5 min apart)', count: dups.size, level: dups.size > 0 ? 'warn' : 'ok' });
+
+    // 3) Future timestamps
+    const future = allData.filter(e => new Date(e.timestamp) > Date.now() + 60000);
+    issues.push({ label: 'Invalid future timestamps', count: future.length, level: future.length > 0 ? 'error' : 'ok' });
+
+    // 4) Missing NPS
+    const noNPS = allData.filter(e => !e.nps || e.nps <= 0);
+    issues.push({ label: 'Responses with no NPS score', count: noNPS.length, level: noNPS.length / Math.max(total, 1) > 0.5 ? 'warn' : 'ok' });
+
+    // 5) Anonymous (no userName)
+    const anon = allData.filter(e => !e.userName || e.userName === 'Friend');
+    issues.push({ label: 'Anonymous submissions', count: anon.length, level: anon.length > total * 0.3 ? 'warn' : 'ok' });
+
+    issues.push({ label: 'Total records scanned', count: total, level: 'ok' });
+
+    container.innerHTML = issues.map(issue => `
+      <div class="audit-item">
+        <span class="audit-badge ${issue.level}">${issue.level.toUpperCase()}</span>
+        <span style="flex:1">${escHtml(issue.label)}</span>
+        <span style="font-weight:700;color:var(--text-primary)">${issue.count}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── Improvement Requests ──
+  function renderImprovements() {
+    const container = document.getElementById('improvementList');
+    if (!container) return;
+
+    const texts = allData
+      .map(e => e.improve || e.featureReq || e.openComment)
+      .filter(t => t && t.trim().length > 3)
+      .slice(0, 30);
+
+    if (!texts.length) {
+      container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:20px 0">No improvement requests yet.</p>';
+      return;
+    }
+
+    container.innerHTML = texts.map((t, i) => `
+      <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.82rem;color:var(--text-soft);line-height:1.5;">
+        <span style="color:var(--text-muted);font-size:0.7rem;margin-right:8px;">${i+1}.</span>
+        ${escHtml(t.trim())}
+      </div>
+    `).join('');
+  }
+
+  // ── Filter + Table ──
+  function applyFilters() {
+    const search    = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const yearF     = document.getElementById('filterYear')?.value || '';
+    const npsF      = document.getElementById('filterNPS')?.value || '';
+    const ratingF   = parseInt(document.getElementById('filterRating')?.value || '0');
+
+    filteredData = allData.filter(e => {
+      if (yearF && e.academicYear !== yearF) return false;
+      if (npsF && getNPSCategory(e.nps) !== npsF) return false;
+      if (ratingF) {
+        const avg = computeAvgRating(e);
+        if (!avg || avg < ratingF) return false;
+      }
+      if (search) {
+        const hay = [e.userName, e.liked, e.improve, e.featureReq, e.openComment, e.academicYear].join(' ').toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
+    });
+
+    currentPage = 1;
+    renderTable();
+    document.getElementById('responseCount').textContent = `(${filteredData.length} of ${allData.length})`;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('responseTableBody');
+    if (!tbody) return;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filteredData.slice(start, start + PAGE_SIZE);
+
+    if (!filteredData.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:28px">No responses match the current filters.</td></tr>`;
+      renderPagination(0);
+      return;
+    }
+
+    tbody.innerHTML = page.map((e, i) => {
+      const num = start + i + 1;
+      const date = new Date(e.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
+      const avg  = computeAvgRating(e);
+      const npsLabel = getNPSCategory(e.nps);
+      const npsBadge = e.nps ? `<span class="nps-pill ${npsLabel}">${e.nps}</span>` : '—';
+      return `
+        <tr onclick="openDetail(${allData.indexOf(e)})" title="Click to view full response">
+          <td style="color:var(--text-muted)">${num}</td>
+          <td style="font-weight:600;color:var(--text-primary)">${escHtml(e.userName || 'Anonymous')}</td>
+          <td>${date}</td>
+          <td>${escHtml(e.academicYear || '—')}</td>
+          <td>${avg ? `${'⭐'.repeat(Math.round(avg))} ${avg.toFixed(1)}` : '—'}</td>
+          <td>${npsBadge}</td>
+          <td>${escHtml(e.stressFrequency || '—')}</td>
+          <td>${escHtml((e.liked || '').substring(0, 50) + ((e.liked||'').length > 50 ? '…' : ''))}</td>
+          <td><button onclick="event.stopPropagation();openDetail(${allData.indexOf(e)})" class="pg-btn" style="padding:4px 10px;font-size:0.72rem">View</button></td>
+        </tr>`;
+    }).join('');
+
+    renderPagination(filteredData.length);
+  }
+
+  function renderPagination(total) {
+    const pg = document.getElementById('pagination');
+    if (!pg) return;
+    const pages = Math.ceil(total / PAGE_SIZE);
+    if (pages <= 1) { pg.innerHTML = ''; return; }
+
+    let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}>← Prev</button>`;
+    for (let i = 1; i <= pages; i++) {
+      if (pages <= 7 || Math.abs(i - currentPage) <= 2 || i === 1 || i === pages) {
+        html += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+      } else if (Math.abs(i - currentPage) === 3) {
+        html += `<span class="pg-info">…</span>`;
+      }
+    }
+    html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=pages?'disabled':''}>Next →</button>`;
+    html += `<span class="pg-info">${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE,total)} of ${total}</span>`;
+    pg.innerHTML = html;
+  }
+
+  function goPage(p) {
+    const pages = Math.ceil(filteredData.length / PAGE_SIZE);
+    currentPage = Math.max(1, Math.min(p, pages));
+    renderTable();
+    document.getElementById('responseTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Detail Modal ──
+  function openDetail(idx) {
+    const e = allData[idx];
+    if (!e) return;
+    const m = document.getElementById('detailModal');
+    const c = document.getElementById('detailContent');
+    if (!m || !c) return;
+
+    const avg = computeAvgRating(e);
+    const date = new Date(e.timestamp).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+
+    c.innerHTML = `
+      <div class="detail-field"><div class="detail-field-label">User</div><div class="detail-field-value">${escHtml(e.userName || 'Anonymous')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Submitted</div><div class="detail-field-value">${date}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Academic Year</div><div class="detail-field-value">${escHtml(e.academicYear || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Stress Frequency</div><div class="detail-field-value">${escHtml(e.stressFrequency || '—')}</div></div>
+      <div class="detail-field">
+        <div class="detail-field-label">Feature Ratings</div>
+        <div class="detail-ratings">
+          ${Object.entries(e.ratings || {}).map(([k,v]) => v > 0 ? `<span class="detail-rating-chip">${k}: ${'★'.repeat(v)}${'☆'.repeat(5-v)}</span>` : '').join('')}
+          ${avg ? `<span class="detail-rating-chip" style="background:rgba(94,196,182,0.15);border-color:rgba(94,196,182,0.3);color:#5ec4b6">Avg: ${avg.toFixed(2)}</span>` : ''}
+        </div>
+      </div>
+      <div class="detail-field"><div class="detail-field-label">NPS Score</div><div class="detail-field-value">${e.nps ? `${e.nps}/10 — <span class="nps-pill ${getNPSCategory(e.nps)}">${getNPSCategory(e.nps)}</span>` : '—'}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Breathing Preference</div><div class="detail-field-value">${escHtml(e.breathingPref || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Session Duration</div><div class="detail-field-value">${escHtml(e.sessionDuration || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Preferred Time</div><div class="detail-field-value">${escHtml(e.preferredTime || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Primary Device</div><div class="detail-field-value">${escHtml(e.preferredPlatform || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">SOS Experience</div><div class="detail-field-value">${escHtml(e.sosPreference || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Most Used Features</div><div class="detail-field-value">${(e.mostUsed || []).join(', ') || '—'}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Liked Most</div><div class="detail-field-value">${escHtml(e.liked || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Improve</div><div class="detail-field-value">${escHtml(e.improve || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Feature Request</div><div class="detail-field-value">${escHtml(e.featureReq || '—')}</div></div>
+      <div class="detail-field"><div class="detail-field-label">Open Comment</div><div class="detail-field-value">${escHtml(e.openComment || '—')}</div></div>
+    `;
+
+    document.getElementById('detailTitle').textContent = `Response — ${e.userName || 'Anonymous'}`;
+    m.classList.add('show');
+    document.documentElement.classList.add('detail-open');
+  }
+
+  function closeDetail() {
+    document.getElementById('detailModal')?.classList.remove('show');
+    document.documentElement.classList.remove('detail-open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  document.getElementById('detailModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
+
+  // ── Export JSON ──
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `Placida_Feedback_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ JSON exported!');
+  }
+
+  // ── Export Excel (XLSX via SheetJS) ──
+  async function exportExcel() {
+    const btn = document.getElementById('exportExcelBtn');
+    const status = document.getElementById('exportStatus');
+    if (!allData.length) { showToast('⚠️ No feedback data to export.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Preparing Excel…';
+    status.textContent = 'Loading SheetJS…';
+
+    // Lazy-load SheetJS
+    if (!window.XLSX) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      }).catch(() => {
+        showToast('❌ Failed to load SheetJS. Check your internet connection.');
+        btn.disabled = false; btn.textContent = '📥 Export Excel (XLSX)'; status.textContent = '';
+        return null;
+      });
+      if (!window.XLSX) return;
+    }
+
+    status.textContent = 'Building sheets…';
+    const wb = XLSX.utils.book_new();
+
+    // ── Sheet 1: Raw Responses ──
+    const rawRows = allData.map((e, i) => ({
+      '#': i + 1,
+      'Submitted At': new Date(e.timestamp).toLocaleString('en-IN'),
+      'User Name': e.userName || 'Anonymous',
+      'Academic Year': e.academicYear || '',
+      'Stress Frequency': e.stressFrequency || '',
+      'Rating: Mood Logger': e.ratings?.moodlogger || '',
+      'Rating: Dashboard': e.ratings?.dashboard || '',
+      'Rating: Breathing': e.ratings?.breathing || '',
+      'Rating: AI Chat': e.ratings?.chat || '',
+      'Rating: Journal': e.ratings?.journal || '',
+      'Avg Rating': computeAvgRating(e)?.toFixed(2) || '',
+      'NPS Score': e.nps || '',
+      'NPS Category': getNPSCategory(e.nps),
+      'Breathing Pref': e.breathingPref || '',
+      'Session Duration': e.sessionDuration || '',
+      'Preferred Time': e.preferredTime || '',
+      'Primary Device': e.preferredPlatform || '',
+      'SOS Experience': e.sosPreference || '',
+      'Most Used Features': (e.mostUsed || []).join(', '),
+      'Liked Most': e.liked || '',
+      'Improve': e.improve || '',
+      'Feature Request': e.featureReq || '',
+      'Open Comment': e.openComment || '',
+    }));
+    const ws1 = XLSX.utils.json_to_sheet(rawRows);
+    setColWidths(ws1, rawRows);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Raw Responses');
+
+    // ── Sheet 2: Analytics Summary ──
+    const featureKeys = ['moodlogger','dashboard','breathing','chat','journal'];
+    const featureLabels = ['Mood Logger','Dashboard','Breathing','AI Chat','Journal'];
+    const featureAvgRow = {};
+    featureKeys.forEach((k, i) => {
+      const vals = allData.map(e => e.ratings?.[k]).filter(v => v && v > 0);
+      featureAvgRow[`Avg: ${featureLabels[i]}`] = vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : 'N/A';
+    });
+    const npsVals = allData.map(e => e.nps).filter(v => v && v > 0);
+    const promoters  = npsVals.filter(n => n >= 9).length;
+    const passives   = npsVals.filter(n => n >= 7 && n <= 8).length;
+    const detractors = npsVals.filter(n => n <= 6).length;
+    const nps = npsVals.length ? Math.round(((promoters-detractors)/npsVals.length)*100) : 'N/A';
+    const summaryRows = [
+      { 'Metric': 'Total Responses', 'Value': allData.length },
+      { 'Metric': 'Overall Avg Rating', 'Value': featureAvgRow },
+      ...featureKeys.map((k, i) => ({ 'Metric': `Avg Rating: ${featureLabels[i]}`, 'Value': featureAvgRow[`Avg: ${featureLabels[i]}`] })),
+      { 'Metric': 'NPS Score', 'Value': nps },
+      { 'Metric': 'NPS Promoters', 'Value': promoters },
+      { 'Metric': 'NPS Passives', 'Value': passives },
+      { 'Metric': 'NPS Detractors', 'Value': detractors },
+      { 'Metric': 'Completion Rate (all 5 rated)', 'Value': `${Math.round((allData.filter(e=>featureKeys.every(k=>e.ratings?.[k]>0)).length/allData.length)*100)}%` },
+    ];
+    const ws2 = XLSX.utils.json_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Analytics Summary');
+
+    // ── Sheet 3: Feature Usage ──
+    const featureUsage = {};
+    allData.forEach(e => (e.mostUsed||[]).forEach(f => { featureUsage[f] = (featureUsage[f]||0)+1; }));
+    const featureRows = Object.entries(featureUsage).sort((a,b)=>b[1]-a[1]).map(([feature,count]) => ({ Feature: feature, Count: count, '% of Users': `${Math.round((count/allData.length)*100)}%` }));
+    const ws3 = XLSX.utils.json_to_sheet(featureRows);
+    XLSX.utils.book_append_sheet(wb, ws3, 'Feature Usage');
+
+    // ── Sheet 4: Improvement Requests ──
+    const impRows = allData.filter(e => e.improve || e.featureReq || e.openComment).map(e => ({
+      'User': e.userName || 'Anonymous',
+      'Improvement': e.improve || '',
+      'Feature Request': e.featureReq || '',
+      'Open Comment': e.openComment || '',
+      'Date': new Date(e.timestamp).toLocaleDateString('en-IN'),
+    }));
+    const ws4 = XLSX.utils.json_to_sheet(impRows);
+    XLSX.utils.book_append_sheet(wb, ws4, 'Improvement Requests');
+
+    // ── Sheet 5: User Segmentation ──
+    const yearMap = {};
+    allData.forEach(e => {
+      const yr = e.academicYear || 'Unknown';
+      if (!yearMap[yr]) yearMap[yr] = { count: 0, ratingSum: 0, ratingCount: 0, npsSum: 0, npsCount: 0 };
+      yearMap[yr].count++;
+      const avg = computeAvgRating(e);
+      if (avg) { yearMap[yr].ratingSum += avg; yearMap[yr].ratingCount++; }
+      if (e.nps) { yearMap[yr].npsSum += e.nps; yearMap[yr].npsCount++; }
+    });
+    const segRows = Object.entries(yearMap).map(([yr, s]) => ({
+      'Academic Year': yr,
+      'Responses': s.count,
+      'Avg Rating': s.ratingCount ? (s.ratingSum/s.ratingCount).toFixed(2) : 'N/A',
+      'Avg NPS': s.npsCount ? (s.npsSum/s.npsCount).toFixed(1) : 'N/A',
+    }));
+    const ws5 = XLSX.utils.json_to_sheet(segRows);
+    XLSX.utils.book_append_sheet(wb, ws5, 'User Segmentation');
+
+    // ── Sheet 6: Platform Preferences ──
+    const platMap = countBy(allData.filter(e => e.preferredPlatform), 'preferredPlatform');
+    const platRows = Object.entries(platMap).sort((a,b)=>b[1]-a[1]).map(([p,c]) => ({ 'Platform': p, 'Count': c, '% of Users': `${Math.round((c/allData.length)*100)}%` }));
+    const ws6 = XLSX.utils.json_to_sheet(platRows);
+    XLSX.utils.book_append_sheet(wb, ws6, 'Platform Preferences');
+
+    // Write and download
+    const fname = `Placida_Feedback_Report_${new Date().toISOString().replace('T','_').substring(0,16).replace(':','-')}.xlsx`;
+    XLSX.writeFile(wb, fname);
+    showToast(`✅ Excel exported: ${fname}`);
+    status.textContent = `✅ ${fname}`;
+    btn.disabled = false;
+    btn.textContent = '📥 Export Excel (XLSX)';
+  }
+
+  // Auto-size columns
+  function setColWidths(ws, rows) {
+    if (!rows.length) return;
+    const keys = Object.keys(rows[0]);
+    ws['!cols'] = keys.map(k => {
+      const maxLen = Math.max(k.length, ...rows.map(r => String(r[k] ?? '').length));
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+    });
+    ws['!freeze'] = { xSplit: 0, ySplit: 1 }; // freeze header row
+  }
+
+  // ── Init ──
+  loadData();
+  </script>
+
+</body>
+</html>

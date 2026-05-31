@@ -51,7 +51,7 @@
     <!-- ── Dashboard Header (Week 2: time-aware greeting + streak) ── -->
     <header class="dashboard-header" aria-label="Dashboard header">
       <h1 class="greeting" id="dashGreeting">
-        Hi, <span>Sahil</span> 👋
+        Hi, <span>...</span> 👋
       </h1>
       <p class="greeting-sub" id="dashGreetingSub">Here's a snapshot of your emotional wellness journey.</p>
     </header>
@@ -297,8 +297,8 @@
   <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
   <script src="script.js"></script>
   <script>
-    function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.body.style.overflow='hidden'; }
-    function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.body.style.overflow=''; }
+    function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.documentElement.classList.add('sos-open'); }
+    function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.documentElement.classList.remove('sos-open'); }
     document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });
     document.addEventListener('keydown', e => { if(e.key==='Escape') closeSOS(); });
   </script>

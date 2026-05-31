@@ -550,17 +550,20 @@ function renderWeeklyHistory(moods) {
   container.innerHTML = moods.slice(0, 7).map(entry => {
     const d = new Date(entry.timestamp);
     const dayLabel = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+    // BUG-003: escape note to prevent XSS before injecting into innerHTML
+    const safeNote = entry.note ? escapeHtmlChat(String(entry.note)) : '';
     return `
       <div class="mood-entry">
         <div class="entry-emoji">${entry.emoji}</div>
         <div class="entry-info">
           <div class="entry-mood">${entry.label}</div>
-          ${entry.note ? `<div class="entry-note">${entry.note}</div>` : ''}
+          ${safeNote ? `<div class="entry-note">${safeNote}</div>` : ''}
         </div>
         <div class="entry-time">${dayLabel}</div>
       </div>`;
   }).join('');
 }
+
 
 
 /* ══════════════════════════════════════

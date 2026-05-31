@@ -410,12 +410,12 @@
     // SOS Logic
     function openSOS()  { 
       document.getElementById('sosModal').classList.add('show'); 
-      document.body.style.overflow='hidden'; 
+      document.documentElement.classList.add('sos-open');
       sosNextStep(0); 
     }
     function closeSOS() { 
       document.getElementById('sosModal').classList.remove('show'); 
-      document.body.style.overflow=''; 
+      document.documentElement.classList.remove('sos-open');
     }
     function sosNextStep(step) {
       document.getElementById('sosStep0').style.display = (step === 0) ? 'block' : 'none';

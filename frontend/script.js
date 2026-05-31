@@ -37,7 +37,7 @@ function escapeHtml(text) {
 
 function formatTime(isoString) {
   const date = new Date(isoString);
-  const diff = (Date.now() - date) / 1000;
+  const diff = Math.max(0, (Date.now() - date) / 1000); // BUG-006: guard negative diff
   if (diff < 60)    return 'Just now';
   if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -155,18 +155,27 @@ function renderGreeting(userName) {
 }
 
 function renderGreetingWithAuth() {
+  // Always render immediately with cached name to avoid blank flash
+  renderGreeting();
   const doRender = (user) => {
-    const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || null;
-    if (name) localStorage.setItem('placida_user_name', name);
-    renderGreeting(name);
+    if (user) {
+      const meta = user.user_metadata || {};
+      // Priority: full_name > name > display_name > email prefix
+      const name = meta.full_name || meta.name || meta.display_name || user.email?.split('@')[0] || null;
+      if (name) {
+        localStorage.setItem('placida_user_name', name); // refresh cache
+        renderGreeting(name.split(' ')[0]);              // use first name only
+        return;
+      }
+    }
+    renderGreeting(); // fallback to cached or 'Friend'
   };
   if (window.supabase) {
     window.supabase.auth.getUser().then(({ data }) => doRender(data?.user)).catch(() => renderGreeting());
   } else {
     document.addEventListener('supabase:ready', () => {
-      window.supabase.auth.getUser().then(({ data }) => doRender(data?.user)).catch(() => renderGreeting());
+      window.supabase?.auth.getUser().then(({ data }) => doRender(data?.user)).catch(() => renderGreeting());
     }, { once: true });
-    renderGreeting();
   }
 }
 
