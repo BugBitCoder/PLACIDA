@@ -27,9 +27,14 @@ Mental health support should feel approachable, safe, and easy to use. Placida a
 - **Session History**: Track your progress over time.
 
 ### 💬 AI Chatbot Support
-- **Supportive Conversations**: Scripted emotional support engine.
-- **Quick-Reply Chips**: Faster interaction for common feelings.
+- **Supportive Conversations**: Free, keyless LLM AI support via Pollinations.
+- **Multilingual**: Naturally understands and replies in the user's language.
 - **Persistence**: Chat history is saved locally for follow-up.
+
+### 🌍 Community
+- **Affirmation Wall**: Globally synced, real-time messages powered by Supabase.
+- **Anonymous Mood Poll**: See how the community is feeling today.
+- **Daily Challenges**: Complete and track small wellness challenges.
 
 ### 📓 Weekly Summary
 - **7-Day Review**: See your emoji trends at a glance.
@@ -45,8 +50,10 @@ Mental health support should feel approachable, safe, and easy to use. Placida a
 
 ## 🛠️ Tech Stack
 - **Frontend**: HTML5, CSS3 (Glassmorphism), Vanilla JavaScript.
+- **Backend/DB**: Supabase (Real-time Affirmations & Auth).
+- **AI**: Pollinations AI (Free LLM endpoint).
 - **Library**: [Chart.js v4.4.0](https://www.chartjs.org/).
-- **Persistence**: `localStorage` (No backend database).
+- **Persistence**: `localStorage` (Offline fallbacks).
 - **Icons**: Unicode Emojis.
 - **Fonts**: [Google Fonts — Inter](https://fonts.google.com/specimen/Inter).
 
