@@ -308,12 +308,12 @@
   <main class="page-wrapper" style="padding-top:0">
 
   <!-- ADMIN PASSCODE OVERLAY -->
-  <div id="adminAuthOverlay" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
-    <div class="card" style="max-width:400px;width:100%;text-align:center;animation: fadeIn 0.5s ease;">
-      <div class="card-icon">🔒</div>
-      <h2>Creator Access Only</h2>
-      <p style="color:var(--text-muted);margin:10px 0 20px;">Enter the admin passcode to view combined feedback analytics.</p>
-      <input type="password" id="adminPasscode" class="pg-input" placeholder="Passcode" style="text-align:center;margin-bottom:15px;" onkeypress="if(event.key === 'Enter') checkAdminAuth()">
+  <div id="adminAuthOverlay" style="position:fixed;inset:0;background:#0d0f1a;background:rgba(13, 15, 26, 0.98);backdrop-filter:blur(10px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
+    <div class="card" style="max-width:400px;width:100%;text-align:center;animation: fadeIn 0.5s ease;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+      <div class="card-icon" style="font-size:3rem;margin-bottom:15px;">🔒</div>
+      <h2 style="font-size:1.8rem;margin-bottom:10px;">Creator Access Only</h2>
+      <p style="color:var(--text-muted, #a1a1aa);margin:10px 0 25px;line-height:1.5;">Enter the admin passcode to view combined feedback analytics.</p>
+      <input type="password" id="adminPasscode" class="pg-input" placeholder="Passcode" style="text-align:center;margin-bottom:15px;width:100%;" onkeypress="if(event.key === 'Enter') checkAdminAuth()">
       <button class="pg-btn" onclick="checkAdminAuth()" style="width:100%">Unlock Dashboard</button>
       <p id="adminAuthError" style="color:#f06b8b;margin-top:15px;font-size:0.85rem;display:none;">Incorrect passcode.</p>
     </div>
