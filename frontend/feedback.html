@@ -184,8 +184,7 @@
 
         <div class="input-group">
           <label for="feedbackImprove">🔧 What would you improve?</label>
-          <textarea id="feedbackImprove" rows="3"
-            placeholder="e.g. I wish the chatbot had more responses for anxiety…"
+          <textarea id="feedbackImprove" rows="3" placeholder="e.g. I wish the chatbot had more responses for anxiety…"
             aria-label="What to improve"></textarea>
         </div>
 
@@ -213,7 +212,8 @@
       </div><!-- /open-ended card -->
 
       <!-- ── Extended Survey Card ── -->
-      <div class="glass-card col-span-2" aria-label="Extended survey" id="extendedSurveyCard" style="animation-delay:0.15s">
+      <div class="glass-card col-span-2" aria-label="Extended survey" id="extendedSurveyCard"
+        style="animation-delay:0.15s">
         <div class="card-header">
           <div class="card-icon purple" aria-hidden="true">📊</div>
           <div>
@@ -318,15 +318,24 @@
           <div class="input-group" style="grid-column: 1 / -1;">
             <label>✅ Most Used Features <span style="opacity:.6;font-weight:400">(select all that apply)</span></label>
             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Mood Logger"> 🌙 Mood Logger</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Dashboard"> 📊 Dashboard</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Breathing"> 🌬️ Breathing</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="AI Chat"> 💬 AI Chat</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Journal"> 📓 Journal</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Meditation"> 🧘 Meditation</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Relax Games"> 🎮 Relax Games</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Community"> 🌍 Community</label>
-              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Insights"> 📈 Insights</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Mood Logger"> 🌙 Mood
+                Logger</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Dashboard"> 📊
+                Dashboard</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Breathing"> 🌬️
+                Breathing</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="AI Chat"> 💬 AI
+                Chat</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Journal"> 📓
+                Journal</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Meditation"> 🧘
+                Meditation</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Relax Games"> 🎮 Relax
+                Games</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Community"> 🌍
+                Community</label>
+              <label class="checkbox-chip"><input type="checkbox" class="most-used-cb" value="Insights"> 📈
+                Insights</label>
             </div>
           </div>
 
@@ -348,7 +357,9 @@
           <button id="exportFeedbackBtn" class="btn-secondary" onclick="exportFeedback()" aria-label="Export as JSON">
             Export JSON ↓
           </button>
-          <a href="admin.html" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;text-align:center;padding:13px 20px;font-size:0.88rem;font-weight:600;" aria-label="View analytics dashboard">
+          <a href="admin.html" class="btn-secondary"
+            style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;text-align:center;padding:13px 20px;font-size:0.88rem;font-weight:600;"
+            aria-label="View analytics dashboard">
             📊 Analytics
           </a>
         </div>
@@ -378,8 +389,10 @@
     <div id="thankYouCard" class="thank-you-card" style="display:none;" aria-live="polite">
       <div class="ty-emoji">🎉</div>
       <h2 id="thankYouHeading">Thank you!</h2>
-      <p>Your feedback has been saved and will help us improve Placida for everyone. The team appreciates you taking the time.</p>
-      <button class="btn-primary" onclick="resetForm()" style="max-width:240px;margin:0 auto;" aria-label="Submit another response">
+      <p>Your feedback has been saved and will help us improve Placida for everyone. The team appreciates you taking the
+        time.</p>
+      <button class="btn-primary" onclick="resetForm()" style="max-width:240px;margin:0 auto;"
+        aria-label="Submit another response">
         Submit Another
       </button>
     </div>
@@ -402,7 +415,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="supabase.js"></script>
-  <script>document.addEventListener('supabase:ready', () => { if(window.supabase) requireAuth(); });</script>
+  <script>document.addEventListener('supabase:ready', () => { if (window.supabase) requireAuth(); });</script>
 
   <script>
     /* ================================================
@@ -413,10 +426,10 @@
     // ── State ──
     const ratings = {
       moodlogger: 0,
-      dashboard:  0,
-      breathing:  0,
-      chat:       0,
-      journal:    0
+      dashboard: 0,
+      breathing: 0,
+      chat: 0,
+      journal: 0
     };
     let npsScore = 0;
 
@@ -425,8 +438,8 @@
     // ── Star Rating Logic ──
     document.querySelectorAll('.star-group').forEach(group => {
       const feature = group.dataset.feature;
-      const stars   = group.querySelectorAll('.star-btn');
-      const label   = document.getElementById('label-' + feature);
+      const stars = group.querySelectorAll('.star-btn');
+      const label = document.getElementById('label-' + feature);
 
       stars.forEach((star, idx) => {
         // Hover preview
@@ -448,9 +461,9 @@
 
     function highlightStars(stars, count, permanent) {
       stars.forEach((s, i) => {
-        s.classList.toggle('star-active',  i < count);
-        s.classList.toggle('star-hover',   !permanent && i < count);
-        s.classList.toggle('star-filled',  permanent  && i < count);
+        s.classList.toggle('star-active', i < count);
+        s.classList.toggle('star-hover', !permanent && i < count);
+        s.classList.toggle('star-filled', permanent && i < count);
       });
     }
 
@@ -459,9 +472,9 @@
       const row = document.getElementById('npsRow');
       for (let i = 1; i <= 10; i++) {
         const btn = document.createElement('button');
-        btn.className   = 'nps-btn';
+        btn.className = 'nps-btn';
         btn.textContent = i;
-        btn.id          = 'nps-' + i;
+        btn.id = 'nps-' + i;
         btn.setAttribute('aria-label', `Score ${i} out of 10`);
         btn.addEventListener('click', () => {
           npsScore = i;
@@ -489,7 +502,7 @@
             }
             if (user.email) return user.email.split('@')[0];
           }
-        } catch {}
+        } catch { }
       }
       // 2) Try cached name from localStorage (offline fallback)
       const cached = localStorage.getItem('placida_user_name');
@@ -510,24 +523,24 @@
       const displayName = await getUserDisplayName();
 
       const entry = {
-        id:          Date.now(),
-        timestamp:   new Date().toISOString(),
-        userName:    displayName,
-        ratings:     { ...ratings },
-        nps:         npsScore,
-        liked:       document.getElementById('feedbackLike').value.trim(),
-        improve:     document.getElementById('feedbackImprove').value.trim(),
-        featureReq:  document.getElementById('feedbackFeature').value.trim(),
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        userName: displayName,
+        ratings: { ...ratings },
+        nps: npsScore,
+        liked: document.getElementById('feedbackLike').value.trim(),
+        improve: document.getElementById('feedbackImprove').value.trim(),
+        featureReq: document.getElementById('feedbackFeature').value.trim(),
         // Extended fields
-        academicYear:      (document.getElementById('academicYear')?.value || '').trim(),
-        stressFrequency:   (document.getElementById('stressFrequency')?.value || '').trim(),
-        breathingPref:     (document.getElementById('breathingPref')?.value || '').trim(),
-        sessionDuration:   (document.getElementById('sessionDuration')?.value || '').trim(),
-        preferredTime:     (document.getElementById('preferredTime')?.value || '').trim(),
+        academicYear: (document.getElementById('academicYear')?.value || '').trim(),
+        stressFrequency: (document.getElementById('stressFrequency')?.value || '').trim(),
+        breathingPref: (document.getElementById('breathingPref')?.value || '').trim(),
+        sessionDuration: (document.getElementById('sessionDuration')?.value || '').trim(),
+        preferredTime: (document.getElementById('preferredTime')?.value || '').trim(),
         preferredPlatform: (document.getElementById('preferredPlatform')?.value || '').trim(),
-        sosPreference:     (document.getElementById('sosPreference')?.value || '').trim(),
-        mostUsed:          [...document.querySelectorAll('.most-used-cb:checked')].map(c => c.value),
-        openComment:       (document.getElementById('openComment')?.value || '').trim()
+        sosPreference: (document.getElementById('sosPreference')?.value || '').trim(),
+        mostUsed: [...document.querySelectorAll('.most-used-cb:checked')].map(c => c.value),
+        openComment: (document.getElementById('openComment')?.value || '').trim()
       };
 
       // Duplicate prevention: warn if same session already submitted within 1 hour
@@ -545,30 +558,30 @@
           const { data: authData } = await window.supabase.auth.getUser().catch(() => ({ data: {} }));
           const user = authData?.user;
           await window.supabase.from('feedback_responses').insert({
-            user_id:            user?.id || null,
-            user_name:          displayName,
-            user_email:         user?.email || null,
-            academic_year:      entry.academicYear,
-            stress_frequency:   entry.stressFrequency,
-            rating_moodlogger:  entry.ratings.moodlogger || null,
-            rating_dashboard:   entry.ratings.dashboard || null,
-            rating_breathing:   entry.ratings.breathing || null,
-            rating_chat:        entry.ratings.chat || null,
-            rating_journal:     entry.ratings.journal || null,
-            nps_score:          entry.nps || null,
+            user_id: user?.id || null,
+            user_name: displayName,
+            user_email: user?.email || null,
+            academic_year: entry.academicYear,
+            stress_frequency: entry.stressFrequency,
+            rating_moodlogger: entry.ratings.moodlogger || null,
+            rating_dashboard: entry.ratings.dashboard || null,
+            rating_breathing: entry.ratings.breathing || null,
+            rating_chat: entry.ratings.chat || null,
+            rating_journal: entry.ratings.journal || null,
+            nps_score: entry.nps || null,
             breathing_preference: entry.breathingPref,
-            session_duration:   entry.sessionDuration,
+            session_duration: entry.sessionDuration,
             most_used_features: entry.mostUsed,
             requested_improvements: entry.improve,
-            preferred_time:     entry.preferredTime,
+            preferred_time: entry.preferredTime,
             preferred_platform: entry.preferredPlatform,
-            sos_preference:     entry.sosPreference,
-            liked_most:         entry.liked,
-            improve:            entry.improve,
-            open_comment:       entry.openComment,
-            submitted_at:       entry.timestamp
-          }).catch(() => {}); // silent fail if table doesn't exist yet
-        } catch {}
+            sos_preference: entry.sosPreference,
+            liked_most: entry.liked,
+            improve: entry.improve,
+            open_comment: entry.openComment,
+            submitted_at: entry.timestamp
+          }).catch(() => { }); // silent fail if table doesn't exist yet
+        } catch { }
       }
 
       // Show thank you with personalized name
@@ -587,19 +600,19 @@
     // ── Export as JSON ──
     function exportFeedback() {
       const entry = {
-        timestamp:  new Date().toISOString(),
-        ratings:    { ...ratings },
-        nps:        npsScore,
-        liked:      document.getElementById('feedbackLike').value.trim(),
-        improve:    document.getElementById('feedbackImprove').value.trim(),
+        timestamp: new Date().toISOString(),
+        ratings: { ...ratings },
+        nps: npsScore,
+        liked: document.getElementById('feedbackLike').value.trim(),
+        improve: document.getElementById('feedbackImprove').value.trim(),
         featureReq: document.getElementById('feedbackFeature').value.trim()
       };
 
       const json = JSON.stringify(entry, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
       a.download = `placida_feedback_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
@@ -633,7 +646,7 @@
 
     // ── Load Past Feedback ──
     function loadPastFeedback() {
-      const all  = JSON.parse(localStorage.getItem('placida_feedback') || '[]');
+      const all = JSON.parse(localStorage.getItem('placida_feedback') || '[]');
       const card = document.getElementById('pastFeedbackCard');
       const list = document.getElementById('pastFeedbackList');
 
@@ -648,15 +661,15 @@
           dateStyle: 'medium', timeStyle: 'short'
         });
         const ratingStr = Object.entries(entry.ratings)
-          .filter(([,v]) => v > 0)
-          .map(([k, v]) => `<span class="past-rating-chip">${featureEmoji(k)} ${'★'.repeat(v)}${'☆'.repeat(5-v)}</span>`)
+          .filter(([, v]) => v > 0)
+          .map(([k, v]) => `<span class="past-rating-chip">${featureEmoji(k)} ${'★'.repeat(v)}${'☆'.repeat(5 - v)}</span>`)
           .join('');
 
         return `
           <div class="past-entry" aria-label="Feedback submitted ${date}">
             <div class="past-entry-date">${date}${entry.nps ? ` &nbsp;·&nbsp; NPS: <strong>${entry.nps}/10</strong>` : ''}</div>
             <div class="past-ratings-row">${ratingStr || '<span style="opacity:.5;font-size:.8rem;">No ratings</span>'}</div>
-            ${entry.liked   ? `<div class="past-text"><span class="past-text-label">💚 Liked:</span> ${escHtml(entry.liked)}</div>` : ''}
+            ${entry.liked ? `<div class="past-text"><span class="past-text-label">💚 Liked:</span> ${escHtml(entry.liked)}</div>` : ''}
             ${entry.improve ? `<div class="past-text"><span class="past-text-label">🔧 Improve:</span> ${escHtml(entry.improve)}</div>` : ''}
           </div>`;
       }).join('');
@@ -670,11 +683,11 @@
     }
 
     function featureEmoji(key) {
-      return { moodlogger:'🌙', dashboard:'📊', breathing:'🌬️', chat:'💬', journal:'📓' }[key] || '⭐';
+      return { moodlogger: '🌙', dashboard: '📊', breathing: '🌬️', chat: '💬', journal: '📓' }[key] || '⭐';
     }
 
     function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     // ── Toast ──
@@ -696,26 +709,97 @@
   <div class="sos-modal" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosModalTitle">
     <div class="sos-dialog">
       <button class="sos-close-btn" onclick="closeSOS()" aria-label="Close">✕</button>
-      <div class="sos-dialog-header"><div class="sos-dialog-icon">🆘</div><div><div class="sos-dialog-title" id="sosModalTitle">You are not alone.</div><div class="sos-dialog-subtitle">Free, confidential mental health support — right now.</div></div></div>
+      <div class="sos-dialog-header">
+        <div class="sos-dialog-icon">🆘</div>
+        <div>
+          <div class="sos-dialog-title" id="sosModalTitle">You are not alone.</div>
+          <div class="sos-dialog-subtitle">Free, confidential mental health support — right now.</div>
+        </div>
+      </div>
       <div class="sos-section-label">🏛️ Government Helplines — Free &amp; Official</div>
-      <a href="tel:18005990019" class="sos-helpline priority"><div class="sos-helpline-emoji">📞</div><div class="sos-helpline-info"><div class="sos-helpline-name">KIRAN <span class="sos-priority-badge">Govt. of India</span></div><div class="sos-helpline-org">Ministry of Social Justice &amp; Empowerment</div><div class="sos-tags"><span class="sos-tag">Toll-Free</span><span class="sos-tag">24/7</span><span class="sos-tag">13 Languages</span></div></div><div class="sos-helpline-number">1800-599-0019</div></a>
-      <a href="tel:08046110007" class="sos-helpline priority"><div class="sos-helpline-emoji">🏥</div><div class="sos-helpline-info"><div class="sos-helpline-name">NIMHANS <span class="sos-priority-badge">Govt. of India</span></div><div class="sos-helpline-org">Nat. Institute of Mental Health &amp; Neuro Sciences</div><div class="sos-tags"><span class="sos-tag">Free</span><span class="sos-tag">Expert Support</span></div></div><div class="sos-helpline-number">080-4611-0007</div></a>
-      <a href="tel:14416" class="sos-helpline priority"><div class="sos-helpline-emoji">🧠</div><div class="sos-helpline-info"><div class="sos-helpline-name">SNEHI Short Code <span class="sos-priority-badge">Govt.</span></div><div class="sos-helpline-org">National Mental Health Programme</div><div class="sos-tags"><span class="sos-tag">Toll-Free</span></div></div><div class="sos-helpline-number">14416</div></a>
+      <a href="tel:18005990019" class="sos-helpline priority">
+        <div class="sos-helpline-emoji">📞</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">KIRAN <span class="sos-priority-badge">Govt. of India</span></div>
+          <div class="sos-helpline-org">Ministry of Social Justice &amp; Empowerment</div>
+          <div class="sos-tags"><span class="sos-tag">Toll-Free</span><span class="sos-tag">24/7</span><span
+              class="sos-tag">13 Languages</span></div>
+        </div>
+        <div class="sos-helpline-number">1800-599-0019</div>
+      </a>
+      <a href="tel:08046110007" class="sos-helpline priority">
+        <div class="sos-helpline-emoji">🏥</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">NIMHANS <span class="sos-priority-badge">Govt. of India</span></div>
+          <div class="sos-helpline-org">Nat. Institute of Mental Health &amp; Neuro Sciences</div>
+          <div class="sos-tags"><span class="sos-tag">Free</span><span class="sos-tag">Expert Support</span></div>
+        </div>
+        <div class="sos-helpline-number">080-4611-0007</div>
+      </a>
+      <a href="tel:14416" class="sos-helpline priority">
+        <div class="sos-helpline-emoji">🧠</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">SNEHI Short Code <span class="sos-priority-badge">Govt.</span></div>
+          <div class="sos-helpline-org">National Mental Health Programme</div>
+          <div class="sos-tags"><span class="sos-tag">Toll-Free</span></div>
+        </div>
+        <div class="sos-helpline-number">14416</div>
+      </a>
       <div class="sos-section-label">🎓 Academic</div>
-      <a href="tel:9152987821" class="sos-helpline"><div class="sos-helpline-emoji">📱</div><div class="sos-helpline-info"><div class="sos-helpline-name">iCall — TISS</div><div class="sos-helpline-org">Tata Institute of Social Sciences</div><div class="sos-tags"><span class="sos-tag">Mon–Sat 8am–10pm</span></div></div><div class="sos-helpline-number">9152987821</div></a>
+      <a href="tel:9152987821" class="sos-helpline">
+        <div class="sos-helpline-emoji">📱</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">iCall — TISS</div>
+          <div class="sos-helpline-org">Tata Institute of Social Sciences</div>
+          <div class="sos-tags"><span class="sos-tag">Mon–Sat 8am–10pm</span></div>
+        </div>
+        <div class="sos-helpline-number">9152987821</div>
+      </a>
       <div class="sos-section-label">🌙 24×7 Crisis Lines</div>
-      <a href="tel:9820466627" class="sos-helpline"><div class="sos-helpline-emoji">🕯️</div><div class="sos-helpline-info"><div class="sos-helpline-name">AASRA</div><div class="sos-helpline-org">Suicide prevention &amp; crisis intervention</div><div class="sos-tags"><span class="sos-tag">24/7</span></div></div><div class="sos-helpline-number">9820466627</div></a>
-      <a href="tel:18602662345" class="sos-helpline"><div class="sos-helpline-emoji">💙</div><div class="sos-helpline-info"><div class="sos-helpline-name">Vandrevala Foundation</div><div class="sos-helpline-org">Mental health helpline, all ages</div><div class="sos-tags"><span class="sos-tag">24/7</span><span class="sos-tag">Confidential</span></div></div><div class="sos-helpline-number">1860-2662-345</div></a>
-      <a href="tel:04424640050" class="sos-helpline"><div class="sos-helpline-emoji">🤝</div><div class="sos-helpline-info"><div class="sos-helpline-name">Snehi</div><div class="sos-helpline-org">Emotional support, Chennai</div><div class="sos-tags"><span class="sos-tag">Mon–Sat 8am–10pm</span></div></div><div class="sos-helpline-number">044-24640050</div></a>
-      <a href="tel:01123389090" class="sos-helpline"><div class="sos-helpline-emoji">☀️</div><div class="sos-helpline-info"><div class="sos-helpline-name">Sumaitri</div><div class="sos-helpline-org">Emotional support, Delhi</div><div class="sos-tags"><span class="sos-tag">Daily 2pm–10pm</span></div></div><div class="sos-helpline-number">011-23389090</div></a>
+      <a href="tel:9820466627" class="sos-helpline">
+        <div class="sos-helpline-emoji">🕯️</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">AASRA</div>
+          <div class="sos-helpline-org">Suicide prevention &amp; crisis intervention</div>
+          <div class="sos-tags"><span class="sos-tag">24/7</span></div>
+        </div>
+        <div class="sos-helpline-number">9820466627</div>
+      </a>
+      <a href="tel:18602662345" class="sos-helpline">
+        <div class="sos-helpline-emoji">💙</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">Vandrevala Foundation</div>
+          <div class="sos-helpline-org">Mental health helpline, all ages</div>
+          <div class="sos-tags"><span class="sos-tag">24/7</span><span class="sos-tag">Confidential</span></div>
+        </div>
+        <div class="sos-helpline-number">1860-2662-345</div>
+      </a>
+      <a href="tel:04424640050" class="sos-helpline">
+        <div class="sos-helpline-emoji">🤝</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">Snehi</div>
+          <div class="sos-helpline-org">Emotional support, Chennai</div>
+          <div class="sos-tags"><span class="sos-tag">Mon–Sat 8am–10pm</span></div>
+        </div>
+        <div class="sos-helpline-number">044-24640050</div>
+      </a>
+      <a href="tel:01123389090" class="sos-helpline">
+        <div class="sos-helpline-emoji">☀️</div>
+        <div class="sos-helpline-info">
+          <div class="sos-helpline-name">Sumaitri</div>
+          <div class="sos-helpline-org">Emotional support, Delhi</div>
+          <div class="sos-tags"><span class="sos-tag">Daily 2pm–10pm</span></div>
+        </div>
+        <div class="sos-helpline-number">011-23389090</div>
+      </a>
       <p class="sos-modal-note">All calls are free and confidential. In immediate danger, call <strong>112</strong>.</p>
     </div>
   </div>
   <script>
-    function openSOS()  { document.getElementById('sosModal').classList.add('show'); document.documentElement.classList.add('sos-open'); }
+    function openSOS() { document.getElementById('sosModal').classList.add('show'); document.documentElement.classList.add('sos-open'); }
     function closeSOS() { document.getElementById('sosModal').classList.remove('show'); document.documentElement.classList.remove('sos-open'); }
-    document.getElementById('sosModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSOS(); });
-    document.addEventListener('keydown', e => { if(e.key==='Escape') closeSOS(); });
+    document.getElementById('sosModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSOS(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSOS(); });
   </script>
 
 </body>
