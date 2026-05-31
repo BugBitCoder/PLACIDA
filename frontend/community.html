@@ -347,46 +347,80 @@
 
   // ════════════════ AFFIRMATION WALL ════════════════
   const STARTER_MESSAGES = [
-    { text:"You don't have to have it all figured out. Just take one step forward.", time: Date.now()-3600000*2, likes:7, liked:false },
-    { text:"Studying is hard but you chose to show up today. That matters.", time: Date.now()-3600000*5, likes:12, liked:false },
-    { text:"Rest is not laziness. It is part of the process.", time: Date.now()-3600000*8, likes:19, liked:false },
-    { text:"You got through 100% of your bad days so far. You're doing better than you think.", time: Date.now()-86400000, likes:34, liked:false },
-    { text:"It's okay to ask for help. Strength is knowing when you need support.", time: Date.now()-86400000*2, likes:21, liked:false },
+    { id: 's1', text:"You don't have to have it all figured out. Just take one step forward.", time: Date.now()-3600000*2, likes:7, liked:false },
+    { id: 's2', text:"Studying is hard but you chose to show up today. That matters.", time: Date.now()-3600000*5, likes:12, liked:false },
+    { id: 's3', text:"Rest is not laziness. It is part of the process.", time: Date.now()-3600000*8, likes:19, liked:false },
+    { id: 's4', text:"You got through 100% of your bad days so far. You're doing better than you think.", time: Date.now()-86400000, likes:34, liked:false },
+    { id: 's5', text:"It's okay to ask for help. Strength is knowing when you need support.", time: Date.now()-86400000*2, likes:21, liked:false },
   ];
 
   const ANON_NAMES = ['A Stargazer','A Quiet Mind','A Fellow Student','A Kind Soul','A Night Owl','A Dreamer','A Wanderer','A Believer'];
+  let wallMessagesData = [...STARTER_MESSAGES];
 
-  function getWallData() {
+  async function fetchWallData() {
+    if (window.supabase) {
+      try {
+        const { data, error } = await window.supabase.from('affirmations').select('*').order('created_at', { ascending: false }).limit(30);
+        if (!error && data && data.length > 0) {
+          wallMessagesData = data.map(m => ({
+            id: m.id,
+            text: m.text,
+            time: new Date(m.created_at).getTime(),
+            likes: m.likes || 0,
+            liked: localStorage.getItem('liked_aff_' + m.id) === 'true'
+          }));
+          return;
+        }
+      } catch (e) { console.warn('Supabase fetch failed', e); }
+    }
+    // Fallback to local storage
     try {
-      const d = JSON.parse(localStorage.getItem('placida_affirmation_wall') || 'null');
-      if (d) return d;
+      const local = JSON.parse(localStorage.getItem('placida_affirmation_wall'));
+      if (local && local.messages) wallMessagesData = local.messages;
     } catch {}
-    return { messages: STARTER_MESSAGES };
   }
 
-  function saveWallData(d) { localStorage.setItem('placida_affirmation_wall', JSON.stringify(d)); }
-
-  function postAffirmation() {
+  async function postAffirmation() {
     const input = document.getElementById('wallInput');
     if (!input) return;
     const text = input.value.trim();
     if (!text) { showToast('✍️ Write something first!'); return; }
     if (text.length < 10) { showToast('Write a bit more — make it meaningful 💚'); return; }
-    const data = getWallData();
-    data.messages.unshift({ text, time: Date.now(), likes: 0, liked: false });
-    saveWallData(data);
+    
+    // Optimistic UI update
+    const newMsg = { id: 'temp_'+Date.now(), text, time: Date.now(), likes: 0, liked: false };
+    wallMessagesData.unshift(newMsg);
+    renderWallUI();
     input.value = '';
-    renderWall();
     showToast('💚 Your message is on the wall!');
+
+    if (window.supabase) {
+      try {
+        await window.supabase.from('affirmations').insert([{ text }]);
+        // Refresh silently to get actual DB ID
+        fetchWallData().then(renderWallUI);
+      } catch (e) { console.warn('Supabase insert failed', e); }
+    }
+    // Always save local fallback
+    localStorage.setItem('placida_affirmation_wall', JSON.stringify({ messages: wallMessagesData }));
   }
 
-  function likeMessage(idx) {
-    const data = getWallData();
-    if (data.messages[idx].liked) { showToast('You already liked this one 💚'); return; }
-    data.messages[idx].liked = true;
-    data.messages[idx].likes++;
-    saveWallData(data);
-    renderWall();
+  async function likeMessage(idx) {
+    const msg = wallMessagesData[idx];
+    if (msg.liked) { showToast('You already liked this one 💚'); return; }
+    msg.liked = true;
+    msg.likes++;
+    renderWallUI();
+
+    if (window.supabase && msg.id && !msg.id.toString().startsWith('temp_') && !msg.id.toString().startsWith('s')) {
+      try {
+        await window.supabase.from('affirmations').update({ likes: msg.likes }).eq('id', msg.id);
+        localStorage.setItem('liked_aff_' + msg.id, 'true');
+      } catch (e) { console.warn('Supabase update failed', e); }
+    } else {
+      // Local fallback for starter/temp messages
+      localStorage.setItem('placida_affirmation_wall', JSON.stringify({ messages: wallMessagesData }));
+    }
   }
 
   function formatWallTime(ts) {
@@ -397,11 +431,10 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  function renderWall() {
-    const data = getWallData();
+  function renderWallUI() {
     const container = document.getElementById('wallMessages');
     if (!container) return;
-    container.innerHTML = data.messages.slice(0, 20).map((m, i) => {
+    container.innerHTML = wallMessagesData.slice(0, 20).map((m, i) => {
       const avatarEmoji = ['🌿','💜','🌊','⭐','🌙','🌸','🔮','🦋'][i % 8];
       const anonName = ANON_NAMES[i % ANON_NAMES.length];
       return `
@@ -422,7 +455,15 @@
     }).join('');
   }
 
-  renderWall();
+  // Load from Supabase on start
+  if (window.supabase) {
+    document.addEventListener('supabase:ready', async () => {
+      await fetchWallData();
+      renderWallUI();
+    });
+  } else {
+    fetchWallData().then(renderWallUI);
+  }
 
   // ════════════════ PEER QUOTES ════════════════
   const PEER_QUOTES = [
