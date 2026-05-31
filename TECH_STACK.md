@@ -1,88 +1,46 @@
-# Placida — Complete Technical Architecture & Tech Stack
+# Placida — Technical Architecture by Team Member
 
-This document serves as a comprehensive deep-dive into the engineering, architecture, and technology stack of Placida. It breaks down every aspect of the project from basic implementations to complex algorithms, categorized by the core development roles.
-
----
-
-## 1. Frontend Architecture & Infrastructure
-**Lead Frontend Developer: Sahil**
-
-### The Basics: HTML5, CSS3, & Vanilla JavaScript
-Placida was intentionally built without heavy frontend frameworks (like React, Vue, or Angular). 
-- **Why?** To ensure lightning-fast load times, minimal bundle sizes, and maximum accessibility on low-end mobile devices.
-- **Implementation:** The entire DOM (Document Object Model) is manipulated using pure Vanilla JavaScript. Dynamic elements (like rendering the Mood Logger history or injecting Affirmation Wall messages) are handled via `document.createElement()` and `innerHTML` parsing.
-
-### Complex Implementation: Progressive Web App (PWA) & Offline-First Design
-Placida is engineered to function entirely without an internet connection.
-- **Service Workers (`sw.js`):** A custom Service Worker script intercepts all outbound HTTP network requests using the `fetch` event listener. 
-- **Caching Strategy:** It utilizes a **"Cache-First, Network Fallback"** strategy. Upon first visit, the Service Worker caches all critical assets (HTML, CSS, JS, images) into the browser's Cache Storage API. On subsequent visits, the app loads directly from the cache (usually under 200ms), bypassing the network entirely.
-- **Manifest (`manifest.json`):** Allows the web app to be installed natively on iOS and Android home screens, functioning completely indistinguishably from a native application.
-
-### Memory & State Management
-- **Local Storage API:** Persistent data (like mood logs, journal entries, and streaks) is serialized into JSON and stored in the browser's `localStorage`. This ensures maximum data privacy (as data never leaves the device) and survives browser restarts.
-- **Session Storage:** Volatile data (like the Admin Dashboard passcode authentication state) is managed via `sessionStorage`, automatically clearing when the tab is closed to maintain security.
-
-### Hardware-Accelerated UI (Glassmorphism)
-- **CSS Compositing:** The Glassmorphism UI is achieved using `backdrop-filter: blur()`. Because blurs are computationally expensive, hardware-accelerated CSS properties like `transform: translate3d(0,0,0)` are applied. This forces the browser to offload the rendering workload from the CPU's main thread to the GPU, guaranteeing a smooth 60 Frames Per Second (FPS) animation rate.
-- **Data Visualization:** The `Chart.js` library is implemented to render complex, responsive `<canvas>` graphs on the Dashboard, interpreting the local JSON mood data without server-side processing.
+This document breaks down the specific technologies and engineering implementations built by each team member for Placida.
 
 ---
 
-## 2. Artificial Intelligence & Crisis Mitigation
-**AI & Chatbot Developer: Ayushi**
+### 💻 SAHIL: Lead Frontend Developer 
+**Your Tech Stack:** HTML5, CSS3, Vanilla JavaScript, Chart.js, Progressive Web App (PWA) Service Workers
 
-### The Basics: REST APIs & Asynchronous JavaScript
-- **API Integration:** The AI Chatbot communicates via HTTP POST requests using the native `fetch()` API.
-- **Async/Await:** Network latency is managed using asynchronous JavaScript (`async/await` and Promises). While the network resolves the API request, the DOM dynamically injects CSS-animated "typing..." indicators, ensuring the UI remains responsive and non-blocking.
-
-### Complex Implementation: Keyless LLM & Prompt Engineering
-- **Pollinations AI:** Traditional chatbots require secure backend servers to hide API keys from the public client. Placida bypasses this infrastructure cost entirely by utilizing a keyless endpoint provided by Pollinations AI. This brings the marginal cost per user interaction down to absolute zero, making the platform infinitely scalable.
-- **System Prompts:** User inputs are not sent raw. The JavaScript engine programmatically prepends a hidden "System Prompt" to every JSON payload. This prompt strictly defines the LLM's behavioral boundaries—instructing it to act as a compassionate listener and preventing it from giving unauthorized medical advice.
-
-### Complex Implementation: Client-Side Crisis Detection Algorithm
-- **Algorithmic Safety Net:** To ensure zero latency during psychiatric emergencies, crisis detection happens entirely client-side, *before* the API request is even dispatched.
-- **RegEx Parsing:** The algorithm utilizes Regular Expressions (`RegEx`) to scan the user's input string against a dictionary of high-risk string literals (e.g., suicide, self-harm, panic). 
-- **Execution Override:** If a match triggers the threshold, the script immediately aborts the `fetch()` request and executes a DOM redirect (`window.location.href`) to the SOS Page, connecting the user to verified government helplines. This protects the user and limits platform liability.
+**What you built & how:**
+- **PWA Architecture:** You built the app to work entirely offline. You used a custom Service Worker (`sw.js`) with a "Cache-First" strategy. When a user opens the app, it loads assets from the browser's Cache Storage API instantly (under 200ms) without needing the internet.
+- **State Management:** You avoided React/Vue to keep the app lightweight. You managed global state using pure Vanilla JS. All user data (like the Mood Logger history) is converted to JSON and securely saved locally using the `localStorage` API so data never leaves the user's device.
+- **Glassmorphism UI:** To ensure the blur effects didn't lag the browser, you used hardware-accelerated CSS (`transform: translate3d`) to push the rendering workload to the GPU, keeping animations at a smooth 60 Frames Per Second.
+- **Data Viz:** You integrated `Chart.js` to render complex HTML5 `<canvas>` graphs on the Dashboard using purely local data.
 
 ---
 
-## 3. Interactive Wellness Engineering
-**Wellness Features Developer: Sanchari**
+### 🤖 AYUSHI: AI & Chatbot Developer
+**Your Tech Stack:** Pollinations AI REST API, Asynchronous JavaScript (Promises), JSON, Regular Expressions (RegEx)
 
-### The Basics: Interactive DOM & State Toggles
-- The Wellness modules (Breathe, Relax) rely on complex state toggling, applying CSS classes dynamically to trigger visual changes based on user interaction.
-
-### Complex Implementation: Main-Thread Optimized Animation Engine
-- **CSS State-Machines:** JavaScript-based animations (like `requestAnimationFrame`) can block the main thread and cause UI stuttering. For the Guided Breathing tool, pure CSS state-machines were built using `@keyframes`. 
-- **Mathematical CSS Timings:** CSS `calc()` functions and dynamic CSS variables (`--breathe-duration`) mathematically control the exact milliseconds required for complex breathing patterns (like the 4-7-8 cycle), ensuring perfect synchronicity without CPU overhead.
-
-### Complex Implementation: HTML5 Canvas API
-- **Zen Canvas:** For the drawing module, the HTML5 `<canvas>` 2D rendering context is utilized. The engine attaches event listeners to `mousedown`, `mousemove`, and `mouseup` (as well as touch equivalents for mobile devices). 
-- **Coordinate Mapping:** The script captures exact X/Y screen coordinates, dynamically calculating vectors and executing `lineTo()` and `stroke()` methods to render smooth, anti-aliased graphics in real-time.
-
-### Complex Implementation: Asynchronous Audio Engine
-- **Web Audio:** The Sound Tiles utilize dynamic instantiation of the HTML5 `Audio` object. 
-- **Memory Management:** The script handles asynchronous audio loading and utilizes boolean state flags to prevent overlapping playbacks. This garbage-collection strategy ensures the browser doesn't run out of memory or crash from stacking uncompressed audio buffers.
+**What you built & how:**
+- **Keyless LLM Engine:** Instead of using expensive servers to hide API keys, you used Pollinations AI's keyless endpoint. You sent HTTP POST requests via the `fetch()` API to stream the AI responses directly into the browser for free, making it infinitely scalable.
+- **Async Rendering:** You used JavaScript `async/await` to handle the network latency. While waiting for the AI response, your script injects a CSS-animated "typing..." indicator so the UI never freezes.
+- **System Prompting:** You programmatically inject a hidden "System Prompt" into every JSON payload to strictly bound the AI's behavior, ensuring it acts as a listener and doesn't give unauthorized medical advice.
+- **Crisis Detection:** You engineered a local RegEx (Regular Expression) parser. Before an API request is even sent, your code scans the user's input for high-risk keywords (e.g., self-harm). If triggered, it aborts the API call and executes a `window.location.href` redirect to the SOS helplines immediately.
 
 ---
 
-## 4. Backend Database, Analytics & Security
-**QA, Analytics & Documentation Lead: Divyans**
+### 🧘‍♀️ SANCHARI: Wellness Features Developer
+**Your Tech Stack:** CSS3 Keyframe Animations, HTML5 Canvas API, Web Audio API
 
-### The Basics: Supabase (PostgreSQL) Integration
-- **Serverless Backend:** For the Community Affirmation Wall, Placida relies on Supabase, an open-source Firebase alternative backed by PostgreSQL.
-- **SDK Implementation:** The frontend connects directly to the database via REST using the Supabase JavaScript Client SDK (`@supabase/supabase-js`).
+**What you built & how:**
+- **Main-Thread Optimized Animations:** For Guided Breathing, you avoided JavaScript animations (which block the main thread and cause lag). Instead, you built a pure CSS state-machine using `@keyframes` and `calc()` functions to mathematically control the exact milliseconds required for the 4-7-8 breathing cycles.
+- **Zen Canvas:** You utilized the HTML5 `<canvas>` 2D rendering context. You attached event listeners to `mousedown`, `mousemove`, and `mouseup` to capture exact X/Y screen coordinates, using `lineTo()` and `stroke()` methods to render smooth, anti-aliased drawing graphics in real time.
+- **Asynchronous Audio:** For the Sound Tiles, you dynamically instantiated HTML5 `Audio` objects. You built boolean state flags to prevent overlapping playbacks, ensuring the browser doesn't run out of memory from stacking audio buffers.
 
-### Complex Implementation: Row Level Security (RLS)
-- **The Threat Model:** Because Placida is a client-side application, the Supabase Anon Key is publicly exposed in the browser. Without security, malicious actors could query, delete, or alter the entire database.
-- **SQL Security Policies:** To prevent this, Row Level Security (RLS) policies were engineered directly in SQL. 
-    - For the *Affirmation Wall*, the RLS policy allows public `INSERT` and `SELECT` (so anyone can post and read). 
-    - For the *Admin Feedback Table*, the policy strictly denies public read access, ensuring that sensitive user data cannot be queried via the Anon Key.
+---
 
-### Complex Implementation: Timezone Normalization & Parsing
-- **Timestamp Drift:** JavaScript's native `Date()` constructor often misinterprets raw database timestamps, shifting them based on the user's local timezone (e.g., IST vs EST).
-- **The Fix:** A data parser was implemented to intercept incoming Supabase ISO strings and coerce them into strict UTC format (by appending a `+ 'Z'`) before rendering them to the DOM, ensuring absolute chronological accuracy across the globe.
+### 📊 DIVYANS: QA, Analytics & Documentation Lead
+**Your Tech Stack:** Supabase (PostgreSQL), Supabase JS SDK, SQL Row Level Security (RLS), JavaScript Blob Exporting
 
-### Complex Implementation: Client-Side File Generation (Data Exporting)
-- **The Problem:** The Admin Panel requires Excel/JSON exports of user data, which normally requires a backend server (like Node.js or Python) to compile the file.
-- **The Solution:** A client-side exporter was engineered. The JavaScript engine takes the raw JSON array from Supabase, maps it into CSV format, and converts it into a Binary Large Object (`Blob`). It then uses `URL.createObjectURL()` to force the browser to trigger a local file download. This provides enterprise-level data exporting with zero backend compute costs.
+**What you built & how:**
+- **Serverless Database Integration:** You synced the Community Affirmation Wall globally by integrating the Supabase JavaScript Client SDK, connecting the static frontend directly to a serverless PostgreSQL database.
+- **Row Level Security (RLS):** Because the frontend is public, you wrote RLS policies directly in SQL to secure the database. You allowed public `INSERT` and `SELECT` for the Affirmation Wall, but strictly denied public read access for the Admin Feedback table to prevent data leaks.
+- **Timezone Normalization:** You fixed timestamp drifting issues by implementing a script that intercepts Supabase ISO strings and coerces them into strict UTC format (`+ 'Z'`) before rendering them to the DOM.
+- **Client-Side Data Exporting:** To export Admin reports without a backend server, you engineered a client-side exporter. The script takes the raw JSON array from Supabase, formats it into CSV, converts it into a `Blob` (Binary Large Object), and uses `URL.createObjectURL()` to force the browser to trigger a local file download natively.
