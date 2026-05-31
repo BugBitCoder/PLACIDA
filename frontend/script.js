@@ -272,7 +272,11 @@ function initKeyboardShortcuts() {
 
 /* ── Onboarding ── */
 function checkOnboarding() {
-  if (localStorage.getItem('placida_onboarded')) { document.body.style.overflow = ''; document.documentElement.style.overflow = ''; return; }
+  if (localStorage.getItem('placida_welcomed') || localStorage.getItem('placida_onboarded')) { 
+    document.body.style.overflow = ''; 
+    document.documentElement.style.overflow = ''; 
+    return; 
+  }
   const modal = document.getElementById('onboardModal');
   if (modal) setTimeout(() => { modal.classList.add('show'); document.body.style.overflow = 'hidden'; }, 700);
 }
