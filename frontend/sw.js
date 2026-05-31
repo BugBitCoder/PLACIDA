@@ -3,7 +3,7 @@
    Offline-first: cache all pages & assets
    ═══════════════════════════════════════════ */
 
-const CACHE_NAME   = 'placida-v7';
+const CACHE_NAME   = 'placida-v8';
 const ASSETS = [
   './',
   './auth.html',

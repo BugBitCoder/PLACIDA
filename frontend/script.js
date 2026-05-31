@@ -583,20 +583,18 @@ async function generateAIInsight() {
   const moodCounts = last30.reduce((acc, m) => { acc[m.label] = (acc[m.label] || 0) + 1; return acc; }, {});
   const streak = computeStreak(moods);
   const summary = JSON.stringify({ total: last30.length, avgScore, moodCounts, streak });
-  const GEMINI_KEY = localStorage.getItem('placida_gemini_key');
-  if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) {
-    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries. Your ${streak}-day streak shows real consistency! 🌟<br><br><span style="color:var(--accent-purple);font-weight:600">To unlock deep AI Pattern Analysis, please go to the Chat page and click the ⚙️ icon to add your free Gemini API key.</span></div>`;
-    return;
-  }
   const prompt = `You are a compassionate wellness AI. User's mood data (last 30 days): ${summary}. Write a warm, personal 4-sentence analysis: (1) Acknowledge their overall pattern with empathy, (2) Point out something positive, (3) Note any concern or celebrate stability, (4) Give ONE specific, actionable recommendation. End with encouragement. Conversational and warm. Address them directly.`;
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+    const res = await fetch('https://text.pollinations.ai/', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'openai',
+        seed: Math.floor(Math.random() * 100000)
+      })
     });
     if (!res.ok) throw new Error('API Error');
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = await res.text();
     if (text) {
       container.innerHTML = '';
       const el = document.createElement('div');
@@ -606,7 +604,7 @@ async function generateAIInsight() {
       const interval = setInterval(() => { el.textContent = text.slice(0, i); i += 4; if (i > text.length) { el.textContent = text; clearInterval(interval); } }, 15);
     } else throw new Error('no text');
   } catch {
-    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries. Your ${streak}-day streak shows real consistency. Keep going! 🌟 (Note: Make sure your API key is valid).</div>`;
+    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries. Your ${streak}-day streak shows real consistency. Keep going! 🌟</div>`;
   }
 }
 

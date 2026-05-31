@@ -99,12 +99,10 @@ function updateBreathUI() {
 
 
 /* ══════════════════════════════════════
-   SECTION 2 — CHATBOT (Gemini AI + rule fallback)
+   SECTION 2 — CHATBOT (Pollinations AI + rule fallback)
    ══════════════════════════════════════ */
 
-/* ⚠️  To use AI features, the user must provide their own key in the Settings UI */
-let GEMINI_KEY = localStorage.getItem('placida_gemini_key') || '';
-const GEMINI_SYSTEM = `You are Placida, a warm, compassionate, emotionally intelligent AI mental wellness companion for students and young adults.
+const AI_SYSTEM = `You are Placida, a warm, compassionate, emotionally intelligent AI mental wellness companion for students and young adults.
 
 Your CORE PURPOSE is to make people feel genuinely heard, validated, and less alone — especially when they are struggling.
 
@@ -154,45 +152,34 @@ function pickUnique(arr) {
 /* — Conversation history for context — */
 const chatHistory = [];
 
-/* — Gemini API call — */
-async function getGeminiResponse(userMessage) {
-  if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) return null;
+/* — AI API call (Pollinations AI - Free, No Key Required) — */
+async function getPollinationsResponse(userMessage) {
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: GEMINI_SYSTEM }] },
-          contents: [
-            ...chatHistory.slice(-6).map(m => ({
-              role: m.role === 'bot' ? 'model' : 'user',
-              parts: [{ text: m.content }]
-            })),
-            { role: 'user', parts: [{ text: userMessage }] }
-          ]
-        })
-      }
-    );
-    if (!res.ok) {
-      if (res.status === 400 || res.status === 403) return "INVALID_KEY";
-      return null;
-    }
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-  } catch { return null; }
-}
-
-function saveApiKey() {
-  const input = document.getElementById('apiKeyInput');
-  if (!input) return;
-  const key = input.value.trim();
-  if (key) {
-    localStorage.setItem('placida_gemini_key', key);
-    GEMINI_KEY = key;
-    if (typeof showToast === 'function') showToast('✅ API Key saved successfully');
-    document.getElementById('apiModal').style.display = 'none';
+    const messages = [
+      { role: 'system', content: AI_SYSTEM },
+      ...chatHistory.slice(-6).map(m => ({
+        role: m.role === 'bot' ? 'assistant' : 'user',
+        content: m.content
+      })),
+      { role: 'user', content: userMessage }
+    ];
+    
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        model: 'openai', 
+        seed: Math.floor(Math.random() * 100000)
+      })
+    });
+    
+    if (!res.ok) return null;
+    const text = await res.text();
+    return text || null;
+  } catch (err) {
+    console.error("AI API Error:", err);
+    return null;
   }
 }
 
@@ -383,12 +370,10 @@ async function sendMessage() {
   // Adaptive Sidebar Update
   analyzeChatMood(text);
 
-  /* Try Gemini first, then fall back to rules */
-  let reply = await getGeminiResponse(text);
+  /* Try AI first, then fall back to rules */
+  let reply = await getPollinationsResponse(text);
   
-  if (reply === "INVALID_KEY") {
-    reply = "I'm currently running in limited offline mode because my API key is missing or invalid! 🧠 To enable intelligent, human-like responses, please click the ⚙️ gear icon above to add your free Gemini API key.";
-  } else if (!reply) {
+  if (!reply) {
     reply = getRuleBasedReply(text);
   }
 

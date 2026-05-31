@@ -280,7 +280,7 @@
             </div>
           </div>
         </div>
-        <button id="chatSettingsBtn" onclick="document.getElementById('apiModal').style.display='flex'" style="background:rgba(255,255,255,.06); border:1px solid var(--border-glass); border-radius:12px; width:40px; height:40px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center; transition:0.3s;" aria-label="AI Settings" onmouseover="this.style.background='rgba(124,106,247,.2)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='var(--text-muted)'">⚙️</button>
+        <!-- Settings button removed since AI is now free -->
       </div>
 
       <!-- Chat Window -->
@@ -361,25 +361,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   
-  <div id="apiModal" style="display:none; position:fixed; inset:0; background:rgba(6,7,16,.9); backdrop-filter:blur(16px); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
-    <div style="background:rgba(14,16,30,.98); border:1px solid rgba(124,106,247,.25); border-radius:24px; padding:32px; max-width:500px; width:100%; box-shadow:0 0 40px rgba(124,106,247,.15); position:relative; animation:fadeInUp .3s ease both;">
-      <button onclick="document.getElementById('apiModal').style.display='none'" style="position:absolute; top:20px; right:24px; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
-      <h2 style="font-size:1.4rem; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:10px;">⚙️ AI Brain Settings</h2>
-      <p style="color:var(--text-soft); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
-        To enable dynamic, intelligent, and deeply conversational AI replies, Placida requires a free Google Gemini API key. Without it, Placida will run in basic offline mode.
-      </p>
-      <ol style="color:var(--text-soft); font-size:0.9rem; line-height:1.6; margin-bottom:24px; padding-left:20px;">
-        <li style="margin-bottom:8px;">Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent-purple); text-decoration:none; font-weight:600;">Google AI Studio</a> and sign in.</li>
-        <li style="margin-bottom:8px;">Click <strong>Create API Key</strong>.</li>
-        <li>Paste it below. It is stored securely on your device only.</li>
-      </ol>
-      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." style="width:100%; background:rgba(255,255,255,.06); border:1px solid var(--border-glass); border-radius:12px; padding:14px 16px; font-family:'Inter',sans-serif; font-size:1rem; color:var(--text-primary); outline:none; margin-bottom:20px; transition:border-color 0.3s;" onfocus="this.style.borderColor='var(--accent-purple)'" onblur="this.style.borderColor='var(--border-glass)'" />
-      <div style="display:flex; justify-content:flex-end; gap:12px;">
-        <button onclick="document.getElementById('apiModal').style.display='none'" style="background:rgba(255,255,255,.06); color:var(--text-primary); border:none; padding:12px 20px; border-radius:12px; cursor:pointer; font-weight:600; transition:0.3s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Cancel</button>
-        <button onclick="saveApiKey()" style="background:linear-gradient(135deg, var(--accent-purple), #9b6af7); color:#fff; border:none; padding:12px 24px; border-radius:12px; cursor:pointer; font-weight:600; box-shadow:0 4px 16px rgba(124,106,247,.3); transition:0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Save Key</button>
-      </div>
-    </div>
-  </div>
 
   <script src="features.js"></script>
   <script src="script.js"></script>
