@@ -99,9 +99,8 @@ function updateBreathUI() {
    SECTION 2 — CHATBOT (Gemini AI + rule fallback)
    ══════════════════════════════════════ */
 
-/* ⚠️  Replace with your free key from https://aistudio.google.com/app/apikey */
-const GEMINI_KEY = 'AIzaSyBnIBJkfGh7vq7-DV7QzEesEA6u-7SIKLcE';
-
+/* ⚠️  To use AI features, the user must provide their own key in the Settings UI */
+let GEMINI_KEY = localStorage.getItem('placida_gemini_key') || '';
 const GEMINI_SYSTEM = `You are Placida, a warm, compassionate, emotionally intelligent AI mental wellness companion for students and young adults.
 
 Your CORE PURPOSE is to make people feel genuinely heard, validated, and less alone — especially when they are struggling.
@@ -170,10 +169,25 @@ async function getGeminiResponse(userMessage) {
         })
       }
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 400 || res.status === 403) return "INVALID_KEY";
+      return null;
+    }
     const data = await res.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch { return null; }
+}
+
+function saveApiKey() {
+  const input = document.getElementById('apiKeyInput');
+  if (!input) return;
+  const key = input.value.trim();
+  if (key) {
+    localStorage.setItem('placida_gemini_key', key);
+    GEMINI_KEY = key;
+    if (typeof showToast === 'function') showToast('✅ API Key saved successfully');
+    document.getElementById('apiModal').style.display = 'none';
+  }
 }
 
 /* — Rich rule-based fallback — */
@@ -365,7 +379,12 @@ async function sendMessage() {
 
   /* Try Gemini first, then fall back to rules */
   let reply = await getGeminiResponse(text);
-  if (!reply) reply = getRuleBasedReply(text);
+  
+  if (reply === "INVALID_KEY") {
+    reply = "I'm currently running in limited offline mode because my API key is missing or invalid! 🧠 To enable intelligent, human-like responses, please click the ⚙️ gear icon above to add your free Gemini API key.";
+  } else if (!reply) {
+    reply = getRuleBasedReply(text);
+  }
 
   /* Proportional delay: feels natural without being slow */
   const delay = Math.min(reply.length * 14, 2400);
