@@ -19,8 +19,8 @@
 - [x] Phase 8 (partial): XSS fix (BUG-003), toast z-index (BUG-002), negative time guard (BUG-006), 380px breakpoints (BUG-013), CSS select + checkbox-chip styles
 
 ## In Progress ⟳
-- [ ] Phase 8: Dynamic stat card colors in dashboard (BUG-004)
-- [ ] Phase 9: Git commit + push + GitHub Pages verification
+- [x] Phase 8: Dynamic stat card colors in dashboard (BUG-004)
+- [x] Phase 9: Git commit + push + GitHub Pages verification
 
 ## Next
 - Update IMPLEMENTATION_LOG.md

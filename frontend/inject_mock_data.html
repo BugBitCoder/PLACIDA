@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inject Mock Data</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+  <h2>Injecting Mock Feedback Data...</h2>
+  <script>
+    const mockData = Array.from({ length: 45 }).map((_, i) => {
+      const ts = new Date(Date.now() - Math.floor(Math.random() * 14 * 24 * 3600 * 1000));
+      return {
+        id: Date.now() - i * 1000,
+        timestamp: ts.toISOString(),
+        userName: ['Alex', 'Jordan', 'Sam', 'Taylor', 'Casey', 'Riley', 'Morgan', 'Quinn', 'Friend'][i % 9] + ' ' + (i % 100),
+        ratings: {
+          moodlogger: Math.floor(Math.random() * 2) + 4,
+          dashboard: Math.floor(Math.random() * 3) + 3,
+          breathing: Math.floor(Math.random() * 2) + 4,
+          chat: Math.floor(Math.random() * 3) + 3,
+          journal: Math.floor(Math.random() * 4) + 2
+        },
+        nps: Math.floor(Math.random() * 10) + 1,
+        liked: 'I really like the UI and how calming it is.',
+        improve: 'Maybe add more breathing exercises?',
+        featureReq: 'Dark mode toggle would be nice.',
+        academicYear: ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Postgraduate'][i % 5],
+        stressFrequency: ['Often', 'Sometimes', 'Rarely', 'Almost daily'][i % 4],
+        breathingPref: ['4-7-8', 'Box Breathing', 'Both'][i % 3],
+        sessionDuration: ['2-5 min', '5-15 min', '15-30 min'][i % 3],
+        preferredTime: ['Morning', 'Evening', 'Late Night', 'Afternoon'][i % 4],
+        preferredPlatform: ['Mobile', 'Desktop', 'Mixed'][i % 3],
+        sosPreference: ['Yes, it helped', 'Saw it, didn\'t need', 'Need it more prominent'][i % 3],
+        mostUsed: [['Mood Logger', 'Dashboard'], ['Breathing', 'AI Chat'], ['Journal', 'Meditation']][i % 3],
+        openComment: 'Keep up the good work!'
+      };
+    });
+
+    const existing = JSON.parse(localStorage.getItem('placida_feedback') || '[]');
+    localStorage.setItem('placida_feedback', JSON.stringify([...existing, ...mockData]));
+
+    document.body.innerHTML += `<p>✅ Injected ${mockData.length} mock feedback entries!</p>`;
+    document.body.innerHTML += `<br><a href="admin.html">Go to Admin Dashboard</a>`;
+  </script>
+</body>
+</html>

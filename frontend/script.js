@@ -4,15 +4,15 @@
    ============================================ */
 
 const MOODS = [
-  { id: 'terrible', emoji: '😔', label: 'Rough',   score: 1 },
-  { id: 'bad',      emoji: '😟', label: 'Low',     score: 2 },
-  { id: 'okay',     emoji: '😐', label: 'Okay',    score: 3 },
-  { id: 'good',     emoji: '🙂', label: 'Good',    score: 4 },
-  { id: 'great',    emoji: '😊', label: 'Great',   score: 5 },
+  { id: 'terrible', emoji: '😔', label: 'Rough', score: 1 },
+  { id: 'bad', emoji: '😟', label: 'Low', score: 2 },
+  { id: 'okay', emoji: '😐', label: 'Okay', score: 3 },
+  { id: 'good', emoji: '🙂', label: 'Good', score: 4 },
+  { id: 'great', emoji: '😊', label: 'Great', score: 5 },
 ];
 
 const STORAGE_KEY = 'placida_moods';
-let selectedMood  = null;
+let selectedMood = null;
 let moodChartInstance = null;
 
 /* ── Shared Utilities ── */
@@ -38,8 +38,8 @@ function escapeHtml(text) {
 function formatTime(isoString) {
   const date = new Date(isoString);
   const diff = Math.max(0, (Date.now() - date) / 1000); // BUG-006: guard negative diff
-  if (diff < 60)    return 'Just now';
-  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
@@ -55,7 +55,7 @@ function selectMood(moodId) {
 function saveMood() {
   if (!selectedMood) { showToast('💜 Please pick a mood first!'); return; }
   const noteInput = document.getElementById('moodNote');
-  const note      = noteInput ? noteInput.value.trim() : '';
+  const note = noteInput ? noteInput.value.trim() : '';
   const entry = {
     id: Date.now(), emoji: selectedMood.emoji, label: selectedMood.label,
     score: selectedMood.score, note: note || '', timestamp: new Date().toISOString(),
@@ -68,8 +68,10 @@ function saveMood() {
     if (!sb) return;
     const { data: { user } } = await sb.auth.getUser().catch(() => ({ data: {} }));
     if (!user) return;
-    await sb.from('moods').insert({ user_id: user.id, score: entry.score, label: entry.label,
-      emoji: entry.emoji, note: entry.note, created_at: entry.timestamp }).catch(() => {});
+    await sb.from('moods').insert({
+      user_id: user.id, score: entry.score, label: entry.label,
+      emoji: entry.emoji, note: entry.note, created_at: entry.timestamp
+    }).catch(() => { });
   });
 
   selectedMood = null;
@@ -97,6 +99,19 @@ function renderStats() {
   set('statWeek',  summary.count);
   set('statAvg',   summary.avg ?? '—');
   set('statTrend', summary.trend);
+
+  // BUG-004: Dynamic color for avg score
+  const avgEl = document.getElementById('statAvg');
+  if (avgEl) {
+    if (summary.avg !== null) {
+      const val = parseFloat(summary.avg);
+      if (val >= 4) avgEl.style.color = '#5ec4b6'; // Green
+      else if (val >= 3) avgEl.style.color = '#e8c443'; // Yellow
+      else avgEl.style.color = '#f06b8b'; // Red
+    } else {
+      avgEl.style.color = '';
+    }
+  }
 }
 
 function renderMoodHistory() {
@@ -211,8 +226,12 @@ function renderMoodChart() {
     data: { labels, datasets: [{ label: 'Avg Mood', data, backgroundColor: gradient, borderRadius: 10, borderSkipped: false }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(13,15,26,0.95)', borderColor: 'rgba(124,106,247,0.4)', borderWidth: 1, titleColor: '#f0f0ff', bodyColor: '#8888aa', padding: 12,
-        callbacks: { label: ctx => { const v = ctx.raw; if (v === null) return '  No entry'; const em = v >= 4.5 ? '😊' : v >= 3.5 ? '🙂' : v >= 2.5 ? '😐' : v >= 1.5 ? '😟' : '😔'; return `  ${em}  Score: ${v} / 5`; } } } },
+      plugins: {
+        legend: { display: false }, tooltip: {
+          backgroundColor: 'rgba(13,15,26,0.95)', borderColor: 'rgba(124,106,247,0.4)', borderWidth: 1, titleColor: '#f0f0ff', bodyColor: '#8888aa', padding: 12,
+          callbacks: { label: ctx => { const v = ctx.raw; if (v === null) return '  No entry'; const em = v >= 4.5 ? '😊' : v >= 3.5 ? '🙂' : v >= 2.5 ? '😐' : v >= 1.5 ? '😟' : '😔'; return `  ${em}  Score: ${v} / 5`; } }
+        }
+      },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#8888aa', font: { family: 'Inter', size: 12 } }, border: { color: 'rgba(255,255,255,0.08)' } },
         y: { min: 0, max: 5, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#8888aa', stepSize: 1, font: { family: 'Inter', size: 12 }, callback: v => ['', '😔', '😟', '😐', '🙂', '😊'][v] || '' }, border: { color: 'rgba(255,255,255,0.08)' } }
@@ -235,10 +254,12 @@ function cancelClear() { const m = document.getElementById('confirmModal'); if (
 /* ── Keyboard Shortcuts ── */
 function initKeyboardShortcuts() {
   document.addEventListener('keydown', e => {
-    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const map = { m: 'index.html', b: 'breathe.html', c: 'chatbot.html', d: 'dashboard.html',
-      i: 'insights.html', s: 'summary.html', j: 'journal.html', n: 'meditation.html', u: 'community.html' };
+    const map = {
+      m: 'index.html', b: 'breathe.html', c: 'chatbot.html', d: 'dashboard.html',
+      i: 'insights.html', s: 'summary.html', j: 'journal.html', n: 'meditation.html', u: 'community.html'
+    };
     if (map[e.key.toLowerCase()]) window.location.href = map[e.key.toLowerCase()];
   });
   const hint = document.getElementById('shortcutHint');
@@ -289,7 +310,7 @@ function renderHeatmap() {
   const days = getLast30DaysData();
   const em = [null, '😔', '😟', '😐', '🙂', '😊'];
   container.innerHTML = days.map(d => {
-    const tip = d.avg !== null ? `${d.date.toLocaleDateString('en-IN', { day:'numeric', month:'short' })} — ${em[Math.round(d.avg)]} ${d.avg.toFixed(1)}/5` : `${d.date.toLocaleDateString('en-IN', { day:'numeric', month:'short' })} — No entry`;
+    const tip = d.avg !== null ? `${d.date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — ${em[Math.round(d.avg)]} ${d.avg.toFixed(1)}/5` : `${d.date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — No entry`;
     return `<div class="heat-cell" style="background:${heatColor(d.avg)};" title="${tip}" role="img" aria-label="${tip}"><span class="heat-date">${d.day}</span>${d.avg !== null ? `<span class="heat-score">${em[Math.round(d.avg)]}</span>` : ''}</div>`;
   }).join('');
 }
@@ -358,34 +379,34 @@ function renderInsightStats() {
 ──────────────────────────────────────────────────────── */
 const WELLNESS_RECOMMENDATIONS = {
   1: [
-    { icon:'🌬️', title:'Breathe First', desc:'A 4-7-8 session reduces cortisol in under 3 minutes.', link:'breathe.html', cta:'Try Breathing' },
-    { icon:'💬', title:'Talk to AI', desc:'Placida listens without judgment — just say what\'s on your mind.', link:'chatbot.html', cta:'Open Chat' },
-    { icon:'🆘', title:'Need Real Support?', desc:'Free, confidential helplines available 24/7.', link:'#', cta:'See Helplines', onclick:'openSOS()' },
-    { icon:'🎮', title:'Worry Crusher', desc:'Write your worry and symbolically destroy it.', link:'relax.html', cta:'Relax' },
+    { icon: '🌬️', title: 'Breathe First', desc: 'A 4-7-8 session reduces cortisol in under 3 minutes.', link: 'breathe.html', cta: 'Try Breathing' },
+    { icon: '💬', title: 'Talk to AI', desc: 'Placida listens without judgment — just say what\'s on your mind.', link: 'chatbot.html', cta: 'Open Chat' },
+    { icon: '🆘', title: 'Need Real Support?', desc: 'Free, confidential helplines available 24/7.', link: '#', cta: 'See Helplines', onclick: 'openSOS()' },
+    { icon: '🎮', title: 'Worry Crusher', desc: 'Write your worry and symbolically destroy it.', link: 'relax.html', cta: 'Relax' },
   ],
   2: [
-    { icon:'🧘', title:'5-Min Meditation', desc:'A short mindfulness session lifts mood and quiets mental chatter.', link:'meditation.html', cta:'Meditate' },
-    { icon:'📓', title:'Write It Out', desc:'Journaling for 5 minutes reduces emotional intensity.', link:'journal.html', cta:'Journal' },
-    { icon:'🌬️', title:'Breathe', desc:'Your nervous system responds quickly to conscious breathing.', link:'breathe.html', cta:'Breathe' },
-    { icon:'🎨', title:'Zen Canvas', desc:'Free-form drawing quiets anxiety and activates calm creativity.', link:'relax.html', cta:'Draw' },
+    { icon: '🧘', title: '5-Min Meditation', desc: 'A short mindfulness session lifts mood and quiets mental chatter.', link: 'meditation.html', cta: 'Meditate' },
+    { icon: '📓', title: 'Write It Out', desc: 'Journaling for 5 minutes reduces emotional intensity.', link: 'journal.html', cta: 'Journal' },
+    { icon: '🌬️', title: 'Breathe', desc: 'Your nervous system responds quickly to conscious breathing.', link: 'breathe.html', cta: 'Breathe' },
+    { icon: '🎨', title: 'Zen Canvas', desc: 'Free-form drawing quiets anxiety and activates calm creativity.', link: 'relax.html', cta: 'Draw' },
   ],
   3: [
-    { icon:'📊', title:'Check Trends', desc:'See patterns in when and why your mood shifts.', link:'insights.html', cta:'Insights' },
-    { icon:'🎯', title:'Today\'s Challenge', desc:'Complete a small wellness challenge to build momentum.', link:'community.html', cta:'Community' },
-    { icon:'📓', title:'Reflect', desc:'Write a short gratitude entry — it compounds over time.', link:'journal.html', cta:'Journal' },
-    { icon:'🎵', title:'Sound Therapy', desc:'ASMR ambient sounds gently shift your mental state.', link:'meditation.html', cta:'Try ASMR' },
+    { icon: '📊', title: 'Check Trends', desc: 'See patterns in when and why your mood shifts.', link: 'insights.html', cta: 'Insights' },
+    { icon: '🎯', title: 'Today\'s Challenge', desc: 'Complete a small wellness challenge to build momentum.', link: 'community.html', cta: 'Community' },
+    { icon: '📓', title: 'Reflect', desc: 'Write a short gratitude entry — it compounds over time.', link: 'journal.html', cta: 'Journal' },
+    { icon: '🎵', title: 'Sound Therapy', desc: 'ASMR ambient sounds gently shift your mental state.', link: 'meditation.html', cta: 'Try ASMR' },
   ],
   4: [
-    { icon:'🔥', title:'Keep Your Streak', desc:'You\'re doing well! Log again tomorrow.', link:'index.html', cta:'Log Mood' },
-    { icon:'🌍', title:'Share Positivity', desc:'Drop an encouraging message on the community wall.', link:'community.html', cta:'Community' },
-    { icon:'📓', title:'Capture This Feeling', desc:'Journal about what made today good.', link:'journal.html', cta:'Journal' },
-    { icon:'🧘', title:'Deepen Practice', desc:'A 10-minute meditation turns a good day into a great one.', link:'meditation.html', cta:'Meditate' },
+    { icon: '🔥', title: 'Keep Your Streak', desc: 'You\'re doing well! Log again tomorrow.', link: 'index.html', cta: 'Log Mood' },
+    { icon: '🌍', title: 'Share Positivity', desc: 'Drop an encouraging message on the community wall.', link: 'community.html', cta: 'Community' },
+    { icon: '📓', title: 'Capture This Feeling', desc: 'Journal about what made today good.', link: 'journal.html', cta: 'Journal' },
+    { icon: '🧘', title: 'Deepen Practice', desc: 'A 10-minute meditation turns a good day into a great one.', link: 'meditation.html', cta: 'Meditate' },
   ],
   5: [
-    { icon:'🌟', title:'You\'re Thriving!', desc:'Note what made today great — your future self will thank you.', link:'journal.html', cta:'Capture It' },
-    { icon:'💌', title:'Pay It Forward', desc:'Send someone a kind message or share encouragement.', link:'community.html', cta:'Community' },
-    { icon:'🔥', title:'Streak is Going!', desc:'Build on this momentum. Log again tomorrow!', link:'index.html', cta:'Log Tomorrow' },
-    { icon:'📊', title:'See Your Progress', desc:'Check how far you\'ve come on your journey.', link:'insights.html', cta:'Insights' },
+    { icon: '🌟', title: 'You\'re Thriving!', desc: 'Note what made today great — your future self will thank you.', link: 'journal.html', cta: 'Capture It' },
+    { icon: '💌', title: 'Pay It Forward', desc: 'Send someone a kind message or share encouragement.', link: 'community.html', cta: 'Community' },
+    { icon: '🔥', title: 'Streak is Going!', desc: 'Build on this momentum. Log again tomorrow!', link: 'index.html', cta: 'Log Tomorrow' },
+    { icon: '📊', title: 'See Your Progress', desc: 'Check how far you\'ve come on your journey.', link: 'insights.html', cta: 'Insights' },
   ],
 };
 
@@ -396,7 +417,7 @@ function renderWellnessRecommendations() {
   const last = moods[0];
   const score = last ? last.score : 3;
   const recs = WELLNESS_RECOMMENDATIONS[score] || WELLNESS_RECOMMENDATIONS[3];
-  const moodLabels = { 1:'Rough 😔', 2:'Low 😟', 3:'Okay 😐', 4:'Good 🙂', 5:'Great 😊' };
+  const moodLabels = { 1: 'Rough 😔', 2: 'Low 😟', 3: 'Okay 😐', 4: 'Good 🙂', 5: 'Great 😊' };
   container.innerHTML = `
     <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px">
       Based on your last mood: <strong style="color:var(--text-primary)">${moodLabels[score]}</strong>
@@ -415,12 +436,12 @@ function renderWellnessRecommendations() {
 
 /* ── Streak Milestones ── */
 const STREAK_MILESTONES = [
-  { days: 3,   emoji: '🌱', label: 'Seedling', msg: '3-day streak! You\'re building a habit.' },
-  { days: 7,   emoji: '🔥', label: 'On Fire',  msg: '7 days straight! You\'re on a roll.' },
-  { days: 14,  emoji: '⚡', label: 'Electric', msg: '2 weeks! Your consistency is inspiring.' },
-  { days: 30,  emoji: '🏆', label: 'Champion', msg: '30 days! That\'s incredible dedication.' },
-  { days: 50,  emoji: '💎', label: 'Diamond',  msg: '50 days! You\'re truly committed.' },
-  { days: 100, emoji: '👑', label: 'Legend',   msg: '100 days! You are a wellness legend.' },
+  { days: 3, emoji: '🌱', label: 'Seedling', msg: '3-day streak! You\'re building a habit.' },
+  { days: 7, emoji: '🔥', label: 'On Fire', msg: '7 days straight! You\'re on a roll.' },
+  { days: 14, emoji: '⚡', label: 'Electric', msg: '2 weeks! Your consistency is inspiring.' },
+  { days: 30, emoji: '🏆', label: 'Champion', msg: '30 days! That\'s incredible dedication.' },
+  { days: 50, emoji: '💎', label: 'Diamond', msg: '50 days! You\'re truly committed.' },
+  { days: 100, emoji: '👑', label: 'Legend', msg: '100 days! You are a wellness legend.' },
 ];
 
 function renderStreakMilestone() {
@@ -610,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initKeyboardShortcuts();
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { }));
   }
 
   if (localStorage.getItem('placida_reminders') === 'on' && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
