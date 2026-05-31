@@ -723,7 +723,8 @@ function initGlobalASMR() {
 
   // Attempt to auto-resume if it was playing
   if (currentASMR) {
-    playASMR(currentASMR).catch(err => {
+    const isPaused = localStorage.getItem('placida_asmr_paused') === 'true';
+    playASMR(currentASMR, isPaused).catch(err => {
       console.log('Autoplay blocked', err);
       updateMiniPlayerUI(true);
     });
@@ -749,7 +750,7 @@ function toggleGlobalASMR(id) {
   }
 }
 
-async function playASMR(id) {
+async function playASMR(id, startPaused = false) {
   const s = ASMR_SOUNDS.find(x => x.id === id);
   if (!s) return;
   
@@ -765,11 +766,19 @@ async function playASMR(id) {
   
   currentASMR = id;
   localStorage.setItem('placida_active_asmr', id);
+  if (!startPaused) {
+    localStorage.setItem('placida_asmr_paused', 'false');
+  }
   
   document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
   const tile = document.getElementById('asmr-' + id);
   if (tile) tile.classList.add('playing');
   updateASMRInfoUI();
+
+  if (startPaused) {
+    updateMiniPlayerUI(true);
+    return;
+  }
 
   try {
     await globalAudio.play();
@@ -784,6 +793,7 @@ function stopASMR() {
   if (globalAudio) globalAudio.pause();
   currentASMR = null;
   localStorage.removeItem('placida_active_asmr');
+  localStorage.removeItem('placida_asmr_paused');
   
   document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
   updateASMRInfoUI();
@@ -796,9 +806,11 @@ function toggleGlobalAudioPlayPause() {
       return;
   }
   if (globalAudio.paused) {
+    localStorage.setItem('placida_asmr_paused', 'false');
     globalAudio.play().then(() => updateMiniPlayerUI(false)).catch(e => console.error(e));
   } else {
     globalAudio.pause();
+    localStorage.setItem('placida_asmr_paused', 'true');
     updateMiniPlayerUI(true);
   }
 }
