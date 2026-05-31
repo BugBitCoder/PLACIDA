@@ -365,7 +365,7 @@
           wallMessagesData = data.map(m => ({
             id: m.id,
             text: m.text,
-            time: new Date(m.created_at).getTime(),
+            time: new Date(m.created_at.endsWith('Z') || m.created_at.includes('+') ? m.created_at : m.created_at + 'Z').getTime(),
             likes: m.likes || 0,
             liked: localStorage.getItem('liked_aff_' + m.id) === 'true'
           }));

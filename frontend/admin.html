@@ -551,7 +551,7 @@
             // Merge: convert Supabase rows to local format
             const merged = sbData.map(r => ({
               id: r.id,
-              timestamp: r.submitted_at,
+              timestamp: (r.submitted_at || '').endsWith('Z') || (r.submitted_at || '').includes('+') ? r.submitted_at : r.submitted_at + 'Z',
               userName: r.user_name || 'Anonymous',
               ratings: {
                 moodlogger: r.rating_moodlogger,
