@@ -20,6 +20,11 @@ let breathCountdown = BREATH_PHASES[0].duration;
 let breathCycles = 0;
 let breathRunning = false;
 
+function toggleBreathing() {
+  if (breathRunning) stopBreathing();
+  else startBreathing();
+}
+
 function startBreathing() {
   if (breathRunning) return;
   breathRunning = true;
@@ -30,8 +35,8 @@ function startBreathing() {
   updateBreathUI();
   setBreathStart();
 
-  const btn = document.getElementById('breathBtn');
-  if (btn) { btn.textContent = 'Stop Session'; btn.onclick = stopBreathing; }
+  const label = document.getElementById('breathLabel');
+  if (label) label.textContent = 'Tap to Stop';
 }
 
 function stopBreathing() {
@@ -44,13 +49,11 @@ function stopBreathing() {
   const counter = document.getElementById('breathCounter');
   const circle = document.getElementById('breathCircle');
   const cycles = document.getElementById('breathCycles');
-  const btn = document.getElementById('breathBtn');
 
-  if (label) label.textContent = 'Ready when you are';
+  if (label) label.textContent = 'Tap to Start';
   if (counter) counter.textContent = '';
   if (circle) { circle.style.transform = 'scale(1)'; circle.style.boxShadow = '0 0 60px rgba(124,106,247,0.3)'; }
   if (cycles) cycles.textContent = '0 cycles completed';
-  if (btn) { btn.textContent = 'Start Breathing'; btn.onclick = startBreathing; }
 }
 
 function setBreathStart() {
@@ -105,7 +108,10 @@ const GEMINI_SYSTEM = `You are Placida, a warm, compassionate, emotionally intel
 
 Your CORE PURPOSE is to make people feel genuinely heard, validated, and less alone — especially when they are struggling.
 
-CRITICAL RULES:
+MULTILINGUAL SUPPORT:
+You are fully multilingual. You MUST automatically detect the language of the user's input and reply fluently in that EXACT same language. Ensure your empathy, warmth, and personality translate appropriately into their language.
+
+KEY GUIDELINES:
 1. ALWAYS start by acknowledging the user's emotion before anything else. Never jump to advice, tips, or suggestions without first validating how they feel.
 2. When someone shares pain (depression, sadness, anxiety, loneliness), respond with empathy FIRST. Say things like "That sounds really heavy" or "I hear you — that's so hard" before anything else.
 3. Keep replies SHORT — 2 to 4 sentences maximum. Never overwhelm with a wall of text.
@@ -589,9 +595,7 @@ function renderWeeklyHistory(moods) {
    INIT
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Breathing page
-  const startBtn = document.getElementById('breathBtn');
-  if (startBtn) startBtn.onclick = startBreathing;
+  // Breathing page is now handled by inline onclick in breathe.html (toggleBreathing)
 
   // Chat page
   const chatSend = document.getElementById('chatSendBtn');

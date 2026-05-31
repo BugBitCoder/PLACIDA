@@ -181,15 +181,25 @@
           <div class="card-icon pink" aria-hidden="true">✨</div>
           <div>
             <div class="card-title">5-Minute Body Scan</div>
-            <div class="card-subtitle">Bring awareness to each part of your body to release tension</div>
+            <div class="card-subtitle">Somatic relaxation: Bring awareness to each part of your body to physically release stress and tension.</div>
           </div>
         </div>
-        <div class="bodyscan-wrap" id="bodyScanWrap">
-          <!-- Rendered by JS -->
+        
+        <!-- Progress Bar -->
+        <div style="background:rgba(255,255,255,0.05); height:6px; border-radius:3px; margin-bottom:16px; overflow:hidden;">
+          <div id="bsProgressBar" style="height:100%; width:0%; background:var(--accent-pink); transition:width 0.3s ease;"></div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-          <button class="med-btn med-btn-primary" onclick="startBodyScan()" id="bsStartBtn">▶ Start Body Scan</button>
-          <button class="med-btn med-btn-secondary" onclick="resetBodyScan()">↺ Reset</button>
+
+        <div class="bodyscan-wrap" id="bodyScanWrap" style="min-height: 180px; display:flex; flex-direction:column; justify-content:center;">
+          <div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">
+            Click Start to begin your guided body scan. You control the pace.
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap; justify-content:center;">
+          <button class="med-btn med-btn-secondary" onclick="prevBodyScan()" id="bsPrevBtn" style="display:none; width:auto; padding:0 20px;">← Prev</button>
+          <button class="med-btn med-btn-primary" onclick="startOrNextBodyScan()" id="bsStartBtn" style="flex:1;">▶ Start Body Scan</button>
+          <button class="med-btn med-btn-secondary" onclick="resetBodyScan()" id="bsResetBtn" style="display:none; width:auto; padding:0 20px;">↺ Reset</button>
         </div>
       </div>
 
@@ -402,108 +412,6 @@
   document.getElementById('medSessionName').textContent = activeSession.title;
 
   // ════════════════════════════════════════
-  // ASMR SOUNDSCAPE (Web Audio API)
-  // ════════════════════════════════════════
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let audioCtx = null;
-  const activeSounds = {};
-
-  const SOUNDS = [
-    { id:'rain',    emoji:'🌧️', name:'Rain',       color:'rgba(94,196,182,.25)' },
-    { id:'ocean',   emoji:'🌊', name:'Ocean',      color:'rgba(94,196,182,.18)' },
-    { id:'forest',  emoji:'🌲', name:'Forest',     color:'rgba(90,210,120,.2)'  },
-    { id:'fire',    emoji:'🔥', name:'Campfire',   color:'rgba(240,140,80,.2)'  },
-    { id:'wind',    emoji:'💨', name:'Wind',       color:'rgba(180,180,220,.18)'},
-    { id:'thunder', emoji:'⛈️', name:'Thunder',    color:'rgba(124,106,247,.2)' },
-    { id:'birds',   emoji:'🐦', name:'Birds',      color:'rgba(180,230,100,.18)'},
-    { id:'stream',  emoji:'💧', name:'Stream',     color:'rgba(94,196,182,.22)' },
-    { id:'white',   emoji:'〰️', name:'White Noise',color:'rgba(200,200,220,.15)'},
-  ];
-
-  function createNoiseNode(type, ctx) {
-    const bufferSize = ctx.sampleRate * 4;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-    for (let i = 0; i < bufferSize; i++) {
-      const w = Math.random() * 2 - 1;
-      if (type === 'rain' || type === 'stream') {
-        // Filtered noise for rain
-        b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759;
-        b2=.96900*b2+w*.1538520; b3=.86650*b3+w*.3104856;
-        b4=.55000*b4+w*.5329522; b5=-.7616*b5-w*.0168980;
-        data[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*0.11;
-        b6=w*.115926;
-      } else if (type === 'white') {
-        data[i] = w * 0.3;
-      } else if (type === 'ocean') {
-        b0=.95*b0+w*.05; b1=.90*b1+w*.07; b2=.85*b2+w*.08;
-        data[i] = (b0+b1+b2) * 0.15;
-      } else if (type === 'wind') {
-        b0=.98*b0+w*.025; b1=.96*b1+w*.03;
-        data[i] = (b0+b1) * 0.3 * (0.8 + 0.2*Math.sin(i/3000));
-      } else if (type === 'fire') {
-        b0=.97*b0+w*.04; b1=.93*b1+w*.06;
-        data[i] = (b0+b1) * 0.18 * (0.7 + 0.3*Math.random());
-      } else {
-        b0=.99*b0+w*.03; b1=.95*b1+w*.05;
-        data[i] = (b0+b1+w*.02)*0.25;
-      }
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    src.loop = true;
-    return src;
-  }
-
-  function toggleSound(id) {
-    if (!audioCtx) audioCtx = new AudioCtx();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const tile = document.getElementById('asmr-' + id);
-    if (activeSounds[id]) {
-      activeSounds[id].gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
-      setTimeout(() => { try { activeSounds[id].src.stop(); } catch {} delete activeSounds[id]; }, 600);
-      if (tile) tile.classList.remove('playing');
-    } else {
-      const src = createNoiseNode(id, audioCtx);
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = id === 'white' ? 'highshelf' : 'lowpass';
-      filter.frequency.value = id === 'birds' ? 4000 : id === 'thunder' ? 200 : 1800;
-      gain.gain.setValueAtTime(0, audioCtx.currentTime);
-      gain.gain.setTargetAtTime(0.35, audioCtx.currentTime, 0.8);
-      src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-      src.start();
-      activeSounds[id] = { src, gain, filter };
-      if (tile) tile.classList.add('playing');
-    }
-    updateASMRInfo();
-  }
-
-  function updateASMRInfo() {
-    const playing = SOUNDS.filter(s => activeSounds[s.id]).map(s => s.name);
-    const info = document.getElementById('asmrInfo');
-    if (info) {
-      info.textContent = playing.length
-        ? '🎵 Playing: ' + playing.join(' + ')
-        : '🔇 All sounds off — tap any tile to play';
-    }
-  }
-
-  function renderASMR() {
-    const grid = document.getElementById('asmrGrid');
-    if (!grid) return;
-    grid.innerHTML = SOUNDS.map(s => `
-      <div class="asmr-tile" id="asmr-${s.id}" onclick="toggleSound('${s.id}')" role="button" aria-label="Toggle ${s.name}" style="background:${s.color}">
-        <div class="asmr-playing-dot"></div>
-        <div class="asmr-icon">${s.emoji}</div>
-        <div class="asmr-name">${s.name}</div>
-      </div>`).join('');
-  }
-  renderASMR();
-
-  // ════════════════════════════════════════
   // BODY SCAN
   // ════════════════════════════════════════
   const BODY_STEPS = [
@@ -519,54 +427,72 @@
   ];
 
   let bsCurrentStep = -1;
-  let bsInterval = null;
-  let bsCompletedSteps = new Set();
 
-  function renderBodyScan() {
+  function renderBodyScanStep() {
     const wrap = document.getElementById('bodyScanWrap');
-    if (!wrap) return;
-    wrap.innerHTML = BODY_STEPS.map((s, i) => `
-      <div class="bs-step ${i < bsCurrentStep ? 'done' : i === bsCurrentStep ? 'active' : ''}" id="bs-step-${i}">
-        <div class="bs-body">${s.body}</div>
+    const startBtn = document.getElementById('bsStartBtn');
+    const prevBtn = document.getElementById('bsPrevBtn');
+    const resetBtn = document.getElementById('bsResetBtn');
+    const bar = document.getElementById('bsProgressBar');
+    
+    if (bsCurrentStep === -1) {
+      wrap.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">Click Start to begin your guided body scan. You control the pace.</div>';
+      startBtn.textContent = '▶ Start Body Scan';
+      prevBtn.style.display = 'none';
+      resetBtn.style.display = 'none';
+      bar.style.width = '0%';
+      return;
+    }
+    
+    if (bsCurrentStep >= BODY_STEPS.length) {
+      wrap.innerHTML = '<div style="text-align:center; padding:30px;"><div style="font-size:3rem; margin-bottom:10px;">🌟</div><div style="font-size:1.1rem; color:var(--accent-pink); font-weight:600;">Body Scan Complete!</div><div style="color:var(--text-soft); font-size:0.9rem; margin-top:8px;">Take a deep breath and notice how you feel.</div></div>';
+      startBtn.textContent = '✓ Finished';
+      startBtn.disabled = true;
+      startBtn.style.opacity = '0.5';
+      prevBtn.style.display = 'none';
+      bar.style.width = '100%';
+      return;
+    }
+
+    const s = BODY_STEPS[bsCurrentStep];
+    wrap.innerHTML = `
+      <div class="bs-step active" style="animation:fadeInUp 0.3s ease both;">
+        <div class="bs-body" style="font-size:2.5rem; margin-right:16px;">${s.body}</div>
         <div class="bs-text">
-          <div class="bs-part">${s.part}</div>
-          <div class="bs-instruction" style="${i === bsCurrentStep ? '' : 'display:none'}">${s.instruction}</div>
+          <div class="bs-part" style="font-size:1.1rem; margin-bottom:6px;">${s.part}</div>
+          <div class="bs-instruction" style="font-size:0.95rem; line-height:1.6;">${s.instruction}</div>
         </div>
-        <div class="bs-check" id="bs-check-${i}">${i < bsCurrentStep ? '✓' : ''}</div>
-      </div>`).join('');
+      </div>`;
+      
+    startBtn.textContent = 'Next Step ➔';
+    startBtn.disabled = false;
+    startBtn.style.opacity = '1';
+    prevBtn.style.display = 'block';
+    resetBtn.style.display = 'block';
+    
+    bar.style.width = Math.round((bsCurrentStep / BODY_STEPS.length) * 100) + '%';
   }
 
-  function startBodyScan() {
-    if (bsCurrentStep >= 0 && bsCurrentStep < BODY_STEPS.length) return; // already running
-    bsCurrentStep = 0;
-    renderBodyScan();
-    document.getElementById('bsStartBtn').textContent = '⏸ Running…';
-    bsInterval = setInterval(() => {
-      bsCurrentStep++;
-      if (bsCurrentStep >= BODY_STEPS.length) {
-        clearInterval(bsInterval);
-        bsCurrentStep = BODY_STEPS.length;
-        renderBodyScan();
-        document.getElementById('bsStartBtn').textContent = '✓ Complete!';
-        showToast('✨ Body scan complete! Notice how you feel.');
-        return;
-      }
-      renderBodyScan();
-      const nextStep = document.getElementById('bs-step-' + bsCurrentStep);
-      if (nextStep) nextStep.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }, 30000); // 30 seconds per step (~4.5 min total)
-    const currentStep = document.getElementById('bs-step-0');
-    if (currentStep) currentStep.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  function startOrNextBodyScan() {
+    bsCurrentStep++;
+    renderBodyScanStep();
+  }
+  
+  function prevBodyScan() {
+    if (bsCurrentStep > 0) {
+      bsCurrentStep--;
+      renderBodyScanStep();
+    }
   }
 
   function resetBodyScan() {
-    clearInterval(bsInterval);
     bsCurrentStep = -1;
-    renderBodyScan();
-    document.getElementById('bsStartBtn').textContent = '▶ Start Body Scan';
+    document.getElementById('bsStartBtn').disabled = false;
+    document.getElementById('bsStartBtn').style.opacity = '1';
+    renderBodyScanStep();
   }
 
-  renderBodyScan();
   </script>
+  <script src="script.js"></script>
 </body>
 </html>

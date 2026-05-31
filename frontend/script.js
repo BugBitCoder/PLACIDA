@@ -583,13 +583,18 @@ async function generateAIInsight() {
   const moodCounts = last30.reduce((acc, m) => { acc[m.label] = (acc[m.label] || 0) + 1; return acc; }, {});
   const streak = computeStreak(moods);
   const summary = JSON.stringify({ total: last30.length, avgScore, moodCounts, streak });
-  const GEMINI_KEY = 'AIzaSyB4oRRi1gNFEQz6LRJ2lIOFMkCEFCQ6y_4';
+  const GEMINI_KEY = localStorage.getItem('placida_gemini_key');
+  if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) {
+    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries. Your ${streak}-day streak shows real consistency! 🌟<br><br><span style="color:var(--accent-purple);font-weight:600">To unlock deep AI Pattern Analysis, please go to the Chat page and click the ⚙️ icon to add your free Gemini API key.</span></div>`;
+    return;
+  }
   const prompt = `You are a compassionate wellness AI. User's mood data (last 30 days): ${summary}. Write a warm, personal 4-sentence analysis: (1) Acknowledge their overall pattern with empathy, (2) Point out something positive, (3) Note any concern or celebrate stability, (4) Give ONE specific, actionable recommendation. End with encouragement. Conversational and warm. Address them directly.`;
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
+    if (!res.ok) throw new Error('API Error');
     const data = await res.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (text) {
@@ -601,7 +606,7 @@ async function generateAIInsight() {
       const interval = setInterval(() => { el.textContent = text.slice(0, i); i += 4; if (i > text.length) { el.textContent = text; clearInterval(interval); } }, 15);
     } else throw new Error('no text');
   } catch {
-    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries — that's a meaningful commitment to self-awareness. Your ${streak}-day streak shows real consistency. Keep going! 🌟</div>`;
+    container.innerHTML = `<div style="font-size:.85rem;color:var(--text-soft);line-height:1.7">You've logged ${moods.length} mood entries. Your ${streak}-day streak shows real consistency. Keep going! 🌟 (Note: Make sure your API key is valid).</div>`;
   }
 }
 
@@ -681,4 +686,150 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  initGlobalASMR();
 });
+
+/* ════════════════════════════════════════
+   GLOBAL ASMR PLAYER (Persistent across pages)
+════════════════════════════════════════ */
+const ASMR_SOUNDS = [
+  { id:'rain',    emoji:'🌧️', name:'Rain',       color:'rgba(94,196,182,.25)', url:'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg' },
+  { id:'ocean',   emoji:'🌊', name:'Ocean',      color:'rgba(94,196,182,.18)', url:'https://actions.google.com/sounds/v1/water/ocean_waves.ogg' },
+  { id:'forest',  emoji:'🌲', name:'Forest',     color:'rgba(90,210,120,.2)',  url:'https://actions.google.com/sounds/v1/weather/summer_night_crickets.ogg' },
+  { id:'fire',    emoji:'🔥', name:'Campfire',   color:'rgba(240,140,80,.2)',  url:'https://actions.google.com/sounds/v1/fire/crackling_fireplace.ogg' },
+  { id:'wind',    emoji:'💨', name:'Wind',       color:'rgba(180,180,220,.18)',url:'https://actions.google.com/sounds/v1/weather/wind_howl.ogg' },
+  { id:'thunder', emoji:'⛈️', name:'Thunder',    color:'rgba(124,106,247,.2)', url:'https://actions.google.com/sounds/v1/weather/thunderstorm.ogg' },
+  { id:'birds',   emoji:'🐦', name:'Birds',      color:'rgba(180,230,100,.18)',url:'https://actions.google.com/sounds/v1/animals/birds_singing.ogg' },
+  { id:'stream',  emoji:'💧', name:'Stream',     color:'rgba(94,196,182,.22)', url:'https://actions.google.com/sounds/v1/water/stream_water.ogg' },
+  { id:'white',   emoji:'〰️', name:'Wind Synth', color:'rgba(200,200,220,.15)',url:'https://actions.google.com/sounds/v1/weather/wind_synth.ogg' },
+];
+
+let globalAudio = null;
+let currentASMR = localStorage.getItem('placida_active_asmr') || null;
+
+function initGlobalASMR() {
+  injectASMRPlayer();
+  
+  // Render grid if we are on meditation page
+  const grid = document.getElementById('asmrGrid');
+  if (grid) {
+    grid.innerHTML = ASMR_SOUNDS.map(s => `
+      <div class="asmr-tile ${currentASMR === s.id ? 'playing' : ''}" id="asmr-${s.id}" onclick="toggleGlobalASMR('${s.id}')" role="button" aria-label="Toggle ${s.name}" style="background:${s.color}">
+        <div class="asmr-playing-dot"></div>
+        <div class="asmr-icon">${s.emoji}</div>
+        <div class="asmr-name">${s.name}</div>
+      </div>`).join('');
+    updateASMRInfoUI();
+  }
+
+  // Attempt to auto-resume if it was playing
+  if (currentASMR) {
+    playASMR(currentASMR).catch(err => {
+      console.log('Autoplay blocked', err);
+      updateMiniPlayerUI(true);
+    });
+  }
+}
+
+function updateASMRInfoUI() {
+  const info = document.getElementById('asmrInfo');
+  if (!info) return;
+  if (currentASMR) {
+    const s = ASMR_SOUNDS.find(x => x.id === currentASMR);
+    info.textContent = '🎵 Playing: ' + (s ? s.name : '');
+  } else {
+    info.textContent = '🔇 All sounds off — tap any tile to play';
+  }
+}
+
+function toggleGlobalASMR(id) {
+  if (currentASMR === id) {
+    stopASMR();
+  } else {
+    playASMR(id);
+  }
+}
+
+async function playASMR(id) {
+  const s = ASMR_SOUNDS.find(x => x.id === id);
+  if (!s) return;
+  
+  if (!globalAudio) {
+    globalAudio = new Audio();
+    globalAudio.loop = true;
+    globalAudio.volume = 0.5;
+  }
+  
+  if (currentASMR !== id || !globalAudio.src.includes(s.url)) {
+    globalAudio.src = s.url;
+  }
+  
+  try {
+    await globalAudio.play();
+    currentASMR = id;
+    localStorage.setItem('placida_active_asmr', id);
+    
+    document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
+    const tile = document.getElementById('asmr-' + id);
+    if (tile) tile.classList.add('playing');
+    updateASMRInfoUI();
+    updateMiniPlayerUI(false);
+  } catch (err) {
+    console.error("Audio playback failed", err);
+    updateMiniPlayerUI(true);
+  }
+}
+
+function stopASMR() {
+  if (globalAudio) globalAudio.pause();
+  currentASMR = null;
+  localStorage.removeItem('placida_active_asmr');
+  
+  document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
+  updateASMRInfoUI();
+  updateMiniPlayerUI(false);
+}
+
+function toggleGlobalAudioPlayPause() {
+  if (!globalAudio) {
+      if (currentASMR) playASMR(currentASMR);
+      return;
+  }
+  if (globalAudio.paused) {
+    globalAudio.play().then(() => updateMiniPlayerUI(false));
+  } else {
+    globalAudio.pause();
+    updateMiniPlayerUI(true);
+  }
+}
+
+function injectASMRPlayer() {
+  const player = document.createElement('div');
+  player.id = 'globalASMRPlayer';
+  player.style.cssText = 'position:fixed; bottom:80px; left:20px; background:rgba(14,16,30,0.95); border:1px solid rgba(94,196,182,0.3); border-radius:50px; padding:8px 16px; display:none; align-items:center; gap:12px; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.5); backdrop-filter:blur(10px); animation:fadeInUp 0.3s ease both;';
+  
+  player.innerHTML = `
+    <div id="gapIcon" style="font-size:1.4rem; cursor:pointer" onclick="toggleGlobalAudioPlayPause()">▶️</div>
+    <div style="display:flex; flex-direction:column; cursor:pointer;" onclick="toggleGlobalAudioPlayPause()">
+      <div style="font-size:0.65rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px">ASMR</div>
+      <div id="gapName" style="font-size:0.85rem; color:var(--text-primary); font-weight:600; line-height:1">--</div>
+    </div>
+    <div style="cursor:pointer; color:var(--text-muted); font-size:1.2rem; margin-left:4px;" onclick="stopASMR()">✕</div>
+  `;
+  document.body.appendChild(player);
+}
+
+function updateMiniPlayerUI(isBlockedOrPaused) {
+  const player = document.getElementById('globalASMRPlayer');
+  if (!player) return;
+  
+  if (currentASMR) {
+    const s = ASMR_SOUNDS.find(x => x.id === currentASMR);
+    player.style.display = 'flex';
+    document.getElementById('gapName').textContent = s ? s.name : 'Audio';
+    document.getElementById('gapIcon').textContent = isBlockedOrPaused ? '▶️' : '⏸️';
+  } else {
+    player.style.display = 'none';
+  }
+}

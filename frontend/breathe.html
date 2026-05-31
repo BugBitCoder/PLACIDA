@@ -213,9 +213,9 @@
     <!-- Circle -->
     <div class="circle-wrapper">
       <div class="breath-ring">
-        <div id="breathCircle" role="status" aria-live="polite" aria-label="Breathing guide">
-          <div id="breathLabel">Ready when you are</div>
-          <div id="breathCounter"></div>
+        <div id="breathCircle" role="button" aria-live="polite" aria-label="Breathing guide, tap to start" style="cursor:pointer;" onclick="toggleBreathing()">
+          <div id="breathLabel" style="pointer-events:none;">Tap to Start</div>
+          <div id="breathCounter" style="pointer-events:none;"></div>
         </div>
       </div>
 
@@ -259,10 +259,7 @@
 
     <!-- Buttons -->
     <div class="btn-area">
-      <button id="breathBtn" class="btn-primary" aria-label="Start breathing session">
-        Start Breathing
-      </button>
-      <a href="index.html" class="btn-secondary" style="text-align:center; text-decoration:none; display:block; padding:14px 24px; border-radius:12px;">
+      <a href="index.html" class="btn-secondary" style="text-align:center; text-decoration:none; display:block; padding:14px 24px; border-radius:12px; width:100%;">
         ← Back to Home
       </a>
     </div>
@@ -293,5 +290,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="features.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
