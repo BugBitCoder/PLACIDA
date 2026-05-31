@@ -497,22 +497,22 @@
     wrap.style.display = 'block';
     output.innerHTML = '<span class="ai-loading">Generating your reflection…<span class="ai-cursor"></span></span>';
 
-    const GEMINI_KEY = localStorage.getItem('placida_gemini_key');
-    if (!GEMINI_KEY || GEMINI_KEY.startsWith('YOUR_')) {
-      output.innerHTML = 'Thank you for sharing. Your willingness to write shows self-awareness and courage. <br><br><span style="color:var(--accent-purple);font-weight:600">To unlock deep AI Reflect analysis, please go to the Chat page and click the ⚙️ icon to add your free Gemini API key.</span>';
-      return;
-    }
     const prompt = `You are a compassionate wellness journaling coach. The user wrote this journal entry:\n\n"${ta.value.trim()}"\n\nWrite a warm, thoughtful, 3-4 sentence reflection that:\n1. Validates what they shared without being dismissive\n2. Points out a strength or insight you notice in their writing\n3. Offers one gentle, actionable thought to carry forward\n4. Ends with an encouraging question to prompt further reflection\n\nKeep it personal, warm, and avoid generic advice. Write as if speaking directly to them.`;
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'openai',
+          seed: Math.floor(Math.random() * 100000)
+        })
       });
+      
       if (!res.ok) throw new Error('API Error');
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const text = await res.text();
+      
       if (text) {
         output.innerHTML = '';
         // Typewriter effect
@@ -526,7 +526,7 @@
         output.textContent = 'Thank you for sharing. Your willingness to write shows self-awareness and courage. Take a moment to notice how you feel after putting these thoughts on paper.';
       }
     } catch {
-      output.textContent = 'Thank you for sharing. Putting your thoughts into words is already a powerful act of self-care. Notice how it feels to have expressed this. (Note: Make sure your API key is valid).';
+      output.textContent = 'Thank you for sharing. Putting your thoughts into words is already a powerful act of self-care. Notice how it feels to have expressed this.';
     }
   }
   </script>
