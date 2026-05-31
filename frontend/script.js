@@ -694,15 +694,15 @@ document.addEventListener('DOMContentLoaded', () => {
    GLOBAL ASMR PLAYER (Persistent across pages)
 ════════════════════════════════════════ */
 const ASMR_SOUNDS = [
-  { id:'rain',    emoji:'🌧️', name:'Rain',       color:'rgba(94,196,182,.25)', url:'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg' },
-  { id:'ocean',   emoji:'🌊', name:'Ocean',      color:'rgba(94,196,182,.18)', url:'https://actions.google.com/sounds/v1/water/ocean_waves.ogg' },
-  { id:'forest',  emoji:'🌲', name:'Forest',     color:'rgba(90,210,120,.2)',  url:'https://actions.google.com/sounds/v1/weather/summer_night_crickets.ogg' },
-  { id:'fire',    emoji:'🔥', name:'Campfire',   color:'rgba(240,140,80,.2)',  url:'https://actions.google.com/sounds/v1/fire/crackling_fireplace.ogg' },
-  { id:'wind',    emoji:'💨', name:'Wind',       color:'rgba(180,180,220,.18)',url:'https://actions.google.com/sounds/v1/weather/wind_howl.ogg' },
-  { id:'thunder', emoji:'⛈️', name:'Thunder',    color:'rgba(124,106,247,.2)', url:'https://actions.google.com/sounds/v1/weather/thunderstorm.ogg' },
-  { id:'birds',   emoji:'🐦', name:'Birds',      color:'rgba(180,230,100,.18)',url:'https://actions.google.com/sounds/v1/animals/birds_singing.ogg' },
-  { id:'stream',  emoji:'💧', name:'Stream',     color:'rgba(94,196,182,.22)', url:'https://actions.google.com/sounds/v1/water/stream_water.ogg' },
-  { id:'white',   emoji:'〰️', name:'Wind Synth', color:'rgba(200,200,220,.15)',url:'https://actions.google.com/sounds/v1/weather/wind_synth.ogg' },
+  { id:'rain',    emoji:'🌧️', name:'Rain',       color:'rgba(94,196,182,.25)', url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/rain/heavy-rain.mp3' },
+  { id:'ocean',   emoji:'🌊', name:'Ocean',      color:'rgba(94,196,182,.18)', url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/waves.mp3' },
+  { id:'forest',  emoji:'🌲', name:'Forest',     color:'rgba(90,210,120,.2)',  url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/wind-in-trees.mp3' },
+  { id:'fire',    emoji:'🔥', name:'Campfire',   color:'rgba(240,140,80,.2)',  url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/campfire.mp3' },
+  { id:'wind',    emoji:'💨', name:'Wind',       color:'rgba(180,180,220,.18)',url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/wind.mp3' },
+  { id:'thunder', emoji:'⛈️', name:'Thunder',    color:'rgba(124,106,247,.2)', url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/rain/thunder.mp3' },
+  { id:'birds',   emoji:'🐦', name:'Birds',      color:'rgba(180,230,100,.18)',url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/animals/birds.mp3' },
+  { id:'stream',  emoji:'💧', name:'Stream',     color:'rgba(94,196,182,.22)', url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/river.mp3' },
+  { id:'white',   emoji:'〰️', name:'Waterfall',  color:'rgba(200,200,220,.15)',url:'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/waterfall.mp3' },
 ];
 
 let globalAudio = null;
@@ -765,15 +765,16 @@ async function playASMR(id) {
     globalAudio.src = s.url;
   }
   
+  currentASMR = id;
+  localStorage.setItem('placida_active_asmr', id);
+  
+  document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
+  const tile = document.getElementById('asmr-' + id);
+  if (tile) tile.classList.add('playing');
+  updateASMRInfoUI();
+
   try {
     await globalAudio.play();
-    currentASMR = id;
-    localStorage.setItem('placida_active_asmr', id);
-    
-    document.querySelectorAll('.asmr-tile').forEach(t => t.classList.remove('playing'));
-    const tile = document.getElementById('asmr-' + id);
-    if (tile) tile.classList.add('playing');
-    updateASMRInfoUI();
     updateMiniPlayerUI(false);
   } catch (err) {
     console.error("Audio playback failed", err);
@@ -797,7 +798,7 @@ function toggleGlobalAudioPlayPause() {
       return;
   }
   if (globalAudio.paused) {
-    globalAudio.play().then(() => updateMiniPlayerUI(false));
+    globalAudio.play().then(() => updateMiniPlayerUI(false)).catch(e => console.error(e));
   } else {
     globalAudio.pause();
     updateMiniPlayerUI(true);
